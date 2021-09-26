@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  nest:
+    container_name: nest
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/usr/proj/server
+      - /usr/proj/server/node_modules
+    ports:
+      - '8080:8080'
+    links:
+      - mongo
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - '27017:27017'
