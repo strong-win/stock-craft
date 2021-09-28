@@ -14,10 +14,10 @@ import {
   CHAT_CLIENT_MESSAGE,
   CHAT_ROOM,
   CHAT_JOIN,
-} from '../events/index.events';
+} from './events/index.events';
 import { response } from '../dto/response.dto';
 
-@WebSocketGateway({ cors: true })
+@WebSocketGateway({ cors: true, namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -58,6 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ...payLoad,
       clientId: client.id,
     });
+    console.log(name, room);
 
     client.join(room);
 
