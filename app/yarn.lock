@@ -3440,10 +3440,10 @@ cosmiconfig@^7.0.0:
     path-type "^4.0.0"
     yaml "^1.10.0"
 
-cra-template@1.1.2:
+cra-template-typescript@1.1.2:
   version "1.1.2"
-  resolved "https://registry.yarnpkg.com/cra-template/-/cra-template-1.1.2.tgz#04bb68c9e9c0822d3c6436950fc6f202c92bc9e5"
-  integrity sha512-NZXGdiY+AODaBU5AZFCLlohOnhQRG+NI8oixWuMQySA3Fp+AcOpZt2d6U7hgUn8wgbLm8ynJwg6hih+ORyojfQ==
+  resolved "https://registry.yarnpkg.com/cra-template-typescript/-/cra-template-typescript-1.1.2.tgz#938f3699430dc9dda0bbf23eeb2e6daf45f3790c"
+  integrity sha512-lA+2Zjtw2q/HxLWY25y9cRL2OY8oK0hz19cnsig5lXDomQ7vbLwM1HZ0DC8IVa895/rCy+Y2Kf5NsR9xCcsA8w==
 
 create-ecdh@^4.0.0:
   version "4.0.4"
