@@ -7,23 +7,25 @@
 
 # Web Service 
 # dependencies
-    /node_modules
-    /.pnp
-    .pnp.js
+node_modules/
+.pnp
+.pnp.js
 
 # testing
-    /coverage
+coverage/
 
 # production
-    /build
+dist/
+build/
 
 # misc
-    .DS_Store
-    .env.*
-    
-    npm-debug.log*
-    yarn-debug.log*
-    yarn-error.log*
+.DS_Store
+.env
+.env.*
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Server
 

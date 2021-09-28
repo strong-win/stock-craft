@@ -1,11 +1,9 @@
 import React from "react";
 
-import Chart  from '../components/Chart';
+import Chart from "../components/Chart";
 
 const ChartWrapper = () => {
-    return(
-        <Chart/>
-    )
-}
+  return <Chart />;
+};
 
 export default ChartWrapper;

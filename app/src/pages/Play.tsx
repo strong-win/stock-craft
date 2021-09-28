@@ -1,13 +1,13 @@
-import React from 'react';
+import React from "react";
 
-import ChartWrpper from '../containers/ChartWrapper';
+import ChartWrpper from "../containers/ChartWrapper";
 
 const Play = () => {
-    return(
-        <>
-            <ChartWrpper/>
-        </>
-    )
-}   
+  return (
+    <>
+      <ChartWrpper />
+    </>
+  );
+};
 
 export default Play;
