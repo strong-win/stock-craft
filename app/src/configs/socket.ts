@@ -1,5 +1,3 @@
-import socketIO from "socket.io-client";
+import io from "socket.io-client";
 
-const io = socketIO("http://localhost:8080");
-
-export default io;
+export default io("http://localhost:8080");
