@@ -17,7 +17,7 @@ import {
 } from './events/index.events';
 import { response } from '../dto/response.dto';
 
-@WebSocketGateway({ cors: true, namespace: 'chat' })
+@WebSocketGateway({ cors: true })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
@@ -44,8 +44,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: `${name} 님이 퇴장하였습니다.`,
       });
 
-      const users = await this.playersService.findByRoom(room);
-      this.server.to(room).emit(CHAT_ROOM, { users, room });
+      const players = await this.playersService.findByRoom(room);
+      this.server.to(room).emit(CHAT_ROOM, players);
     }
   }
 
@@ -58,7 +58,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ...payLoad,
       clientId: client.id,
     });
-    console.log(name, room);
 
     client.join(room);
 
@@ -72,8 +71,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       text: `${name} 님이 방에 입장하셨습니다.`,
     });
 
-    const users = await this.playersService.findByRoom(room);
-    this.server.emit(CHAT_ROOM, { room, users });
+    const players = await this.playersService.findByRoom(room);
+    this.server.emit(CHAT_ROOM, players);
   }
 
   @SubscribeMessage(CHAT_CLIENT_MESSAGE)
