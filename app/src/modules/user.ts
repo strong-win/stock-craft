@@ -31,6 +31,9 @@ export const userSlice = createSlice({
     updateName(state, action: PayloadAction<string>) {
       state.name = action.payload;
     },
+    updateCode(state, action: PayloadAction<string>) {
+      state.code = action.payload;
+    },
     updatePlayers: (state, action: PayloadAction<PlayerType[]>) => {
       state.players = action.payload;
     },
@@ -40,6 +43,7 @@ export const userSlice = createSlice({
   },
 });
 
-export const { updateName, updateMessage, updatePlayers } = userSlice.actions;
+export const { updateName, updateCode, updateMessage, updatePlayers } =
+  userSlice.actions;
 
 export default userSlice.reducer;

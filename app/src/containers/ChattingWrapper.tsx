@@ -1,14 +1,36 @@
-import { shallowEqual, useSelector } from "react-redux";
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
 import Chatting from "../components/Chatting";
+import { emitMessage } from "../modules/sockets";
 import { MessageType } from "../modules/user";
 
-const ChattingWrapper = () => {
+const ChattingWrapper = ({ name }: { name: string }) => {
   const messages: MessageType[] = useSelector(
-    (state: RootState) => state.user.messages,
-    shallowEqual
+    (state: RootState) => state.user.messages
   );
-  return <Chatting messages={messages} />;
+  const dispatch = useDispatch();
+
+  const [message, setMessage] = useState("");
+
+  const sendMessage = (e: any) => {
+    e.preventDefault();
+
+    if (message) {
+      dispatch(emitMessage(message));
+      setMessage("");
+    }
+  };
+
+  return (
+    <Chatting
+      name={name}
+      message={message}
+      setMessage={setMessage}
+      sendMessage={sendMessage}
+      messages={messages}
+    />
+  );
 };
 
 export default ChattingWrapper;

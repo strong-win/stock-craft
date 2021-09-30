@@ -1,3 +1,10 @@
 import io from "socket.io-client";
 
-export default io("http://localhost:8080");
+const connectSocket = () => {
+  const socket = io("http://localhost:8080/");
+  return new Promise((resolve) => {
+    resolve(socket);
+  });
+};
+
+export default connectSocket;

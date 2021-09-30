@@ -1,14 +1,17 @@
-import { shallowEqual, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "..";
 import Players from "../components/Players";
 import { PlayerType } from "../modules/user";
 
-const PlayersWrapper = () => {
+type PlayersWrapperProps = {
+  code: string;
+};
+
+const PlayersWrapper = ({ code }: PlayersWrapperProps) => {
   const players: PlayerType[] = useSelector(
-    (state: RootState) => state.user.players,
-    shallowEqual
+    (state: RootState) => state.user.players
   );
-  return <Players players={players} />;
+  return <Players code={code} players={players} />;
 };
 
 export default PlayersWrapper;
