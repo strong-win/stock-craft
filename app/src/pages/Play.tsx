@@ -6,16 +6,16 @@ import { RootState } from "..";
 import ChartWrpper from "../containers/ChartWrapper";
 import ChattingWrapper from "../containers/ChattingWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
-import { emitJoin } from "../modules/sockets";
-import { updateCode, updateName } from "../modules/user";
+import { emitJoin } from "../modules/sockets/chatting";
+import { updateCode, updateName } from "../modules/game";
 import { createName } from "../utils/userInfo";
 import TradeWrapper from "../containers/TradeWrapper";
 
 const Play = ({ location }: any) => {
   const { room } = queryString.parse(location.search);
 
-  const name = useSelector((state: RootState) => state.user.name);
-  const code = useSelector((state: RootState) => state.user.code);
+  const name = useSelector((state: RootState) => state.game.name);
+  const code = useSelector((state: RootState) => state.game.code);
   const dispatch = useDispatch();
 
   useEffect(() => {

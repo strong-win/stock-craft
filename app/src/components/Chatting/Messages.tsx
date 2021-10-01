@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 
-import { MessageType } from "../../modules/user";
+import { messageType } from "../../modules/game";
 import Message from "./Message";
 import "../../styles/Chatting.css";
 
 type ChattingProps = {
   name: string;
-  messages: MessageType[];
+  messages: messageType[];
 };
 
 const Messages = ({ name, messages }: ChattingProps) => {

@@ -1,11 +1,9 @@
 import { Socket } from "socket.io-client";
 import { eventChannel } from "redux-saga";
 import { createAction } from "@reduxjs/toolkit";
-import { call, put, take, all, apply } from "redux-saga/effects";
+import { call, put, take, apply } from "@redux-saga/core/effects";
 
-import connectSocket from "../configs/socket";
-
-import { MessageType, PlayerType, updateMessage, updatePlayers } from "./user";
+import { messageType, playerType, updateMessage, updatePlayers } from "../game";
 import {
   CHAT_CLIENT_MESSAGE,
   CHAT_JOIN,
@@ -14,8 +12,8 @@ import {
 } from "./events";
 
 const createMessageChannel = (socket: Socket) => {
-  return eventChannel<MessageType>((emit) => {
-    socket.on(CHAT_SERVER_MESSAGE, (message: MessageType) => {
+  return eventChannel<messageType>((emit) => {
+    socket.on(CHAT_SERVER_MESSAGE, (message: messageType) => {
       emit(message);
     });
 
@@ -29,14 +27,14 @@ export function* receieveMessage(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: MessageType = yield take(channel);
+    const payload: messageType = yield take(channel);
     yield put(updateMessage(payload));
   }
 }
 
 const createPlayersChannel = (socket: Socket) => {
-  return eventChannel<PlayerType[]>((emit) => {
-    socket.on(CHAT_ROOM, (players: PlayerType[]) => {
+  return eventChannel<playerType[]>((emit) => {
+    socket.on(CHAT_ROOM, (players: playerType[]) => {
       emit(players);
     });
 
@@ -50,7 +48,7 @@ export function* receivePlayers(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: PlayerType[] = yield take(channel);
+    const payload: playerType[] = yield take(channel);
     yield put(updatePlayers(payload));
   }
 }
@@ -60,7 +58,7 @@ export const emitJoin = createAction(
   (payload: { name: string; room: string }) => ({ payload })
 );
 
-export function* joinSaga(socket: Socket) {
+export function* emitJoinSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(emitJoin.type);
     yield apply(socket, socket.emit, [CHAT_JOIN, payload]);
@@ -77,15 +75,4 @@ export function* emitMessageSaga(socket: Socket) {
     const { payload } = yield take(emitMessage.type);
     yield apply(socket, socket.emit, [CHAT_CLIENT_MESSAGE, payload]);
   }
-}
-
-export function* handleIO() {
-  const socket: Socket = yield call(connectSocket);
-
-  yield all([
-    receieveMessage(socket),
-    receivePlayers(socket),
-    joinSaga(socket),
-    emitMessageSaga(socket),
-  ]);
 }

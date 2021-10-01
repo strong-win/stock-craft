@@ -1,42 +1,43 @@
-import Board from "./Board";
-import Button from "./Button";
-import Input from "./Input";
+import TradeBoard from "./TradeBoard";
+import TradeButton from "./TradeButton";
+import TradeInput from "./TradeInput";
+
 import "../../styles/Trade.css";
+import { billType } from "../../containers/TradeWrapper";
 
 type TradeProps = {
-  stockPrice: number;
-  stockQuantity: number;
-  inputPrice: number;
-  inputQuantity: number;
-  setInputPrice: React.Dispatch<React.SetStateAction<number>>;
-  setInputQuantity: React.Dispatch<React.SetStateAction<number>>;
+  isLock: boolean;
+  stockBill: billType;
+  tradeBill: billType;
+  setTradeBill: React.Dispatch<React.SetStateAction<billType>>;
+  handleDeal: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 const Trade = ({
-  stockPrice,
-  stockQuantity,
-  inputPrice,
-  inputQuantity,
-  setInputPrice,
-  setInputQuantity,
+  isLock,
+  stockBill,
+  tradeBill,
+  setTradeBill,
+  handleDeal,
 }: TradeProps) => {
-  return (
+  return isLock ? (
     <>
       <h1>Input Container</h1>
       <div className="trade">
-        <Board
-          stockPrice={stockPrice}
-          stockQuantity={stockQuantity}
-          setInputPrice={setInputPrice}
-          setInputQuantity={setInputQuantity}
+        <div>Locked</div>
+      </div>
+    </>
+  ) : (
+    <>
+      <h1>Input Container</h1>
+      <div className="trade">
+        <TradeBoard
+          stockBill={stockBill}
+          tradeBill={tradeBill}
+          setTradeBill={setTradeBill}
         />
-        <Input
-          inputPrice={inputPrice}
-          inputQuantity={inputQuantity}
-          setInputPrice={setInputPrice}
-          setInputQuantity={setInputQuantity}
-        />
-        <Button />
+        <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
+        <TradeButton handleDeal={handleDeal} />
       </div>
     </>
   );

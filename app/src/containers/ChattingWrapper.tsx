@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Chatting from "../components/Chatting";
-import { emitMessage } from "../modules/sockets";
-import { MessageType } from "../modules/user";
+import { emitMessage } from "../modules/sockets/chatting";
+import { messageType } from "../modules/game";
 
 const ChattingWrapper = ({ name }: { name: string }) => {
-  const messages: MessageType[] = useSelector(
-    (state: RootState) => state.user.messages
+  const messages: messageType[] = useSelector(
+    (state: RootState) => state.game.messages
   );
   const dispatch = useDispatch();
 

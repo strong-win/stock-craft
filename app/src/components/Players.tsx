@@ -1,15 +1,15 @@
-import { PlayerType } from "../modules/user";
+import { playerType } from "../modules/game";
 
 type PlayersProps = {
   code: string;
-  players: PlayerType[];
+  players: playerType[];
 };
 
 const Players = ({ code, players }: PlayersProps) => {
   return (
     <div>
       <h1>Player Container</h1>
-      <h3>code: {code}</h3>
+      <div>code: {code}</div>
 
       {players.map(({ clientId, name }, index) => (
         <div key={index}>

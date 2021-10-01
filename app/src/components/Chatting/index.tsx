@@ -1,8 +1,8 @@
 import React from "react";
 
-import { MessageType } from "../../modules/user";
+import { messageType } from "../../modules/game";
 import "../../styles/Chatting.css";
-import Input from "./Input";
+import Input from "./ChatInput";
 
 import Messages from "./Messages";
 
@@ -11,7 +11,7 @@ type ChattingProps = {
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
-  messages: MessageType[];
+  messages: messageType[];
 };
 
 const Chatting = ({
@@ -25,7 +25,7 @@ const Chatting = ({
     <>
       <h1>Chatting Container</h1>
       <div className="chatting">
-        <h3>name: {name}</h3>
+        <div>name: {name}</div>
         <Messages name={name} messages={messages} />
         <Input
           message={message}

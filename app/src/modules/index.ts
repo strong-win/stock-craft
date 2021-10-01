@@ -1,11 +1,13 @@
 import { all } from "redux-saga/effects";
 import { combineReducers } from "redux";
 
-import { userSlice } from "./user";
+import { gameSlice } from "./game";
 import { handleIO } from "./sockets";
+import { stockSlice } from "./stock";
 
 export const rootReducer = combineReducers({
-  user: userSlice.reducer,
+  game: gameSlice.reducer,
+  stock: stockSlice.reducer,
 });
 
 export function* rootSaga() {
