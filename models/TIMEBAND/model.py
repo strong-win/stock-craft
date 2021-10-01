@@ -28,7 +28,7 @@ class TIMEBANDModel:
 
         # Set device
         self.device = device
-        
+
         self.netD = None
         self.netG = None
 

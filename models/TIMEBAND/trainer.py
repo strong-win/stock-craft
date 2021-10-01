@@ -40,6 +40,8 @@ class TIMEBANDTrainer:
         self.answer = None
         self.future_data = None
 
+        self.true_data = None
+
     def set_config(self, config: dict = None) -> dict:
         """
         Configure settings related to the data set.
@@ -70,7 +72,6 @@ class TIMEBANDTrainer:
         self.print_interval = print_cfg["interval"]
 
         # Visual option
-        self.visual = config["visual"]
         self.print_cfg = config["print"]
 
     def train(self, trainset, validset):
@@ -88,6 +89,9 @@ class TIMEBANDTrainer:
         valid_score_plot = []
         EPOCHS = self.base_epochs + self.iter_epochs
         for epoch in range(self.base_epochs, EPOCHS):
+            # Dashboard
+            self.dashboard.init_figure()
+
             # Train Section
             losses = init_loss()
             train_tqdm = tqdm(trainset, loss_info("Train", epoch, losses))
@@ -119,9 +123,6 @@ class TIMEBANDTrainer:
         def generate(x):
             return self.netG(x).to(self.device)
 
-        # if not training and self.visual:
-        #     self.dashboard.close_figure()
-
         self.data = None
         self.answer = None
 
@@ -149,6 +150,7 @@ class TIMEBANDTrainer:
             true_y = data["decoded"].to(self.device)
             real_x = data["observed"]
             real_y = data["forecast"]
+            batchs = true_y.shape[0]
 
             # Optimizer initialize
             self.optimD.zero_grad()
@@ -205,28 +207,31 @@ class TIMEBANDTrainer:
             self.predict(pred_y)
 
             score = self.metric.NMAE(pred_y, real_y, real_test=True).detach().numpy()
-            score1 = self.metric.NMAE(pred_y[:, 0], real_y[:, 0]).detach().numpy()
-            score2 = self.metric.NMAE(pred_y[:, 6], real_y[:, 6]).detach().numpy()
-            score3 = self.metric.NMAE(pred_y[:, 13], real_y[:, 13]).detach().numpy()
-            score4 = self.metric.NMAE(pred_y[:, 27], real_y[:, 27]).detach().numpy()
             score_all = self.metric.NMAE(pred_y, real_y).detach().numpy()
 
             # Losses Log
             losses["Score"] += score
-            losses["Score1"] += score1
-            losses["Score2"] += score2
-            losses["Score3"] += score3
-            losses["Score4"] += score4
             losses["ScoreAll"] += score_all
 
             tqdm.set_description(loss_info(TAG, epoch, losses, i))
             # if not training and self.visual is True:
             #     self.dashboard.initalize(window)
-            #     self.dashboard.visualize(window, true, pred)
+            self.data_process(real_x)
+
+            self.dashboard.visualize(batchs, self.true_data)
 
         self.result(real_y, training)
 
         return losses["Score"] / (i + 1)
+
+    def data_process(self, real):
+        batch_size = real.shape[0]
+
+        if self.true_data is None:
+            self.true_data = real[0, :-1, :]
+
+        for b in range(batch_size):
+            self.true_data = np.concatenate([self.true_data, real[b, -1:, :]])
 
     def data_concat(self, real, true, pred):
         batch_size = pred.shape[0]

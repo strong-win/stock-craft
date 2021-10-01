@@ -38,7 +38,7 @@ class TIMEBANDCore:
         self.metric = TIMEBANDMetric(self.metric_cfg, self.device)
 
         # Visualize option
-        self.dashboard = TIMEBANDDashboard(self.dashboard_cfg)
+        self.dashboard = TIMEBANDDashboard(self.dashboard_cfg, self.dataset)
 
     def init_dataset(self):
         self.dataset = TIMEBANDDataset(self.dataset_cfg, self.device)

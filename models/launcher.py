@@ -68,12 +68,12 @@ def launcher():
     logger.info("*********************")
 
     netG = None
-    # try:
-    #     # Run Model Trainning
-    #     netD, netG = model.train()
-    # except (KeyboardInterrupt, SyntaxError):
-    #     model.models.save(model.netD, model.netG)
-    #     logger.warn("Abort!")
+    try:
+        # Run Model Trainning
+        netD, netG = model.train()
+    except (KeyboardInterrupt, SyntaxError):
+        model.models.save(model.netD, model.netG)
+        logger.warn("Abort!")
 
     logger.info("*********************")
     logger.info("- Model Output -")

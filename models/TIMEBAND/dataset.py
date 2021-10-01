@@ -13,6 +13,7 @@ from utils.preprocess import onehot_encoding
 
 logger = Logger(__file__)
 
+
 class Dataset:
     def __init__(self, dataset):
         self.observed = dataset["observed"]
@@ -35,7 +36,8 @@ class Dataset:
         }
 
         return data
-    
+
+
 class TIMEBANDDataset:
     """
     TIMEBAND Dataset
@@ -78,10 +80,12 @@ class TIMEBANDDataset:
 
         # Columns
         self.index_col = config["index_col"]
+        self.index_format = config["index_format"]
+
         self.year = config["year"]
         self.month = config["month"]
         self.weekday = config["weekday"]
-        
+
         self.drops = config["drops"]
         self.targets = config["targets"]
 
@@ -120,6 +124,7 @@ class TIMEBANDDataset:
         self.timestamp = data.index.to_series()
         self.month_cat = self.onehot(data, self.month, self.timestamp.dt.month_name())
         self.weekday_cat = self.onehot(data, self.weekday, self.timestamp.dt.day_name())
+        self.timestamp = data.index.strftime(self.index_format).tolist()
 
         logger.info(f"  - File   : {csv_path}")
         logger.info(f"  - Index  : {self.index_col}")
@@ -134,7 +139,7 @@ class TIMEBANDDataset:
         self.train_set = Dataset(train_set)
         self.valid_set = Dataset(valid_set)
         self.preds_set = Dataset(preds_set)
-        
+
         # Feature info
         self.shape = self.train_set.decoded.shape
         self.encode_dims = self.train_set.encoded.shape[2]
@@ -152,7 +157,7 @@ class TIMEBANDDataset:
         # Timeseries K Sliding window
         if k_step <= self.window_sliding:
             data = data[: self.data_length - self.window_sliding + k_step]
-            
+
         # Keep Real Data
         data_length = len(data)
         encode_real = data.copy()
@@ -167,7 +172,7 @@ class TIMEBANDDataset:
         weekday = self.weekday_cat[:data_length]
         data = pd.concat([data, month], axis=1)
         data = pd.concat([data, weekday], axis=1)
-        
+
         # Encoded Split, Decoded Set split
         encode_data = data.copy()
         decode_data = data[self.targets].copy()
@@ -183,7 +188,6 @@ class TIMEBANDDataset:
             dataset = {
                 "observed": observed[idx_s:idx_e],
                 "forecast": forecast[idx_s:idx_e],
-
                 "encoded": encoded[idx_s:idx_e],
                 "decoded": decoded[idx_s:idx_e],
             }
@@ -191,7 +195,7 @@ class TIMEBANDDataset:
 
         # Dataset
         split_idx = min(int(data_length * self.split_rate), data_length - valid_minlen)
-        
+
         train_set = get_dataset(idx_s=0, idx_e=split_idx - self.forecast_len)
         valid_set = get_dataset(idx_s=split_idx, idx_e=-1)
         preds_set = get_dataset(idx_s=-2 * self.forecast_len)
@@ -218,7 +222,7 @@ class TIMEBANDDataset:
         forecast = np.array(forecast)
 
         return observed, forecast
-    
+
     def minmax_scaler(self, data):
         # Data Local
         self.origin_max = data.max(0)
@@ -227,18 +231,18 @@ class TIMEBANDDataset:
         min_p = self.cutoff_min
         max_p = self.cutoff_max
         logger.info(f"Cutting : Min {min_p*100} % , Max {max_p*100} %")
-        
+
         for col in data.columns:
             uniques = sorted(data[col].unique())
             pivot_min = uniques[max(0, int(len(uniques) * min_p))]
             pivot_max = uniques[min(-1, -int(len(uniques) * max_p))]
-            
+
             data[col][data[col] < pivot_min] = pivot_min
             data[col][data[col] > pivot_max] = pivot_max
-            
+
         self.encode_min = data.min()
         self.encode_max = data.max(0) * 1.05
-        
+
         self.decode_min = torch.tensor(self.encode_min[self.targets])
         self.decode_max = torch.tensor(self.encode_max[self.targets])
 
@@ -285,7 +289,7 @@ class TIMEBANDDataset:
         for col in data:
             if data[col].dtype == "object":
                 continue
-        
+
             try:
                 for row in range(len(data[col])):
                     if data[col][row] <= 0:
@@ -333,14 +337,14 @@ class TIMEBANDDataset:
         encoded.index = data.index
 
         return encoded
-    
+
     def parse_datetime(self, data):
         datetimes = []
         for record in data:
             datetimes.append(parse(record))
-            
+
         return datetimes
-    
+
     def __len__(self):
         return self.length
 
