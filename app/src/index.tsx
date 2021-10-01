@@ -8,11 +8,13 @@ import Play from "./pages/Play";
 import "bootstrap/dist/css/bootstrap.css";
 
 ReactDOM.render(
-  <Router>
-    <Switch>
-      <Route exact path="/" component={Play} />
-    </Switch>
-  </Router>,
+  <React.StrictMode>
+    <Router>
+      <Switch>
+        <Route exact path="/" component={Play} />
+      </Switch>
+    </Router>
+  </React.StrictMode>,
   document.getElementById("root")
 );
 
