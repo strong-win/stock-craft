@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/recharts": "1.8.20",
     "cra-template-typescript": "1.1.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
     "react-router-dom": "5.3.0",
     "react-scripts": "4.0.3",
+    "reactstrap": "8.10.0",
+    "recharts": "2.1.4",
     "web-vitals": "2.1.0"
   },
   "scripts": {
@@ -33,5 +36,15 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/reactstrap": "8.7.2",
+    "@typescript-eslint/eslint-plugin": "4.32.0",
+    "@typescript-eslint/parser": "4.32.0",
+    "eslint": "7.32.0",
+    "eslint-config-prettier": "8.3.0",
+    "eslint-plugin-prettier": "4.0.0",
+    "eslint-plugin-react": "7.26.0",
+    "prettier": "2.4.1"
   }
 }

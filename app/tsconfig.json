@@ -10,7 +10,7 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+    "strict": false,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -18,11 +18,20 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "noImplicitAny": false,
+    "strictNullChecks": false
   },
   "include": [
     "src",
     "**/*.ts",
     "**/*.tsx"
+  ],
+  "type": [
+    "node",
+    "webpack",
+    "react",
+    "react-dom",
+    "reactstrap"
   ]
 }

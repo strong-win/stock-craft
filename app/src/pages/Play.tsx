@@ -1,11 +1,11 @@
 import React from "react";
 
-import ChartWrpper from "../containers/ChartWrapper";
+import CorporationsWrapper from "../containers/CorporationsWrapper";
 
 const Play = () => {
   return (
     <>
-      <ChartWrpper />
+      <CorporationsWrapper />
     </>
   );
 };
