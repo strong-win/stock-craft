@@ -1,0 +1,76 @@
+{
+    "core":{
+        "mode": "train",
+
+        "workers": 2,
+        "batch_size": 28,
+        "seed": 42
+    },
+    "dataset": {
+        "directory": "data/power",
+        "data_name": "sample_data",
+
+        "index_col": "timestamp",
+        "year": "year",
+        "month": "month",
+        "weekday": "weekday",
+
+        "drops": ["drop col1", "drop col2", "drop col3", "drop col4"],
+        "targets": ["target col1", "target col2", "target col3", "target col4"],
+        "stride": 1,
+        "observed_len": 28,
+        "forecast_len": 28,
+
+        "log": false,
+
+        "split_rate": 0.9,
+        "window_scale": 2,
+        "window_sliding": 1,
+
+        "scaler": false,
+        "cutoff": {
+            "min": 0.01,
+            "max": 0
+        }
+    },
+    "models": {
+        "directory": "TIMEBAND/pretrained/",
+        "model_tag": "tag",
+        
+        "load": true,
+        "load_interval": 20,
+
+        "reload": true,
+        "reload_interval": 15,
+        
+        "save": true,
+        "save_interval": 2,
+        
+        "best_score": 2,
+        "hidden_dim": 128
+    },
+    "metric": {
+        "zero_ignoring": true,
+        "gp_weight": 10,
+        "l1_weight": 100,
+        "l2_weight": 1
+    },
+    "trainer": {
+        "epochs": {
+            "base": 0,
+            "iter": 10,
+            "critic": 5
+        },
+        "learning_rate": {
+            "base": 0.0002,
+            "gammaD": 1.0,
+            "gammaG": 0.5
+        },
+        "amplifier": 1.0,
+        "print": {
+            "verbose": 1,
+            "interval": 5
+        },
+        "visual": false
+    }
+}
