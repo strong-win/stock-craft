@@ -1,13 +1,15 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import queryString from "query-string";
+
 import { RootState } from "..";
 import ChartWrpper from "../containers/ChartWrapper";
 import ChattingWrapper from "../containers/ChattingWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
+import { emitJoin } from "../modules/sockets";
 import { updateCode, updateName } from "../modules/user";
 import { createName } from "../utils/userInfo";
-import { join } from "../modules/sockets";
+import TradeWrapper from "../containers/TradeWrapper";
 
 const Play = ({ location }: any) => {
   const { room } = queryString.parse(location.search);
@@ -22,7 +24,7 @@ const Play = ({ location }: any) => {
 
     if (typeof room === "string") {
       dispatch(updateCode(room));
-      dispatch(join({ name: createdName, room }));
+      dispatch(emitJoin({ name: createdName, room }));
     }
   }, [dispatch, room]);
 
@@ -31,6 +33,7 @@ const Play = ({ location }: any) => {
       <ChartWrpper />
       <ChattingWrapper name={name} />
       <PlayersWrapper code={code} />
+      <TradeWrapper />
     </>
   );
 };

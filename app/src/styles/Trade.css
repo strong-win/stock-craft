@@ -1,0 +1,26 @@
+.trade {
+  display: flex;
+  justify-content: space-between;
+  background: #dddddd;
+  width: 50vh;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+}
+
+.board {
+  display: flex;
+  flex-direction: column;
+}
+
+.buttonOuterContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.buttonContainer {
+  display: flex;
+}

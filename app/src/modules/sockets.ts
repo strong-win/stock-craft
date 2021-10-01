@@ -1,14 +1,17 @@
 import { Socket } from "socket.io-client";
 import { eventChannel } from "redux-saga";
-import { call, put, take, all, apply } from "redux-saga/effects";
-import { MessageType, PlayerType, updateMessage, updatePlayers } from "./user";
-import connectSocket from "../configs/socket";
 import { createAction } from "@reduxjs/toolkit";
+import { call, put, take, all, apply } from "redux-saga/effects";
 
-const CHAT_SERVER_MESSAGE = "chat/server_message";
-const CHAT_CLIENT_MESSAGE = "chat/client_message";
-const CHAT_ROOM = "chat/room";
-const CHAT_JOIN = "chat/join";
+import connectSocket from "../configs/socket";
+
+import { MessageType, PlayerType, updateMessage, updatePlayers } from "./user";
+import {
+  CHAT_CLIENT_MESSAGE,
+  CHAT_JOIN,
+  CHAT_ROOM,
+  CHAT_SERVER_MESSAGE,
+} from "./events";
 
 const createMessageChannel = (socket: Socket) => {
   return eventChannel<MessageType>((emit) => {
@@ -52,14 +55,14 @@ export function* receivePlayers(socket: Socket) {
   }
 }
 
-export const join = createAction(
+export const emitJoin = createAction(
   CHAT_JOIN,
   (payload: { name: string; room: string }) => ({ payload })
 );
 
 export function* joinSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(join.type);
+    const { payload } = yield take(emitJoin.type);
     yield apply(socket, socket.emit, [CHAT_JOIN, payload]);
   }
 }

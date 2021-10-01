@@ -1,0 +1,30 @@
+.chatting {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #dddddd;
+  width: 50vh;
+  height: 50vh;
+}
+
+.messages {
+  padding: 5% 0;
+  overflow: auto;
+  background: #ffffff;
+  margin: 5px;
+  flex: auto;
+}
+
+.message {
+  display: flex;
+  padding: 0 5%;
+  margin-top: 3px;
+}
+
+.justifyStart {
+  justify-content: flex-start;
+}
+
+.justifyEnd {
+  justify-content: flex-end;
+}

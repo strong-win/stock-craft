@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import reportWebVitals from "./reportWebVitals";
 import { Provider } from "react-redux";
-
-import Play from "./pages/Play";
-import { rootReducer, rootSaga } from "./modules";
 import { configureStore } from "@reduxjs/toolkit";
 import createSagaMiddleware from "@redux-saga/core";
+
+import { rootReducer, rootSaga } from "./modules";
+import Play from "./pages/Play";
+import reportWebVitals from "./reportWebVitals";
 
 const sagaMiddleware = createSagaMiddleware();
 
