@@ -1,4 +1,3 @@
-from numpy.lib import math, median
 import torch
 import numpy as np
 import pandas as pd
@@ -11,6 +10,7 @@ from utils.logger import Logger
 from TIMEBAND.model import TIMEBANDModel
 from TIMEBAND.metric import TIMEBANDMetric
 from TIMEBAND.dataset import TIMEBANDDataset
+from TIMEBAND.dashboard import TIMEBANDDashboard
 
 logger = Logger(__file__)
 
@@ -22,6 +22,7 @@ class TIMEBANDTrainer:
         dataset: TIMEBANDDataset,
         models: TIMEBANDModel,
         metric: TIMEBANDMetric,
+        dashboard: TIMEBANDDashboard,
         device: torch.device,
     ) -> None:
         # Set device
@@ -30,6 +31,7 @@ class TIMEBANDTrainer:
         self.dataset = dataset
         self.models = models
         self.metric = metric
+        self.dashboard = dashboard
 
         # Set Config
         config = self.set_config(config=config)
@@ -37,8 +39,6 @@ class TIMEBANDTrainer:
         self.data = None
         self.answer = None
         self.future_data = None
-        #  np.ones((self.dataset.decode_dims))
-        # self.data_gamma = np.array([self.amplifier])
 
     def set_config(self, config: dict = None) -> dict:
         """
@@ -99,7 +99,7 @@ class TIMEBANDTrainer:
             valid_tqdm = tqdm(validset, loss_info("Valid", epoch))
             valid_score = self.train_step(valid_tqdm, epoch, training=False)
             valid_score_plot.append(valid_score)
-            
+
             if (epoch + 1) % models.save_interval == 0:
                 models.save(self.netD, self.netG)
 
@@ -111,79 +111,6 @@ class TIMEBANDTrainer:
         models.save(netD_best, netG_best)
 
         return self.netD, self.netG
-        # self.plot_score(train_score_plot, valid_score_plot)
-
-
-    def inference(self, netG, dataset):
-        logger.info("Predict the data")
-
-        pred_tqdm = tqdm(dataset)
-
-        def generate(x):
-            return netG(x).to(self.device)
-
-        self.data = None
-        self.answer = None
-        for i, data in enumerate(pred_tqdm):
-            true_x = data["encoded"].to(self.device)
-            fake_y = generate(true_x)
-
-            pred = self.dataset.denormalize(fake_y.cpu())
-            # for f in range(self.dataset.decode_dims):
-            #     pred[:, :, f] = pred[:, :, f] * self.data_gamma[f]
-
-            self.eval(pred)
-            # self.predict(pred_y)
-
-            batch_size = pred.shape[0]
-            future_size = pred.shape[1]
-            feature_dim = pred.shape[2]
-            pred = pred.reshape((-1, future_size, feature_dim))
-            preds = np.concatenate(
-                [
-                    self.future_data[-batch_size - future_size :].detach().numpy(),
-                    np.zeros((batch_size, future_size, feature_dim)),
-                ]
-            )
-
-            if self.answer is None:
-                self.answer = np.zeros(
-                    (batch_size + future_size - 1, future_size, feature_dim)
-                )
-                self.index = 0
-            else:
-                self.answer = np.concatenate(
-                    [self.answer, np.zeros((batch_size, future_size, feature_dim))],
-                )
-
-            for f in range(future_size):
-                self.answer[self.index + f : self.index + f + batch_size, f] = preds[
-                    batch_size : 2 * batch_size, f
-                ]
-            self.index += batch_size
-
-        answer = self.answer.reshape(-1, future_size)
-        answer[answer == 0] = np.nan
-        mean_value = np.nanmean(answer, axis=1).reshape((-1, 1))
-
-        times = pd.DataFrame(self.dataset.preds_times.reshape(-1, 1))
-        output = pd.DataFrame(mean_value)
-        mean_output = pd.concat([times, output], axis=1)
-
-        return mean_output, output
-
-    def eval(self, pred):
-        batch_size = pred.shape[0]
-        window_size = pred.shape[1]
-        future_size = pred.shape[1]
-        feature_dim = pred.shape[2]
-
-        pred = pred.reshape((-1, future_size, feature_dim))
-        if self.future_data is None:
-            empty = torch.empty(pred.shape)
-            self.future_data = torch.cat([empty, pred])
-            return
-        self.future_data = torch.cat([self.future_data, pred])
 
     def train_step(self, tqdm, epoch, training=True):
         def discriminate(x):
@@ -461,15 +388,6 @@ class TIMEBANDTrainer:
         # logger.info(f"\n{data_gamma_df.T}")
         # self.data_gamma = next_gamma
 
-    # def plot_score(self, train_scores, valid_scores):
-    #     plt.plot(train_scores, label="train_score")
-    #     plt.plot(valid_scores, label="valid_score")
-    #     plt.xlabel("epoch")
-    #     plt.ylabel("score(nmae)")
-    #     plt.title("score_plot")
-    #     plt.legend()
-    #     plt.show()
-
 
 def loss_info(process, epoch, losses=None, i=0):
     if losses is None:
@@ -479,10 +397,6 @@ def loss_info(process, epoch, losses=None, i=0):
         f"[{process} e{epoch + 1:4d}]"
         f"Score {losses['Score']/(i+1):7.4f}("
         f"all {losses['ScoreAll']/(i+1):5.2f} "
-        f"1d {losses['Score1']/(i+1):5.2f} "
-        f"1w {losses['Score2']/(i+1):5.2f} "
-        f"2w {losses['Score3']/(i+1):5.2f} "
-        f"4w {losses['Score4']/(i+1):5.2f})"
         f"D {losses['D']/(i+1):7.3f} "
         f"G {losses['G']/(i+1):7.3f} "
         f"L1 {losses['l1']/(i+1):6.3f} "
@@ -499,9 +413,5 @@ def init_loss() -> dict:
         "l2": 0,
         "GP": 0,
         "Score": 0,
-        "Score1": 0,
-        "Score2": 0,
-        "Score3": 0,
-        "Score4": 0,
         "ScoreAll": 0,
     }
