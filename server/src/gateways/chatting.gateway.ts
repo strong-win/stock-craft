@@ -15,7 +15,6 @@ import {
   CHATTING_ROOM,
   CHATTING_JOIN,
 } from './events';
-import { response } from '../dto/response.dto';
 
 @WebSocketGateway({ cors: true })
 export class ChattingGateway
@@ -54,10 +53,10 @@ export class ChattingGateway
   @SubscribeMessage(CHATTING_JOIN)
   async handleJoin(
     client: Socket,
-    payLoad: { name: string; room: string },
+    payload: { name: string; room: string },
   ): Promise<void> {
     const { name, room } = await this.playersService.create({
-      ...payLoad,
+      ...payload,
       clientId: client.id,
     });
 
@@ -78,13 +77,11 @@ export class ChattingGateway
   }
 
   @SubscribeMessage(CHATTING_CLIENT_MESSAGE)
-  async handleMessage(client: Socket, message: string): Promise<response> {
+  async handleMessage(client: Socket, message: string): Promise<void> {
     const { name, room } = await this.playersService.findByClientId(client.id);
 
     this.server
       .to(room)
       .emit(CHATTING_SERVER_MESSAGE, { user: name, text: message });
-
-    return { status: 'OK' };
   }
 }

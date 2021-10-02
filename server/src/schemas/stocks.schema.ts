@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-export type ChartDocument = Chart & Document;
+export type StockDocument = Stock & Document;
 
 @Schema()
-export class Chart {
+export class Stock {
   @Prop()
   room: string;
 
@@ -20,10 +20,10 @@ export class Chart {
   ticker: string;
 
   @Prop()
-  corp: string;
+  corpName: string;
 
   @Prop()
   price: number;
 }
 
-export const ChartSchema = SchemaFactory.createForClass(Chart);
+export const StocksSchema = SchemaFactory.createForClass(Stock);

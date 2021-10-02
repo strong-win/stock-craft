@@ -7,3 +7,4 @@ export const TRADE_REQUEST = 'trade/request';
 export const TRADE_REFRESH = 'trade/refresh';
 
 export const CHART_REQUEST = 'chart/request';
+export const CHART_RESPONSE = 'chart/response';

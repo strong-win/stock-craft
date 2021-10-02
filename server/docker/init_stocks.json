@@ -1,0 +1,434 @@
+[
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 900
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "kang",
+    "corpName": "창구물신",
+    "price": 900
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 1500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 700
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 1,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 2,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 3,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 1800
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 4,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 2000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 1,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 2,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 600
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 3,
+    "ticker": "kang",
+    "corpName": "창구물신",
+    "price": 1800
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 4,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 1,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 600
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 2,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 3,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 2000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 4,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 3000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 1,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 2,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 1400
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 3,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 600
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 2,
+    "tick": 4,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 1,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 400
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 2,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 2000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 3,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 3600
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 4,
+    "ticker": "gyu",
+    "corpName": "규희전자",
+    "price": 4000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 1,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 2000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 2,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 1200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 3,
+    "ticker": "kang",
+    "corpName": "창구물신",
+    "price": 3600
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 4,
+    "ticker": "kang",
+    "corpName": "창구물산",
+    "price": 400
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 1,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 1200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 2,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 2000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 3,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 4000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 4,
+    "ticker": "han",
+    "corpName": "상일제약",
+    "price": 6000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 1,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 400
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 2,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 2800
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 3,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 1200
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 3,
+    "tick": 4,
+    "ticker": "lee",
+    "corpName": "호준건설",
+    "price": 2400
+  }
+]
