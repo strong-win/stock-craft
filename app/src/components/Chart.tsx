@@ -1,5 +1,7 @@
 import React from "react";
 
-const Chart = () => <div>it's chart</div>;
+const Chart = () => {
+  return <h1>Chart Container</h1>;
+};
 
 export default Chart;
