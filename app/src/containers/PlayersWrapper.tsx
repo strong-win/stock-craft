@@ -5,14 +5,14 @@ import Players from "../components/Players";
 import { playerType } from "../modules/game";
 
 type PlayersWrapperProps = {
-  code: string;
+  room: string;
 };
 
-const PlayersWrapper = ({ code }: PlayersWrapperProps) => {
+const PlayersWrapper = ({ room }: PlayersWrapperProps) => {
   const players: playerType[] = useSelector(
     (state: RootState) => state.game.players
   );
-  return <Players code={code} players={players} />;
+  return <Players room={room} players={players} />;
 };
 
 export default PlayersWrapper;

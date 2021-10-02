@@ -1,8 +1,15 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // stock state 는 모든 유저간 공유하는 state
 
+export type timeType = {
+  week: number;
+  day: number;
+  tick: number;
+};
+
 export type corpType = {
+  ticker: string;
   corpName: string;
   price: number;
 };
@@ -11,28 +18,43 @@ export type stockType = {
   week: number;
   day: number;
   tick: number;
-  corps: corpType[];
+  dayTicks: corpType[][];
 
   // selected coporation
-  corpInd: number;
-  corpStock: corpType;
+  selectedCorpInd: number;
+  selectedCorpStock: corpType;
 };
 
 const initialState: stockType = {
-  week: 0,
+  week: 1,
   day: 0,
   tick: 0,
-  corps: [],
+  dayTicks: [],
 
   // selected coporation
-  corpInd: 0,
-  corpStock: { corpName: "", price: 0 },
+  selectedCorpInd: 0,
+  selectedCorpStock: { ticker: "", corpName: "", price: 0 },
 };
 
 export const stockSlice = createSlice({
   name: "stock",
   initialState,
-  reducers: {},
+  reducers: {
+    updateChart(
+      state,
+      action: PayloadAction<{
+        week: number;
+        day: number;
+        dayTicks: corpType[][];
+      }>
+    ) {
+      state.week = action.payload.week;
+      state.day = action.payload.day;
+      state.dayTicks = action.payload.dayTicks;
+    },
+  },
 });
+
+export const { updateChart } = stockSlice.actions;
 
 export default stockSlice.reducer;

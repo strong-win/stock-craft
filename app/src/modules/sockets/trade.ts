@@ -4,7 +4,7 @@ import { Socket } from "socket.io-client";
 import { TRADE_REFRESH, TRADE_REQUEST } from "./events";
 
 type TradeRequestType = {
-  code: string;
+  room: string;
   week: number;
   day: number;
   tick: number;
@@ -15,7 +15,7 @@ type TradeRequestType = {
 };
 
 type TradeRefreshType = {
-  code: string;
+  room: string;
   weeek: number;
   day: number;
   tick: number;

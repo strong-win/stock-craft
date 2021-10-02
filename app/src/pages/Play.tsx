@@ -7,32 +7,32 @@ import ChartWrpper from "../containers/ChartWrapper";
 import ChattingWrapper from "../containers/ChattingWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
 import { emitJoin } from "../modules/sockets/chatting";
-import { updateCode, updateName } from "../modules/game";
-import { createName } from "../utils/userInfo";
+import { updateRoom, updateName } from "../modules/game";
+import { createName } from "../utils/create";
 import TradeWrapper from "../containers/TradeWrapper";
 
 const Play = ({ location }: any) => {
-  const { room } = queryString.parse(location.search);
+  const { room: initRoom } = queryString.parse(location.search);
 
   const name = useSelector((state: RootState) => state.game.name);
-  const code = useSelector((state: RootState) => state.game.code);
+  const room = useSelector((state: RootState) => state.game.room);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const createdName = createName();
     dispatch(updateName(createdName));
 
-    if (typeof room === "string") {
-      dispatch(updateCode(room));
-      dispatch(emitJoin({ name: createdName, room }));
+    if (typeof initRoom === "string") {
+      dispatch(updateRoom(initRoom));
+      dispatch(emitJoin({ name: createdName, room: initRoom }));
     }
-  }, [dispatch, room]);
+  }, [dispatch, initRoom]);
 
   return (
     <>
       <ChartWrpper />
       <ChattingWrapper name={name} />
-      <PlayersWrapper code={code} />
+      <PlayersWrapper room={room} />
       <TradeWrapper />
     </>
   );

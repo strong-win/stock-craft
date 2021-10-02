@@ -5,15 +5,15 @@ import { call, put, take, apply } from "@redux-saga/core/effects";
 
 import { messageType, playerType, updateMessage, updatePlayers } from "../game";
 import {
-  CHAT_CLIENT_MESSAGE,
-  CHAT_JOIN,
-  CHAT_ROOM,
-  CHAT_SERVER_MESSAGE,
+  CHATTING_CLIENT_MESSAGE,
+  CHATTING_JOIN,
+  CHATTING_ROOM,
+  CHATTING_SERVER_MESSAGE,
 } from "./events";
 
 const createMessageChannel = (socket: Socket) => {
   return eventChannel<messageType>((emit) => {
-    socket.on(CHAT_SERVER_MESSAGE, (message: messageType) => {
+    socket.on(CHATTING_SERVER_MESSAGE, (message: messageType) => {
       emit(message);
     });
 
@@ -34,7 +34,7 @@ export function* receieveMessage(socket: Socket) {
 
 const createPlayersChannel = (socket: Socket) => {
   return eventChannel<playerType[]>((emit) => {
-    socket.on(CHAT_ROOM, (players: playerType[]) => {
+    socket.on(CHATTING_ROOM, (players: playerType[]) => {
       emit(players);
     });
 
@@ -54,25 +54,25 @@ export function* receivePlayers(socket: Socket) {
 }
 
 export const emitJoin = createAction(
-  CHAT_JOIN,
+  CHATTING_JOIN,
   (payload: { name: string; room: string }) => ({ payload })
 );
 
 export function* emitJoinSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(emitJoin.type);
-    yield apply(socket, socket.emit, [CHAT_JOIN, payload]);
+    yield apply(socket, socket.emit, [CHATTING_JOIN, payload]);
   }
 }
 
 export const emitMessage = createAction(
-  CHAT_CLIENT_MESSAGE,
+  CHATTING_CLIENT_MESSAGE,
   (payload: string) => ({ payload })
 );
 
 export function* emitMessageSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(emitMessage.type);
-    yield apply(socket, socket.emit, [CHAT_CLIENT_MESSAGE, payload]);
+    yield apply(socket, socket.emit, [CHATTING_CLIENT_MESSAGE, payload]);
   }
 }

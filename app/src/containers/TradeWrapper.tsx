@@ -11,13 +11,15 @@ export type billType = {
 };
 
 const TradeWrapper = () => {
-  const { code, corpAsset } = useSelector((state: RootState) => state.game);
-  const { week, day, tick, corpStock } = useSelector(
+  const { room, selectedCorpAsset } = useSelector(
+    (state: RootState) => state.game
+  );
+  const { week, day, tick, selectedCorpStock } = useSelector(
     (state: RootState) => state.stock
   );
 
-  const { corpName, quantity, isLock } = corpAsset;
-  const stockBill = { price: corpStock.price, quantity };
+  const { corpName, quantity, isLock } = selectedCorpAsset;
+  const stockBill = { price: selectedCorpStock.price, quantity };
   const dispatch = useDispatch();
 
   const [tradeBill, setTradeBill] = useState<billType>(stockBill);
@@ -27,7 +29,7 @@ const TradeWrapper = () => {
     dispatch(
       emitTradeRequest({
         ...tradeBill,
-        code,
+        room,
         week,
         day,
         tick,
