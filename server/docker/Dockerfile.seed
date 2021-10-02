@@ -1,0 +1,5 @@
+FROM mongo
+
+COPY ./docker/init_chart.json /init_chart.json
+
+CMD mongoimport --host mongodb --db stockcraft --collection stock --type json --file /init_chart.json --jsonArray

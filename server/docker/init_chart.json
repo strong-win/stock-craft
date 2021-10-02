@@ -1,0 +1,146 @@
+[
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "gyu",
+    "corp": "규희전자",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "gyu",
+    "corp": "규희전자",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "gyu",
+    "corp": "규희전자",
+    "price": 900
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "gyu",
+    "corp": "규희전자",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "kang",
+    "corp": "창구물산",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "kang",
+    "corp": "창구물산",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "kang",
+    "corp": "창구물신",
+    "price": 900
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "kang",
+    "corp": "창구물산",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "han",
+    "corp": "상일제약",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "han",
+    "corp": "상일제약",
+    "price": 500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "han",
+    "corp": "상일제약",
+    "price": 1000
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "han",
+    "corp": "상일제약",
+    "price": 1500
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 1,
+    "ticker": "lee",
+    "corp": "호준건설",
+    "price": 100
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 2,
+    "ticker": "lee",
+    "corp": "호준건설",
+    "price": 700
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 3,
+    "ticker": "lee",
+    "corp": "호준건설",
+    "price": 300
+  },
+  {
+    "room": "ABC123",
+    "week": 1,
+    "day": 1,
+    "tick": 4,
+    "ticker": "lee",
+    "corp": "호준건설",
+    "price": 500
+  }
+]
