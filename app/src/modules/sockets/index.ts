@@ -1,7 +1,7 @@
 import { all, call } from "@redux-saga/core/effects";
 import { Socket } from "socket.io-client";
 import connectSocket from "../../configs/socket";
-import { emitChartSaga, receiveChart } from "./chart";
+import { emitChartRequestSaga, receiveChart } from "./chart";
 import {
   emitMessageSaga,
   emitJoinSaga,
@@ -30,7 +30,7 @@ export function* handleIO() {
     receieveTradeResponse(socket),
 
     // chart
-    emitChartSaga(socket),
+    emitChartRequestSaga(socket),
     receiveChart(socket),
   ]);
 }

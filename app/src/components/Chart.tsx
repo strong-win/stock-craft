@@ -1,23 +1,22 @@
 import React from "react";
-import { corpType } from "../modules/stock";
+import { chartType } from "../modules/stock";
 
 type ChartProps = {
-  dayTicks: corpType[][];
+  charts: chartType[];
   handleRefresh: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-const Chart = ({ dayTicks, handleRefresh }: ChartProps) => {
+const Chart = ({ charts, handleRefresh }: ChartProps) => {
   return (
     <>
       <h1>Chart Container</h1>
-      {dayTicks.map((tick, i) => (
-        <div key={i}>
-          <div>tick: {i + 1}</div>
-          {tick.map((corp, j) => (
-            <div key={j}>
-              <span>{corp.ticker}</span>
-              <span>{corp.corpName}</span>
-              <span>{corp.price}</span>
+      {charts.map((corp) => (
+        <div key={corp.corpId}>
+          <div>{corp.corpName}</div>
+          {corp.todayChart.map((price, index) => (
+            <div key={index}>
+              <span>tick: {index + 1}</span>&nbsp;
+              <span>price: {price}</span>
             </div>
           ))}
         </div>

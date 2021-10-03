@@ -2,7 +2,7 @@ import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { CHART_REQUEST, CHART_RESPONSE } from "./events";
 import { apply, call, put, take } from "@redux-saga/core/effects";
-import { corpType, updateChart } from "../stock";
+import { updateChart } from "../stock";
 import { eventChannel } from "@redux-saga/core";
 
 type chartRequestType = {
@@ -11,27 +11,25 @@ type chartRequestType = {
   day: number;
 };
 
-type chartResponseType = {
-  week: number;
-  day: number;
-  dayTicks: corpType[][];
+export type dayChartType = {
+  [key: string]: number[];
 };
 
-export const emitChart = createAction(
+export const emitChartRequest = createAction(
   CHART_REQUEST,
   (payload: chartRequestType) => ({ payload })
 );
 
-export function* emitChartSaga(socket: Socket) {
+export function* emitChartRequestSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitChart.type);
+    const { payload } = yield take(emitChartRequest.type);
     yield apply(socket, socket.emit, [CHART_REQUEST, payload]);
   }
 }
 
 const createChartChannel = (socket: Socket) => {
-  return eventChannel<chartResponseType>((emit) => {
-    socket.on(CHART_RESPONSE, (chart: chartResponseType) => {
+  return eventChannel<dayChartType>((emit) => {
+    socket.on(CHART_RESPONSE, (chart: dayChartType) => {
       emit(chart);
     });
 
@@ -45,7 +43,7 @@ export function* receiveChart(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: chartResponseType = yield take(channel);
+    let payload: dayChartType = yield take(channel);
     yield put(updateChart(payload));
   }
 }

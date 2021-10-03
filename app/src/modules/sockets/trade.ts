@@ -2,6 +2,7 @@ import { eventChannel } from "@redux-saga/core";
 import { apply, call, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
+import { assetType } from "../game";
 import { TRADE_REFRESH, TRADE_REQUEST, TRADE_RESPONSE } from "./events";
 
 type TradeRequestType = {
@@ -9,8 +10,7 @@ type TradeRequestType = {
   week: number;
   day: number;
   tick: number;
-  ticker: string;
-  corpName: string;
+  corpId: string;
   price: number;
   quantity: number;
   deal: string;
@@ -18,27 +18,15 @@ type TradeRequestType = {
 
 type TradeRefreshType = {
   room: string;
-  weeek: number;
+  week: number;
   day: number;
   tick: number;
 };
 
 type TradeResponseType = {
-  player: {
-    _id: string;
-    name: string;
-    room: string;
-    clinetId: string;
-    cash: number;
-  };
-  trade: {
-    ticker: string;
-    corpName: string;
-    price: number;
-    quantity: number;
-    deal: string;
-    isLock: boolean;
-  };
+  cash: number;
+  assets: assetType[];
+  corpId: string;
 };
 
 export const emitTradeRequest = createAction(

@@ -1,20 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-// game state 는 각 유저간 고유한 state
+export type messageType = {
+  user: string;
+  text: string;
+};
 
 export type playerType = {
   clientId: string;
   name: string;
 };
 
-export type messageType = {
-  user: string;
-  text: string;
-};
-
 export type assetType = {
-  ticker: string;
-  corpName: string;
+  corpId: string;
   quantity: number;
   isLock: boolean;
 };
@@ -26,10 +23,7 @@ export type gameType = {
   players: playerType[];
   cash: number;
   assets: assetType[];
-
-  // selected corporation
-  selectedCorpInd: number;
-  selectedCorpAsset: assetType;
+  selectedCorpId: string;
 };
 
 const initialState: gameType = {
@@ -38,16 +32,13 @@ const initialState: gameType = {
   messages: [],
   players: [],
   cash: 100_000,
-  assets: [],
-
-  // selected coporation
-  selectedCorpInd: 0,
-  selectedCorpAsset: {
-    ticker: "gyu",
-    corpName: "규희전자",
-    quantity: 0,
-    isLock: false,
-  },
+  assets: [
+    { corpId: "gyu", quantity: 0, isLock: false },
+    { corpId: "kang", quantity: 0, isLock: false },
+    { corpId: "han", quantity: 0, isLock: false },
+    { corpId: "lee", quantity: 0, isLock: false },
+  ], // for test
+  selectedCorpId: "gyu",
 };
 
 export const gameSlice = createSlice({
