@@ -27,13 +27,13 @@ export type stockType = {
 
 const initialState: stockType = {
   week: 1,
-  day: 0,
-  tick: 0,
+  day: 1,
+  tick: 1,
   dayTicks: [],
 
   // selected coporation
   selectedCorpInd: 0,
-  selectedCorpStock: { ticker: "", corpName: "", price: 0 },
+  selectedCorpStock: { ticker: "gyu", corpName: "규희전자", price: 100 },
 };
 
 export const stockSlice = createSlice({

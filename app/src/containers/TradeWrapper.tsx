@@ -18,7 +18,7 @@ const TradeWrapper = () => {
     (state: RootState) => state.stock
   );
 
-  const { corpName, quantity, isLock } = selectedCorpAsset;
+  const { ticker, corpName, quantity, isLock } = selectedCorpAsset;
   const stockBill = { price: selectedCorpStock.price, quantity };
   const dispatch = useDispatch();
 
@@ -33,6 +33,7 @@ const TradeWrapper = () => {
         week,
         day,
         tick,
+        ticker,
         corpName,
         deal,
       })

@@ -8,7 +8,11 @@ import {
   receieveMessage,
   receivePlayers,
 } from "./chatting";
-import { emitTradeRefreshSaga, emitTradeRequestSaga } from "./trade";
+import {
+  emitTradeRefreshSaga,
+  emitTradeRequestSaga,
+  receieveTradeResponse,
+} from "./trade";
 
 export function* handleIO() {
   const socket: Socket = yield call(connectSocket);
@@ -23,6 +27,7 @@ export function* handleIO() {
     // trade
     emitTradeRequestSaga(socket),
     emitTradeRefreshSaga(socket),
+    receieveTradeResponse(socket),
 
     // chart
     emitChartSaga(socket),

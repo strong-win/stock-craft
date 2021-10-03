@@ -13,6 +13,7 @@ export type messageType = {
 };
 
 export type assetType = {
+  ticker: string;
   corpName: string;
   quantity: number;
   isLock: boolean;
@@ -36,12 +37,17 @@ const initialState: gameType = {
   room: "",
   messages: [],
   players: [],
-  cash: 0,
+  cash: 100_000,
   assets: [],
 
   // selected coporation
   selectedCorpInd: 0,
-  selectedCorpAsset: { corpName: "", quantity: 0, isLock: false },
+  selectedCorpAsset: {
+    ticker: "gyu",
+    corpName: "규희전자",
+    quantity: 0,
+    isLock: false,
+  },
 };
 
 export const gameSlice = createSlice({
