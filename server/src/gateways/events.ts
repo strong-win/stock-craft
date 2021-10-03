@@ -4,6 +4,7 @@ export const CHATTING_ROOM = 'chatting/room';
 export const CHATTING_JOIN = 'chatting/join';
 
 export const TRADE_REQUEST = 'trade/request';
+export const TRADE_RESPONSE = 'trade/response';
 export const TRADE_REFRESH = 'trade/refresh';
 
 export const CHART_REQUEST = 'chart/request';

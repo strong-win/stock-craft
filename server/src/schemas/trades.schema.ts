@@ -8,7 +8,10 @@ export class Trade {
   clientId: string;
 
   @Prop()
-  corp: string;
+  ticker: string;
+
+  @Prop()
+  corpName: string;
 
   @Prop()
   price: number;
@@ -20,4 +23,4 @@ export class Trade {
   deal: string;
 }
 
-export const TradeSchema = SchemaFactory.createForClass(Trade);
+export const TradesSchema = SchemaFactory.createForClass(Trade);

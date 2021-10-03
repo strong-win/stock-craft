@@ -30,4 +30,17 @@ export class StocksService {
 
     return { week, day, dayTicks };
   }
+
+  async findPrice(
+    room: string,
+    week: number,
+    day: number,
+    tick: number,
+    ticker: string,
+  ): Promise<number> {
+    const stock = await this.stockModel
+      .findOne({ room, week, day, tick, ticker })
+      .exec();
+    return stock.price;
+  }
 }

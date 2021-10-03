@@ -1,4 +1,5 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
+import { assetType } from 'src/schemas/players.schema';
 
 export class CreatePlayerDto {
   @IsNotEmpty()
@@ -9,4 +10,10 @@ export class CreatePlayerDto {
 
   @IsNotEmpty()
   room: string;
+
+  @IsOptional()
+  cash: number;
+
+  @IsOptional()
+  assets: assetType[];
 }

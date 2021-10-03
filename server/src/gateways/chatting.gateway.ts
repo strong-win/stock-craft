@@ -58,6 +58,8 @@ export class ChattingGateway
     const { name, room } = await this.playersService.create({
       ...payload,
       clientId: client.id,
+      cash: 100_000,
+      assets: [],
     });
 
     client.join(room);
