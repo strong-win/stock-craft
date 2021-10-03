@@ -1,5 +1,5 @@
+import { dayChartType } from 'src/dto/chart-response.dto';
 import { StocksService } from './../services/stocks.service';
-import { Logger } from '@nestjs/common';
 import {
   SubscribeMessage,
   WebSocketGateway,
@@ -8,54 +8,31 @@ import {
 import { Server, Socket } from 'socket.io';
 
 import { CHART_REQUEST, CHART_RESPONSE } from './events';
-
-export type timeType = {
-  week: number;
-  day: number;
-  tick: number;
-};
-
-export type corpType = {
-  ticker: string;
-  corpName: string;
-  price: number;
-};
-
-export type tickType = timeType & corpType;
-
-export type timeDayTicksType = {
-  week: number;
-  day: number;
-  dayTicks: corpType[];
-};
-
-export type chartRequestType = {
-  room: string;
-  week: number;
-  day: number;
-};
+import { ChartRequestDto } from 'src/dto/chart-request.dto';
 
 @WebSocketGateway({ cors: true })
 export class ChartGateway {
   @WebSocketServer()
   server: Server;
 
-  private logger: Logger = new Logger('AppGateway');
-
   constructor(private stocksService: StocksService) {}
 
   @SubscribeMessage(CHART_REQUEST)
   async handleChartRequest(
     client: Socket,
-    payload: chartRequestType,
+    payload: ChartRequestDto,
   ): Promise<void> {
     const { room, week, day } = payload;
-    const timeDayTicks = await this.stocksService.findDayTicks(room, week, day);
+    const dayChart: dayChartType = await this.stocksService.findDayChart(
+      room,
+      week,
+      day,
+    );
 
     // To do
     // receive request from all players in the room with item
-    // check if all players requested and emit timeDayTicks to all players in the room
+    // check if all players requested and emit timedayChart to all players in the room
 
-    this.server.to(room).emit(CHART_RESPONSE, timeDayTicks);
+    this.server.to(room).emit(CHART_RESPONSE, dayChart);
   }
 }

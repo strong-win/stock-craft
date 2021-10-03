@@ -19,7 +19,7 @@ export class TradesService {
     clientId: string,
     tradeRequestDto: TradeRequestDto,
   ): Promise<TradeResponseDto> {
-    const { room, week, day, tick, ticker, corpName, price, quantity, deal } =
+    const { room, week, day, tick, corpId, corpName, price, quantity, deal } =
       tradeRequestDto;
 
     // find stock price
@@ -28,7 +28,7 @@ export class TradesService {
       week,
       day,
       tick,
-      ticker,
+      corpId,
     });
 
     // find player asset
@@ -46,10 +46,10 @@ export class TradesService {
       // check if player can directly trade
       isDirect = stock.price <= price ? true : false;
 
-      // flag for player assets having ticker object
+      // flag for player assets having corpId object
       let isIncluded = false;
       for (let asset of player.assets) {
-        if (asset.ticker === ticker) {
+        if (asset.corpId === corpId) {
           // if player can directly trade
           if (isDirect) {
             asset = { ...asset, quantity: (asset.quantity += quantity) };
@@ -59,7 +59,7 @@ export class TradesService {
       }
       // if player can directly trade but not included
       if (isDirect && !isIncluded) {
-        player.assets.push({ ticker, corpName, quantity });
+        player.assets.push({ corpId, quantity, isLock: false });
       }
 
       // caclulate cash and asset with deal
@@ -71,7 +71,7 @@ export class TradesService {
 
       let isIncluded = false;
       for (let asset of player.assets) {
-        if (asset.ticker === ticker) {
+        if (asset.corpId === corpId) {
           // check if player can trade
           if (asset.quantity < quantity) {
             const error = new Error('유저 자산 수량이 부족합니다');
@@ -90,7 +90,7 @@ export class TradesService {
         throw error;
       }
 
-      if (isDirect && isIncluded) {
+      if (isDirect) {
         // caclulate cash and asset with deal
         player.cash += price * quantity;
       }
@@ -102,13 +102,29 @@ export class TradesService {
     );
     // add to trade collection if player cannot directly trade
     if (!isDirect) {
-      const trade = { clientId, ticker, corpName, price, quantity, deal };
+      const trade = {
+        week,
+        day,
+        tick,
+        clientId,
+        corpId,
+        corpName,
+        price,
+        quantity,
+        deal,
+      };
       this.tradeModel.create(trade);
+
+      // lock asset if player cannot directly tade
+      player.assets.map((asset) =>
+        asset.corpId === corpId ? { ...asset, isLock: true } : asset,
+      );
     }
 
     return {
-      player,
-      trade: { ticker, corpName, price, quantity, deal, isLock: !isDirect },
+      cash: player.cash,
+      assets: player.assets,
+      corpId: corpId,
     };
   }
 

@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Date } from 'mongoose';
 
 export type TradeDocument = Trade & Document;
 
@@ -8,7 +9,16 @@ export class Trade {
   clientId: string;
 
   @Prop()
-  ticker: string;
+  week: number;
+
+  @Prop()
+  day: number;
+
+  @Prop()
+  tick: number;
+
+  @Prop()
+  corpId: string;
 
   @Prop()
   corpName: string;
@@ -21,6 +31,9 @@ export class Trade {
 
   @Prop()
   deal: string;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
 }
 
 export const TradesSchema = SchemaFactory.createForClass(Trade);

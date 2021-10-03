@@ -17,7 +17,7 @@ export class Stock {
   tick: number;
 
   @Prop()
-  ticker: string;
+  corpId: string;
 
   @Prop()
   corpName: string;

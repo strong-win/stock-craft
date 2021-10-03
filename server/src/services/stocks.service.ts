@@ -1,8 +1,14 @@
-import { timeDayTicksType } from './../gateways/chart.gateway';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { dayChartType } from 'src/dto/chart-response.dto';
 import { Stock, StockDocument } from 'src/schemas/stocks.schema';
+
+type tickType = {
+  tick: number;
+  corpId: string;
+  price: number;
+};
 
 @Injectable()
 export class StocksService {
@@ -10,25 +16,31 @@ export class StocksService {
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
   ) {}
 
-  async findDayTicks(
+  async findDayChart(
     room: string,
     week: number,
     day: number,
-  ): Promise<timeDayTicksType> {
+  ): Promise<dayChartType> {
     const stocks = await this.stockModel.find({ room, week, day }).exec();
 
-    const dayTicks = [];
+    const dayChart = {};
     for (const stock of stocks) {
-      const { tick, ticker, corpName, price } = stock;
+      const { tick, corpId, price } = stock;
 
-      if (dayTicks[tick - 1]) {
-        dayTicks[tick - 1].push({ ticker, corpName, price });
+      if (!dayChart[corpId]) {
+        dayChart[corpId] = [{ tick, corpId, price }];
       } else {
-        dayTicks[tick - 1] = [{ ticker, corpName, price }];
+        dayChart[corpId].push({ tick, corpId, price });
       }
     }
 
-    return { week, day, dayTicks };
+    for (const corpId in dayChart) {
+      dayChart[corpId] = dayChart[corpId]
+        .sort((a: tickType, b: tickType) => a.tick - b.tick)
+        .map((tickChart: tickType) => tickChart.price);
+    }
+
+    return dayChart;
   }
 
   async findPrice(
@@ -36,10 +48,10 @@ export class StocksService {
     week: number,
     day: number,
     tick: number,
-    ticker: string,
+    corpId: string,
   ): Promise<number> {
     const stock = await this.stockModel
-      .findOne({ room, week, day, tick, ticker })
+      .findOne({ room, week, day, tick, corpId })
       .exec();
     return stock.price;
   }

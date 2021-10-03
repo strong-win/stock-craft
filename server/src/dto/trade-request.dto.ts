@@ -14,7 +14,7 @@ export class TradeRequestDto {
   tick: number;
 
   @IsNotEmpty()
-  ticker: string;
+  corpId: string;
 
   @IsNotEmpty()
   corpName: string;

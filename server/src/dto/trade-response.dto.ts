@@ -1,15 +1,13 @@
-import { PlayerDocument } from '../schemas/players.schema';
-
-type tradeResultType = {
-  ticker: string;
-  corpName: string;
-  price: number;
-  quantity: number;
-  deal: string;
-  isLock: boolean;
-};
+import { IsNotEmpty } from 'class-validator';
+import { assetType } from '../schemas/players.schema';
 
 export class TradeResponseDto {
-  player: PlayerDocument;
-  trade: tradeResultType;
+  @IsNotEmpty()
+  cash: number;
+
+  @IsNotEmpty()
+  assets: assetType[];
+
+  @IsNotEmpty()
+  corpId: string;
 }

@@ -3,21 +3,21 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 export type PlayerDocument = Player & Document;
 
 export type assetType = {
-  ticker: string;
-  corpName: string;
+  corpId: string;
   quantity: number;
+  isLock: boolean;
 };
 
 @Schema()
 export class Player {
+  @Prop()
+  room: string;
+
   @Prop({ unique: true })
   clientId: string;
 
   @Prop()
   name: string;
-
-  @Prop()
-  room: string;
 
   @Prop()
   cash: number;
