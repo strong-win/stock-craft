@@ -1,5 +1,5 @@
 const Clocks = () => {
-    return <div>Clocks</div>;
-  };
-  
+  return <div>Clocks</div>;
+};
+
 export default Clocks;

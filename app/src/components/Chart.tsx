@@ -10,27 +10,24 @@ import {
   Legend,
 } from "recharts";
 
-type ChartData = {
-  time: number;
-  value: number;
-};
+import { chartDataType } from "./Corporations";
 
 type ChartProps = {
-  data: {
+  corp: {
     id: string;
     name: string;
-    data: ChartData[];
+    chartData: chartDataType[];
   };
   onClickBackButton: (id: string) => void;
 };
 
-const Chart = ({ data, onClickBackButton }: ChartProps) => {
+const Chart = ({ corp, onClickBackButton }: ChartProps) => {
   return (
     <>
       <LineChart
         width={500}
         height={300}
-        data={data?.data}
+        data={corp?.chartData}
         margin={{
           top: 5,
           right: 30,
@@ -43,12 +40,6 @@ const Chart = ({ data, onClickBackButton }: ChartProps) => {
         <YAxis />
         <Tooltip />
         <Legend />
-        {/* <Line
-        type="monotone"
-        dataKey="pv"
-        stroke="#8884d8"
-        activeDot={{ r: 8 }}
-      /> */}
         <Line type="monotone" dataKey="value" stroke="#82ca9d" />
       </LineChart>
       <Button onClick={() => onClickBackButton("")}>뒤로가기</Button>

@@ -6,7 +6,7 @@ const MockData = [
   {
     id: "gyu",
     name: "규희전자",
-    data: [
+    chartData: [
       {
         time: 0,
         value: 1,
@@ -28,7 +28,7 @@ const MockData = [
   {
     id: "kang",
     name: "창구물산",
-    data: [
+    chartData: [
       {
         time: 0,
         value: 5,
@@ -50,7 +50,7 @@ const MockData = [
   {
     id: "han",
     name: "상일제약",
-    data: [
+    chartData: [
       {
         time: 0,
         value: 3,
@@ -72,7 +72,7 @@ const MockData = [
   {
     id: "lee",
     name: "호준건설",
-    data: [
+    chartData: [
       {
         time: 0,
         value: 1,
@@ -106,11 +106,11 @@ const CorporationsWrapper = () => {
 
   return isChartView ? (
     <Chart
-      data={MockData.find((corp) => corp.id === selectedCorpId)}
-      onClickBackButton={() => onClickCorpItem("")}
+      corp={MockData.find((corp) => corp.id === selectedCorpId)}
+      onClickBackButton={onClickCorpItem}
     />
   ) : (
-    <Corporations data={MockData} onClickCorpItem={onClickCorpItem} />
+    <Corporations corps={MockData} onClickCorpItem={onClickCorpItem} />
   );
 };
 

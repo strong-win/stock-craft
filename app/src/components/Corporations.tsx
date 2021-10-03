@@ -1,24 +1,24 @@
 import React from "react";
 import { ListGroup, ListGroupItem } from "reactstrap";
 
-type corpTimeData = {
+export type chartDataType = {
   time: number;
   value: number;
 };
 
-type corpData = {
+type corpsType = {
   id: string;
   name: string;
-  data: corpTimeData[];
+  chartData: chartDataType[];
 };
 
 type CorperationsProps = {
-  data: corpData[];
+  corps: corpsType[];
   onClickCorpItem: (id: string) => void;
 };
 
-const Corporations = ({ data, onClickCorpItem }: CorperationsProps) => {
-  const CorporationItems = data.map((corp: corpData) => (
+const Corporations = ({ corps, onClickCorpItem }: CorperationsProps) => {
+  const CorporationItems = corps.map((corp: corpsType) => (
     <ListGroupItem
       tag="a"
       key={corp.id}

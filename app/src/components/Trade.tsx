@@ -1,5 +1,5 @@
 const Trade = () => {
-    return <div>Trade</div>;
+  return <div>Trade</div>;
 };
 
 export default Trade;
