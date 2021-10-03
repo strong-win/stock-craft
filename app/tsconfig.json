@@ -1,16 +1,12 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": false,
+    "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "module": "esnext",
@@ -22,16 +18,6 @@
     "noImplicitAny": false,
     "strictNullChecks": false
   },
-  "include": [
-    "src",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "type": [
-    "node",
-    "webpack",
-    "react",
-    "react-dom",
-    "reactstrap"
-  ]
+  "include": ["src", "**/*.ts", "**/*.tsx"],
+  "type": ["node", "webpack", "react", "react-dom", "reactstrap"]
 }
