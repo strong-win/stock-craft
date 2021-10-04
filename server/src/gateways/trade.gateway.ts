@@ -28,12 +28,9 @@ export class TradeGateway {
     payload: TradeRequestDto,
   ): Promise<void> {
     try {
-      console.log(payload);
       const player = await this.tradesService.handleTrade(client.id, payload);
       this.server.to(client.id).emit(TRADE_RESPONSE, player);
     } catch (e) {
-      console.log(e);
-
       if (e.name === 'TradeException') {
         // To do
         // handle TradeException
@@ -66,7 +63,6 @@ export class TradeGateway {
       day,
       tick,
     );
-    console.log(player);
     this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
 }
