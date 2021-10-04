@@ -5,7 +5,7 @@ export type TradeDocument = Trade & Document;
 
 @Schema()
 export class Trade {
-  @Prop({ unique: true })
+  @Prop()
   clientId: string;
 
   @Prop()
@@ -34,6 +34,9 @@ export class Trade {
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
+
+  @Prop()
+  status: 'pending' | 'cancel' | 'disposed';
 }
 
 export const TradesSchema = SchemaFactory.createForClass(Trade);

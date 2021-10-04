@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class TradeRefreshDto {
   @IsNotEmpty()
-  code: string;
+  room: string;
 
   @IsNotEmpty()
   week: number;

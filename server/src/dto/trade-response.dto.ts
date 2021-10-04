@@ -7,7 +7,4 @@ export class TradeResponseDto {
 
   @IsNotEmpty()
   assets: assetType[];
-
-  @IsNotEmpty()
-  corpId: string;
 }

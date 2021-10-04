@@ -46,22 +46,14 @@ export class TradesService {
       // check if player can directly trade
       isDirect = stock.price <= price ? true : false;
 
-      // flag for player assets having corpId object
-      let isIncluded = false;
-      for (let asset of player.assets) {
+      for (const asset of player.assets) {
         if (asset.corpId === corpId) {
-          // if player can directly trade
-          if (isDirect) {
-            asset = { ...asset, quantity: (asset.quantity += quantity) };
-            isIncluded = true;
-          }
+          asset.quantity = isDirect
+            ? asset.quantity + quantity
+            : asset.quantity;
+          asset.isLock = !isDirect;
         }
       }
-      // if player can directly trade but not included
-      if (isDirect && !isIncluded) {
-        player.assets.push({ corpId, quantity, isLock: false });
-      }
-
       // caclulate cash and asset with deal
       player.cash -= price * quantity;
     }
@@ -69,8 +61,7 @@ export class TradesService {
       // check if player can directly trade
       isDirect = stock.price >= price ? true : false;
 
-      let isIncluded = false;
-      for (let asset of player.assets) {
+      for (const asset of player.assets) {
         if (asset.corpId === corpId) {
           // check if player can trade
           if (asset.quantity < quantity) {
@@ -78,28 +69,14 @@ export class TradesService {
             error.name = 'TradeException';
             throw error;
           }
-          // update quantity if player can directly trade
-          asset = { ...asset, quantity: (asset.quantity -= quantity) };
-          isIncluded = true;
+          asset.quantity = asset.quantity - quantity;
+          asset.isLock = !isDirect;
         }
       }
-      // if player cannot trade because of asset not included
-      if (!isIncluded) {
-        const error = new Error('유저 자산 수량이 부족합니다');
-        error.name = 'TradeException';
-        throw error;
-      }
-
-      if (isDirect) {
-        // caclulate cash and asset with deal
-        player.cash += price * quantity;
-      }
+      // if corp is included in assets
+      isDirect ? (player.cash += price * quantity) : null;
     }
-    // modify asset with new stocks
-    await this.playerModel.updateOne(
-      { clientId },
-      { cash: player.cash, assets: player.assets },
-    );
+
     // add to trade collection if player cannot directly trade
     if (!isDirect) {
       const trade = {
@@ -112,23 +89,128 @@ export class TradesService {
         price,
         quantity,
         deal,
+        status: 'pending',
       };
-      this.tradeModel.create(trade);
-
-      // lock asset if player cannot directly tade
-      player.assets.map((asset) =>
-        asset.corpId === corpId ? { ...asset, isLock: true } : asset,
-      );
+      await this.tradeModel.create(trade);
     }
+
+    // modify asset with new stocks
+    await this.playerModel.updateOne(
+      { clientId },
+      { cash: player.cash, assets: player.assets },
+    );
 
     return {
       cash: player.cash,
       assets: player.assets,
-      corpId: corpId,
     };
   }
 
-  // To do
   // trade refresh
+  async handleRefresh(
+    room: string,
+    clientId: string,
+    week: number,
+    day: number,
+    tick: number,
+  ): Promise<TradeResponseDto> {
+    const player = await this.playerModel.findOne({ clientId });
+    const trades = await this.tradeModel
+      .find({ clientId, status: 'pending' })
+      .exec();
+
+    for (const trade of trades) {
+      const { corpId } = trade;
+      const stock = await this.stockModel.findOne({
+        room,
+        week,
+        day,
+        tick,
+        corpId,
+      });
+
+      if (trade.deal === 'buy') {
+        if (trade.price >= stock.price) {
+          for (const asset of player.assets) {
+            if (asset.corpId === corpId) {
+              asset.quantity += trade.quantity;
+              asset.isLock = false;
+            }
+          }
+          await this.tradeModel.updateOne(
+            { _id: trade._id },
+            { $set: { status: 'disposed' } },
+          );
+        }
+      }
+
+      if (trade.deal === 'sell') {
+        if (trade.price <= stock.price) {
+          player.cash += trade.price * trade.quantity;
+
+          for (const asset of player.assets) {
+            if (asset.corpId === corpId) {
+              asset.isLock = false;
+            }
+          }
+          await this.tradeModel.updateOne(
+            { _id: trade._id },
+            { $set: { status: 'disposed' } },
+          );
+        }
+      }
+
+      await this.playerModel.updateOne(
+        { clientId },
+        { cash: player.cash, assets: player.assets },
+      );
+    }
+    return {
+      cash: player.cash,
+      assets: player.assets,
+    };
+  }
+
   // trade cancel
+  async handleTradeCancel(
+    clientId: string,
+    corpId: string,
+  ): Promise<TradeResponseDto> {
+    const player = await this.playerModel.findOne({ clientId });
+    const trade = await this.tradeModel.findOne({
+      clientId,
+      corpId,
+      status: 'pending',
+    });
+
+    if (trade.deal === 'buy') {
+      player.cash += trade.price * trade.quantity;
+
+      for (const asset of player.assets) {
+        if (asset.corpId == corpId) {
+          asset.isLock = false;
+        }
+      }
+    }
+    if (trade.deal === 'sell') {
+      for (const asset of player.assets) {
+        if (asset.corpId == corpId) {
+          asset.quantity = asset.quantity + trade.quantity;
+          asset.isLock = false;
+        }
+      }
+    }
+    trade.status = 'cancel';
+    trade.save();
+
+    await this.playerModel.updateOne(
+      { clientId },
+      { cash: player.cash, assets: player.assets },
+    );
+
+    return {
+      cash: player.cash,
+      assets: player.assets,
+    };
+  }
 }

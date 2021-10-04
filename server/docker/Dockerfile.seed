@@ -1,5 +1,7 @@
 FROM mongo
 
 COPY ./docker/init_stocks.json /init_stocks.json
+COPY ./docker/init_games.json /init_games.json
 
-CMD mongoimport --host mongodb --db stockcraft --collection stocks --type json --file /init_stocks.json --jsonArray
+CMD mongoimport --host mongodb --db stockcraft --collection stocks --type json --file /init_stocks.json --jsonArray && \ 
+    mongoimport --host mongodb --db stockcraft --collection games --type json --file /init_games.json --jsonArray
