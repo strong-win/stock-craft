@@ -24,6 +24,7 @@ export type gameType = {
   cash: number;
   assets: assetType[];
   selectedCorpId: string;
+  started: boolean;
 };
 
 const initialState: gameType = {
@@ -39,6 +40,7 @@ const initialState: gameType = {
     { corpId: "lee", quantity: 0, isLock: false },
   ], // for test
   selectedCorpId: "gyu",
+  started: false,
 };
 
 export const gameSlice = createSlice({
@@ -57,10 +59,36 @@ export const gameSlice = createSlice({
     updateMessage: (state, action: PayloadAction<messageType>) => {
       state.messages = [...state.messages, action.payload];
     },
+    updateAssets: (state, action: PayloadAction<assetType[]>) => {
+      state.assets = action.payload;
+    },
+    updateCash: (state, action: PayloadAction<number>) => {
+      state.cash = action.payload;
+    },
+    updateStarted: (state, action: PayloadAction<boolean>) => {
+      state.started = action.payload;
+    },
+    initializeAssets: (
+      state,
+      action: PayloadAction<{ corpId: string; corpName: string }[]>
+    ) => {
+      for (const corp of action.payload) {
+        const { corpId } = corp;
+        state.assets.push({ corpId, quantity: 0, isLock: false });
+      }
+    },
   },
 });
 
-export const { updateName, updateRoom, updateMessage, updatePlayers } =
-  gameSlice.actions;
+export const {
+  updateName,
+  updateRoom,
+  updateMessage,
+  updatePlayers,
+  updateAssets,
+  updateCash,
+  updateStarted,
+  initializeAssets,
+} = gameSlice.actions;
 
 export default gameSlice.reducer;

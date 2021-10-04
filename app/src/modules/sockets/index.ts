@@ -8,7 +8,9 @@ import {
   receieveMessage,
   receivePlayers,
 } from "./chatting";
+import { emitGameRequestSaga, receieveGameResponse } from "./game";
 import {
+  emitTradeCancelSaga,
   emitTradeRefreshSaga,
   emitTradeRequestSaga,
   receieveTradeResponse,
@@ -26,11 +28,16 @@ export function* handleIO() {
 
     // trade
     emitTradeRequestSaga(socket),
+    emitTradeCancelSaga(socket),
     emitTradeRefreshSaga(socket),
     receieveTradeResponse(socket),
 
     // chart
     emitChartRequestSaga(socket),
     receiveChart(socket),
+
+    // game
+    emitGameRequestSaga(socket),
+    receieveGameResponse(socket),
   ]);
 }

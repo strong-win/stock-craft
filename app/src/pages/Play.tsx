@@ -7,15 +7,15 @@ import ChartWrpper from "../containers/ChartWrapper";
 import ChattingWrapper from "../containers/ChattingWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
 import { emitJoin } from "../modules/sockets/chatting";
-import { updateRoom, updateName } from "../modules/game";
+import { updateRoom, updateName } from "../modules/user";
 import { createName } from "../utils/create";
 import TradeWrapper from "../containers/TradeWrapper";
+import { emitGameRequest } from "../modules/sockets/game";
 
 const Play = ({ location }: any) => {
   const { room: initRoom } = queryString.parse(location.search);
 
-  const name = useSelector((state: RootState) => state.game.name);
-  const room = useSelector((state: RootState) => state.game.room);
+  const { name, room, started } = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -28,12 +28,20 @@ const Play = ({ location }: any) => {
     }
   }, [dispatch, initRoom]);
 
-  return (
+  const onGameStart = (e: any) => {
+    dispatch(emitGameRequest({ room }));
+  };
+
+  return started ? (
     <>
       <ChartWrpper />
       <ChattingWrapper name={name} />
       <PlayersWrapper room={room} />
       <TradeWrapper />
+    </>
+  ) : (
+    <>
+      <button onClick={onGameStart}>START</button>
     </>
   );
 };

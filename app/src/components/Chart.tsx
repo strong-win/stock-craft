@@ -10,12 +10,12 @@ const Chart = ({ charts, handleRefresh }: ChartProps) => {
   return (
     <>
       <h1>Chart Container</h1>
-      {charts.map((corp) => (
-        <div key={corp.corpId}>
+      {charts.map((corp, corpIndex) => (
+        <div key={corpIndex}>
           <div>{corp.corpName}</div>
-          {corp.todayChart.map((price, index) => (
-            <div key={index}>
-              <span>tick: {index + 1}</span>&nbsp;
+          {corp.todayChart.map((price, priceIndex) => (
+            <div key={priceIndex}>
+              <span>tick: {priceIndex + 1}</span>&nbsp;
               <span>price: {price}</span>
             </div>
           ))}

@@ -1,9 +1,14 @@
 import { eventChannel } from "@redux-saga/core";
-import { apply, call, take } from "@redux-saga/core/effects";
+import { apply, call, put, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { assetType } from "../game";
-import { TRADE_REFRESH, TRADE_REQUEST, TRADE_RESPONSE } from "./events";
+import { assetType, updateAssets, updateCash } from "../user";
+import {
+  TRADE_CANCEL,
+  TRADE_REFRESH,
+  TRADE_REQUEST,
+  TRADE_RESPONSE,
+} from "./events";
 
 type TradeRequestType = {
   room: string;
@@ -26,7 +31,6 @@ type TradeRefreshType = {
 type TradeResponseType = {
   cash: number;
   assets: assetType[];
-  corpId: string;
 };
 
 export const emitTradeRequest = createAction(
@@ -38,6 +42,18 @@ export function* emitTradeRequestSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(emitTradeRequest.type);
     yield apply(socket, socket.emit, [TRADE_REQUEST, payload]);
+  }
+}
+
+export const emitTradeCancel = createAction(
+  TRADE_CANCEL,
+  (payload: { corpId: string }) => ({ payload })
+);
+
+export function* emitTradeCancelSaga(socket: Socket) {
+  while (true) {
+    const { payload } = yield take(emitTradeCancel.type);
+    yield apply(socket, socket.emit, [TRADE_CANCEL, payload]);
   }
 }
 
@@ -70,7 +86,8 @@ export function* receieveTradeResponse(socket: Socket) {
   );
   while (true) {
     const payload: TradeResponseType = yield take(channel);
-    console.log(payload);
+    yield put(updateAssets(payload.assets));
+    yield put(updateCash(payload.cash));
 
     // To do
     // update player asset and cash

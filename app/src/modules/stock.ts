@@ -14,17 +14,17 @@ export type stockType = {
 
 const initialState: stockType = {
   charts: [
-    { corpId: "gyu", corpName: "규희전자", totalChart: [], todayChart: [] },
-    { corpId: "kang", corpName: "창구물산", totalChart: [], todayChart: [] },
-    { corpId: "han", corpName: "상일제약", totalChart: [], todayChart: [] },
-    { corpId: "lee", corpName: "호준건설", totalChart: [], todayChart: [] },
+    // { corpId: "gyu", corpName: "규희전자", totalChart: [], todayChart: [] },
+    // { corpId: "kang", corpName: "창구물산", totalChart: [], todayChart: [] },
+    // { corpId: "han", corpName: "상일제약", totalChart: [], todayChart: [] },
+    // { corpId: "lee", corpName: "호준건설", totalChart: [], todayChart: [] },
   ], // for test
 };
 export const stockSlice = createSlice({
   name: "stock",
   initialState,
   reducers: {
-    updateChart(state, action: PayloadAction<dayChartType>) {
+    updateDayChart(state, action: PayloadAction<dayChartType>) {
       for (const corpId in action.payload) {
         state.charts.map((chart, index) =>
           chart.corpId === corpId
@@ -33,9 +33,18 @@ export const stockSlice = createSlice({
         );
       }
     },
+    initializeCharts(
+      state,
+      action: PayloadAction<{ corpId: string; corpName: string }[]>
+    ) {
+      for (const corp of action.payload) {
+        const { corpId, corpName } = corp;
+        state.charts.push({ corpId, corpName, totalChart: [], todayChart: [] });
+      }
+    },
   },
 });
 
-export const { updateChart } = stockSlice.actions;
+export const { updateDayChart, initializeCharts } = stockSlice.actions;
 
 export default stockSlice.reducer;

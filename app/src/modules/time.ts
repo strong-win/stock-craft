@@ -20,9 +20,12 @@ export const timeSlice = createSlice({
       state.week = action.payload.week;
       state.day = action.payload.day;
     },
+    updateTick(state, action: PayloadAction<{ tick: number }>) {
+      state.tick = action.payload.tick;
+    },
   },
 });
 
-export const { updateTime } = timeSlice.actions;
+export const { updateTime, updateTick } = timeSlice.actions;
 
 export default timeSlice.reducer;

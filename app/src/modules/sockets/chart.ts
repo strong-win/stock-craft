@@ -2,7 +2,7 @@ import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { CHART_REQUEST, CHART_RESPONSE } from "./events";
 import { apply, call, put, take } from "@redux-saga/core/effects";
-import { updateChart } from "../stock";
+import { updateDayChart } from "../stock";
 import { eventChannel } from "@redux-saga/core";
 
 type chartRequestType = {
@@ -44,6 +44,6 @@ export function* receiveChart(socket: Socket) {
   );
   while (true) {
     let payload: dayChartType = yield take(channel);
-    yield put(updateChart(payload));
+    yield put(updateDayChart(payload));
   }
 }

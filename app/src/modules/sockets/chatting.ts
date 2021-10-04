@@ -3,7 +3,7 @@ import { eventChannel } from "redux-saga";
 import { createAction } from "@reduxjs/toolkit";
 import { call, put, take, apply } from "@redux-saga/core/effects";
 
-import { messageType, playerType, updateMessage, updatePlayers } from "../game";
+import { messageType, playerType, updateMessage, updatePlayers } from "../user";
 import {
   CHATTING_CLIENT_MESSAGE,
   CHATTING_JOIN,

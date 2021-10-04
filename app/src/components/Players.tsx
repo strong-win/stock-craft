@@ -1,4 +1,4 @@
-import { playerType } from "../modules/game";
+import { playerType } from "../modules/user";
 
 type PlayersProps = {
   room: string;

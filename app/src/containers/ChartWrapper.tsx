@@ -6,7 +6,7 @@ import { updateTime } from "../modules/time";
 import { calculateNext } from "../utils/calculate";
 
 const ChartWrapper = () => {
-  const { room } = useSelector((state: RootState) => state.game);
+  const { room } = useSelector((state: RootState) => state.user);
   const { charts } = useSelector((state: RootState) => state.stock);
   const { week, day } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();

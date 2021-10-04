@@ -1,6 +1,6 @@
 import React from "react";
 
-import { messageType } from "../../modules/game";
+import { messageType } from "../../modules/user";
 import "../../styles/Chatting.css";
 import Input from "./ChatInput";
 

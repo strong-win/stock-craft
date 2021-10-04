@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-import { messageType } from "../../modules/game";
+import { messageType } from "../../modules/user";
 import Message from "./Message";
 import "../../styles/Chatting.css";
 

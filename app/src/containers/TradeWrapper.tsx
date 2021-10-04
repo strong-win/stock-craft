@@ -3,9 +3,14 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Trade from "../components/Trade";
-import { assetType } from "../modules/game";
-import { emitTradeRequest } from "../modules/sockets/trade";
+import { assetType } from "../modules/user";
+import {
+  emitTradeCancel,
+  emitTradeRefresh,
+  emitTradeRequest,
+} from "../modules/sockets/trade";
 import { chartType } from "../modules/stock";
+import { updateTick } from "../modules/time";
 
 export type billType = {
   price: number;
@@ -15,7 +20,7 @@ export type billType = {
 const TradeWrapper = () => {
   // redux state
   const { room, assets, selectedCorpId } = useSelector(
-    (state: RootState) => state.game
+    (state: RootState) => state.user
   );
   const { charts } = useSelector((state: RootState) => state.stock);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
@@ -62,6 +67,16 @@ const TradeWrapper = () => {
     );
   };
 
+  const handleCancel = (e: any) => {
+    dispatch(emitTradeCancel({ corpId: selectedCorpId }));
+  };
+
+  const handleRefresh = (e: any) => {
+    const nextTick = (tick % 4) + 1;
+    dispatch(updateTick({ tick: nextTick }));
+    dispatch(emitTradeRefresh({ room, week, day, tick: nextTick }));
+  };
+
   return (
     <Trade
       isLock={isLock}
@@ -69,6 +84,8 @@ const TradeWrapper = () => {
       tradeBill={tradeBill}
       setTradeBill={setTradeBill}
       handleDeal={handleDeal}
+      handleCancel={handleCancel}
+      handleRefresh={handleRefresh}
     />
   );
 };

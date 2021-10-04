@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Players from "../components/Players";
-import { playerType } from "../modules/game";
+import { playerType } from "../modules/user";
 
 type PlayersWrapperProps = {
   room: string;
@@ -10,7 +10,7 @@ type PlayersWrapperProps = {
 
 const PlayersWrapper = ({ room }: PlayersWrapperProps) => {
   const players: playerType[] = useSelector(
-    (state: RootState) => state.game.players
+    (state: RootState) => state.user.players
   );
   return <Players room={room} players={players} />;
 };
