@@ -18,7 +18,7 @@ const initialState: stockType = {
     // { corpId: "kang", corpName: "창구물산", totalChart: [], todayChart: [] },
     // { corpId: "han", corpName: "상일제약", totalChart: [], todayChart: [] },
     // { corpId: "lee", corpName: "호준건설", totalChart: [], todayChart: [] },
-  ], // for test
+  ],
 };
 export const stockSlice = createSlice({
   name: "stock",

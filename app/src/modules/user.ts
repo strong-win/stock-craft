@@ -34,11 +34,11 @@ const initialState: gameType = {
   players: [],
   cash: 100_000,
   assets: [
-    { corpId: "gyu", quantity: 0, isLock: false },
-    { corpId: "kang", quantity: 0, isLock: false },
-    { corpId: "han", quantity: 0, isLock: false },
-    { corpId: "lee", quantity: 0, isLock: false },
-  ], // for test
+    // { corpId: "gyu", quantity: 0, isLock: false },
+    // { corpId: "kang", quantity: 0, isLock: false },
+    // { corpId: "han", quantity: 0, isLock: false },
+    // { corpId: "lee", quantity: 0, isLock: false },
+  ],
   selectedCorpId: "gyu",
   started: false,
 };

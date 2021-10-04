@@ -43,9 +43,5 @@ export function* receieveGameResponse(socket: Socket) {
     yield put(initializeCharts(payload.corps));
     yield put(initializeAssets(payload.corps));
     yield put(updateStarted(true));
-
-    // To do
-    // update player asset and cash
-    // update trade container with lock
   }
 }
