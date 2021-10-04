@@ -1,15 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import reportWebVitals from "./reportWebVitals";
 
+import reportWebVitals from "./reportWebVitals";
 import Play from "./pages/Play";
+
+import "bootstrap/dist/css/bootstrap.css";
 
 ReactDOM.render(
   <React.StrictMode>
     <Router>
       <Switch>
-        <Route exact path="/play" component={Play} />
+        <Route exact path="/" component={Play} />
       </Switch>
     </Router>
   </React.StrictMode>,
