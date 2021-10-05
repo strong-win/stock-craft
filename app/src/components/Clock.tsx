@@ -32,6 +32,7 @@ const Clock = ({ week, day, tick }: TimeType) => {
       <CountdownCircleTimer
         isPlaying
         duration={15}
+        onComplete={() => [true, 0]}
         colors={[
           ["#008000", 0.5],
           ["#ffa500", 0.25],

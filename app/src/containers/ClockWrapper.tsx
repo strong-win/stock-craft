@@ -1,15 +1,29 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import Clock from "../components/Clock";
 
-const mockData = {
-  week: 1,
-  day: 2,
-  tick: 3,
-};
-
 const ClockWrapper = () => {
-  return <Clock week={mockData.week} day={mockData.day} tick={mockData.tick} />;
+  const [week, setWeek] = useState<number>(1);
+  const [day, setDay] = useState<number>(1);
+  const [tick, setTick] = useState<number>(1);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (tick < 4) {
+        setTick(tick + 1);
+      } else {
+        setTick(1);
+        if (day < 6) {
+          setDay(day + 1);
+        } else {
+          setDay(1);
+          setWeek(week + 1);
+        }
+      }
+    }, 15000);
+  }, [tick]);
+
+  return <Clock week={week} day={day} tick={tick} />;
 };
 
 export default ClockWrapper;
