@@ -16,7 +16,8 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "noImplicitAny": false,
-    "strictNullChecks": false
+    "strictNullChecks": false,
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   "include": ["src", "**/*.ts", "**/*.tsx"],
   "type": ["node", "webpack", "react", "react-dom", "reactstrap"]

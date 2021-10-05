@@ -1,35 +1,35 @@
 import React from "react";
-import { ListGroup, ListGroupItem } from "reactstrap";
-
-export type chartDataType = {
-  time: number;
-  value: number;
-};
-
-type corpsType = {
-  id: string;
-  name: string;
-  chartData: chartDataType[];
-};
+import { ListGroup, ListGroupItem, Button } from "reactstrap";
+import { chartType } from "../modules/stock";
 
 type CorperationsProps = {
-  corps: corpsType[];
+  corps: chartType[];
   onClickCorpItem: (id: string) => void;
+  handleRefresh: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-const Corporations = ({ corps, onClickCorpItem }: CorperationsProps) => {
-  const CorporationItems = corps.map((corp: corpsType) => (
+const Corporations = ({
+  corps,
+  onClickCorpItem,
+  handleRefresh,
+}: CorperationsProps) => {
+  const CorporationItems = corps.map((corp: chartType) => (
     <ListGroupItem
       tag="a"
-      key={corp.id}
+      key={corp.corpId}
       href="#"
-      onClick={() => onClickCorpItem(corp.id)}
+      onClick={() => onClickCorpItem(corp.corpId)}
       action
     >
-      {corp.name}
+      {corp.corpName}
     </ListGroupItem>
   ));
-  return <ListGroup>{CorporationItems}</ListGroup>;
+  return (
+    <>
+      <ListGroup>{CorporationItems}</ListGroup>
+      <Button onClick={handleRefresh}>Refresh</Button>
+    </>
+  );
 };
 
 export default Corporations;
