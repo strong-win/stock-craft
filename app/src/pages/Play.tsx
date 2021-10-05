@@ -1,11 +1,11 @@
 import React from "react";
 
-import ChartWrpper from "../containers/ChartWrapper";
+import ClockWrapper from "../containers/ClockWrapper";
 
 const Play = () => {
   return (
     <>
-      <ChartWrpper />
+      <ClockWrapper />
     </>
   );
 };
