@@ -2,8 +2,8 @@ import React from "react";
 
 import { messageType } from "../../modules/user";
 import "../../styles/Chatting.css";
-import Input from "./ChatInput";
 
+import Input from "./ChatInput";
 import Messages from "./Messages";
 
 type ChattingProps = {

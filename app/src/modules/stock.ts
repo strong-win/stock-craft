@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
 import { dayChartType } from "./sockets/chart";
 
 export type chartType = {

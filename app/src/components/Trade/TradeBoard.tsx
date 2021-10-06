@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+
 import { billType } from "../../containers/TradeWrapper";
 
 type BoardProps = {

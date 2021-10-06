@@ -1,9 +1,11 @@
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { CHART_REQUEST, CHART_RESPONSE } from "./events";
-import { apply, call, put, take } from "@redux-saga/core/effects";
-import { updateDayChart } from "../stock";
 import { eventChannel } from "@redux-saga/core";
+import { apply, call, put, take } from "@redux-saga/core/effects";
+
+import { updateDayChart } from "../stock";
+
+import { CHART_REQUEST, CHART_RESPONSE } from "./events";
 
 type chartRequestType = {
   room: string;

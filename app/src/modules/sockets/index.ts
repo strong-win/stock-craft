@@ -1,6 +1,8 @@
 import { all, call } from "@redux-saga/core/effects";
 import { Socket } from "socket.io-client";
+
 import connectSocket from "../../configs/socket";
+
 import { chartRequestSaga, chartResponseSaga } from "./chart";
 import {
   chattingJoinSaga,

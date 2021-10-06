@@ -1,4 +1,3 @@
-import React from "react";
 import { chartType } from "../modules/stock";
 
 import { Button } from "reactstrap";

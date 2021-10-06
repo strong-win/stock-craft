@@ -1,5 +1,6 @@
 import React from "react";
 import { ListGroup, ListGroupItem, Button } from "reactstrap";
+
 import { chartType } from "../modules/stock";
 
 type CorperationsProps = {

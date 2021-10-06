@@ -1,9 +1,9 @@
+import "../../styles/Trade.css";
+import { billType } from "../../containers/TradeWrapper";
+
 import TradeBoard from "./TradeBoard";
 import TradeButton from "./TradeButton";
 import TradeInput from "./TradeInput";
-
-import "../../styles/Trade.css";
-import { billType } from "../../containers/TradeWrapper";
 
 type TradeProps = {
   isLock: boolean;
