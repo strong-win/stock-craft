@@ -1,0 +1,18 @@
+# Pretrained model
+*.pth
+
+# Config setting
+config.json
+
+# Log files
+*.log
+
+# Data Files
+*.csv
+
+*.bat
+
+__pycache__
+
+# Upload sample files
+!sample.*
