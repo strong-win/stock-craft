@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Chatting from "../components/Chatting";
-import { emitMessage } from "../modules/sockets/chatting";
+import { chattingRequest } from "../modules/sockets/chatting";
 import { messageType } from "../modules/user";
 
 const ChattingWrapper = ({ name }: { name: string }) => {
@@ -18,7 +18,7 @@ const ChattingWrapper = ({ name }: { name: string }) => {
     e.preventDefault();
 
     if (message) {
-      dispatch(emitMessage(message));
+      dispatch(chattingRequest(message));
       setMessage("");
     }
   };

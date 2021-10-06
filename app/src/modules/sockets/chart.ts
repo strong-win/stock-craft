@@ -15,14 +15,14 @@ export type dayChartType = {
   [key: string]: number[];
 };
 
-export const emitChartRequest = createAction(
+export const chartRequest = createAction(
   CHART_REQUEST,
   (payload: chartRequestType) => ({ payload })
 );
 
-export function* emitChartRequestSaga(socket: Socket) {
+export function* chartRequestSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitChartRequest.type);
+    const { payload } = yield take(CHART_REQUEST);
     yield apply(socket, socket.emit, [CHART_REQUEST, payload]);
   }
 }
@@ -37,7 +37,7 @@ const createChartChannel = (socket: Socket) => {
   });
 };
 
-export function* receiveChart(socket: Socket) {
+export function* chartResponseSaga(socket: Socket) {
   const channel: ReturnType<typeof createChartChannel> = yield call(
     createChartChannel,
     socket

@@ -8,11 +8,11 @@ import PlayersWrapper from "../containers/PlayersWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import { updateRoom, updateName } from "../modules/user";
-import { emitJoin } from "../modules/sockets/chatting";
-import { emitGameRequest } from "../modules/sockets/game";
+import { chattingJoin } from "../modules/sockets/chatting";
+import { gameStartRequest } from "../modules/sockets/game";
 import { createName } from "../utils/create";
 
-const Play = ({ location }: any) => {
+const Play = ({ location, history }: any) => {
   const { room: initRoom } = queryString.parse(location.search);
 
   const { name, room, started } = useSelector((state: RootState) => state.user);
@@ -22,14 +22,17 @@ const Play = ({ location }: any) => {
     const createdName = createName();
     dispatch(updateName(createdName));
 
+    if (typeof initRoom === "undefined") {
+      history.push("/");
+    }
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
-      dispatch(emitJoin({ name: createdName, room: initRoom }));
+      dispatch(chattingJoin({ name: createdName, room: initRoom }));
     }
-  }, [dispatch, initRoom]);
+  }, [dispatch, history, initRoom]);
 
   const onGameStart = (e: any) => {
-    dispatch(emitGameRequest({ room }));
+    dispatch(gameStartRequest({ room }));
   };
 
   return started ? (

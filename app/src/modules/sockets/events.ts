@@ -1,3 +1,12 @@
+/**
+ * 아래와 같이 변경 예정
+ *
+ * export const CHATTING_REQUEST = "chatting/request";
+ * export const CHATTING_RESPONSE = "chatting/response";
+ * export const CHATTING_PLAYERS = "chatting/players";
+ * export const CHATTING_JOIN + "chatting/join"
+ */
+
 export const CHATTING_SERVER_MESSAGE = "chatting/server_message";
 export const CHATTING_CLIENT_MESSAGE = "chatting/client_message";
 export const CHATTING_ROOM = "chatting/room";

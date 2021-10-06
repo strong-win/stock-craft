@@ -21,7 +21,7 @@ const Corporations = ({
       onClick={() => onClickCorpItem(corp.corpId)}
       action
     >
-      {corp.corpName}
+      <div>{corp.corpName}</div>
     </ListGroupItem>
   ));
   return (

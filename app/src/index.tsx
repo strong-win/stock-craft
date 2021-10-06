@@ -8,6 +8,7 @@ import createSagaMiddleware from "@redux-saga/core";
 import { rootReducer, rootSaga } from "./modules";
 import Play from "./pages/Play";
 import reportWebVitals from "./reportWebVitals";
+import Main from "./pages/Main";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -24,6 +25,7 @@ ReactDOM.render(
     <Provider store={store}>
       <Router>
         <Switch>
+          <Route exact path="/" component={Main} />
           <Route exact path="/play" component={Play} />
         </Switch>
       </Router>

@@ -26,9 +26,9 @@ export const stockSlice = createSlice({
   reducers: {
     updateDayChart(state, action: PayloadAction<dayChartType>) {
       for (const corpId in action.payload) {
-        state.corps.map((chart, index) =>
-          chart.corpId === corpId
-            ? (chart.todayChart = action.payload[corpId])
+        state.corps.map((corp) =>
+          corp.corpId === corpId
+            ? (corp.todayChart = action.payload[corpId])
             : null
         );
       }

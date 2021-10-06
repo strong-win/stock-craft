@@ -11,7 +11,31 @@ import {
   CHATTING_SERVER_MESSAGE,
 } from "./events";
 
-const createMessageChannel = (socket: Socket) => {
+export const chattingJoin = createAction(
+  CHATTING_JOIN,
+  (payload: { name: string; room: string }) => ({ payload })
+);
+
+export function* chattingJoinSaga(socket: Socket) {
+  while (true) {
+    const { payload } = yield take(CHATTING_JOIN);
+    yield apply(socket, socket.emit, [CHATTING_JOIN, payload]);
+  }
+}
+
+export const chattingRequest = createAction(
+  CHATTING_CLIENT_MESSAGE,
+  (payload: string) => ({ payload })
+);
+
+export function* chattingRequestSaga(socket: Socket) {
+  while (true) {
+    const { payload } = yield take(CHATTING_CLIENT_MESSAGE);
+    yield apply(socket, socket.emit, [CHATTING_CLIENT_MESSAGE, payload]);
+  }
+}
+
+const createChattingChannel = (socket: Socket) => {
   return eventChannel<messageType>((emit) => {
     socket.on(CHATTING_SERVER_MESSAGE, (message: messageType) => {
       emit(message);
@@ -21,9 +45,9 @@ const createMessageChannel = (socket: Socket) => {
   });
 };
 
-export function* receieveMessage(socket: Socket) {
-  const channel: ReturnType<typeof createMessageChannel> = yield call(
-    createMessageChannel,
+export function* chattingResponseSaga(socket: Socket) {
+  const channel: ReturnType<typeof createChattingChannel> = yield call(
+    createChattingChannel,
     socket
   );
   while (true) {
@@ -42,7 +66,7 @@ const createPlayersChannel = (socket: Socket) => {
   });
 };
 
-export function* receivePlayers(socket: Socket) {
+export function* playersResponseSaga(socket: Socket) {
   const channel: ReturnType<typeof createPlayersChannel> = yield call(
     createPlayersChannel,
     socket
@@ -50,29 +74,5 @@ export function* receivePlayers(socket: Socket) {
   while (true) {
     const payload: playerType[] = yield take(channel);
     yield put(updatePlayers(payload));
-  }
-}
-
-export const emitJoin = createAction(
-  CHATTING_JOIN,
-  (payload: { name: string; room: string }) => ({ payload })
-);
-
-export function* emitJoinSaga(socket: Socket) {
-  while (true) {
-    const { payload } = yield take(emitJoin.type);
-    yield apply(socket, socket.emit, [CHATTING_JOIN, payload]);
-  }
-}
-
-export const emitMessage = createAction(
-  CHATTING_CLIENT_MESSAGE,
-  (payload: string) => ({ payload })
-);
-
-export function* emitMessageSaga(socket: Socket) {
-  while (true) {
-    const { payload } = yield take(emitMessage.type);
-    yield apply(socket, socket.emit, [CHATTING_CLIENT_MESSAGE, payload]);
   }
 }

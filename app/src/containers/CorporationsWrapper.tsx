@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
 import Chart from "../components/Chart";
 import Corporations from "../components/Corporations";
-import { emitChartRequest } from "../modules/sockets/chart";
+import { chartRequest } from "../modules/sockets/chart";
 import { chartType } from "../modules/stock";
 import { updateTime } from "../modules/time";
 import { calculateNext } from "../utils/calculate";
@@ -30,21 +30,27 @@ const CorporationsWrapper = () => {
 
   const handleRefresh = (e: any) => {
     const { nextWeek, nextDay } = calculateNext(week, day);
-    dispatch(emitChartRequest({ room, week: nextWeek, day: nextDay }));
+    dispatch(chartRequest({ room, week: nextWeek, day: nextDay }));
     dispatch(updateTime({ week: nextWeek, day: nextDay }));
   };
 
   return isChartView ? (
-    <Chart
-      corp={corps.find((corp: chartType) => corp.corpId === selectedCorpId)}
-      onClickBackButton={onClickCorpItem}
-    />
+    <>
+      <h1>Chart Container</h1>
+      <Chart
+        corp={corps.find((corp: chartType) => corp.corpId === selectedCorpId)}
+        onClickBackButton={onClickCorpItem}
+      />
+    </>
   ) : (
-    <Corporations
-      corps={corps}
-      onClickCorpItem={onClickCorpItem}
-      handleRefresh={handleRefresh}
-    />
+    <>
+      <h1>Corporation Container</h1>
+      <Corporations
+        corps={corps}
+        onClickCorpItem={onClickCorpItem}
+        handleRefresh={handleRefresh}
+      />
+    </>
   );
 };
 

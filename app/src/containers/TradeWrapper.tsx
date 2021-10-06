@@ -5,9 +5,9 @@ import { RootState } from "..";
 import Trade from "../components/Trade";
 import { assetType } from "../modules/user";
 import {
-  emitTradeCancel,
-  emitTradeRefresh,
-  emitTradeRequest,
+  tradeCancel,
+  tradeRefresh,
+  tradeRequest,
 } from "../modules/sockets/trade";
 import { chartType } from "../modules/stock";
 import { updateTick } from "../modules/time";
@@ -37,15 +37,16 @@ const TradeWrapper = () => {
   const [isLock, setIsLock] = useState(false);
 
   useEffect(() => {
-    const corpStock: chartType = corps.filter(
+    const corpStock: chartType = corps.find(
       (chart) => chart.corpId === selectedCorpId
-    )[0];
-    const corpAsset: assetType = assets.filter(
+    );
+    const corpAsset: assetType = assets.find(
       (asset) => asset.corpId === selectedCorpId
-    )[0];
+    );
 
     const { quantity, isLock } = corpAsset;
     const stockBill = { price: corpStock.todayChart[tick - 1] || 0, quantity };
+
     setIsLock(isLock);
     setStockBill(stockBill);
   }, [assets, selectedCorpId, corps, tick]);
@@ -55,7 +56,7 @@ const TradeWrapper = () => {
   const handleDeal = (e: any) => {
     const deal = e.target.name;
     dispatch(
-      emitTradeRequest({
+      tradeRequest({
         ...tradeBill,
         room,
         week,
@@ -68,13 +69,13 @@ const TradeWrapper = () => {
   };
 
   const handleCancel = (e: any) => {
-    dispatch(emitTradeCancel({ corpId: selectedCorpId }));
+    dispatch(tradeCancel({ corpId: selectedCorpId }));
   };
 
   const handleRefresh = (e: any) => {
     const nextTick = (tick % 4) + 1;
     dispatch(updateTick({ tick: nextTick }));
-    dispatch(emitTradeRefresh({ room, week, day, tick: nextTick }));
+    dispatch(tradeRefresh({ room, week, day, tick: nextTick }));
   };
 
   return (

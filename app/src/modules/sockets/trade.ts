@@ -33,38 +33,38 @@ type TradeResponseType = {
   assets: assetType[];
 };
 
-export const emitTradeRequest = createAction(
+export const tradeRequest = createAction(
   TRADE_REQUEST,
   (payload: TradeRequestType) => ({ payload })
 );
 
-export function* emitTradeRequestSaga(socket: Socket) {
+export function* tradeRequestSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitTradeRequest.type);
+    const { payload } = yield take(TRADE_REQUEST);
     yield apply(socket, socket.emit, [TRADE_REQUEST, payload]);
   }
 }
 
-export const emitTradeCancel = createAction(
+export const tradeCancel = createAction(
   TRADE_CANCEL,
   (payload: { corpId: string }) => ({ payload })
 );
 
-export function* emitTradeCancelSaga(socket: Socket) {
+export function* tradeCancelSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitTradeCancel.type);
+    const { payload } = yield take(TRADE_CANCEL);
     yield apply(socket, socket.emit, [TRADE_CANCEL, payload]);
   }
 }
 
-export const emitTradeRefresh = createAction(
+export const tradeRefresh = createAction(
   TRADE_REFRESH,
   (payload: TradeRefreshType) => ({ payload })
 );
 
-export function* emitTradeRefreshSaga(socket: Socket) {
+export function* tradeRefreshSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitTradeRefresh.type);
+    const { payload } = yield take(TRADE_REFRESH);
     yield apply(socket, socket.emit, [TRADE_REFRESH, payload]);
   }
 }
@@ -79,7 +79,7 @@ const createTradeResponseChannel = (socket: Socket) => {
   });
 };
 
-export function* receieveTradeResponse(socket: Socket) {
+export function* tradeResponseSaga(socket: Socket) {
   const channel: ReturnType<typeof createTradeResponseChannel> = yield call(
     createTradeResponseChannel,
     socket

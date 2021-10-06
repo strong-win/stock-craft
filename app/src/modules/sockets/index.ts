@@ -1,19 +1,19 @@
 import { all, call } from "@redux-saga/core/effects";
 import { Socket } from "socket.io-client";
 import connectSocket from "../../configs/socket";
-import { emitChartRequestSaga, receiveChart } from "./chart";
+import { chartRequestSaga, chartResponseSaga } from "./chart";
 import {
-  emitMessageSaga,
-  emitJoinSaga,
-  receieveMessage,
-  receivePlayers,
+  chattingJoinSaga,
+  chattingRequestSaga,
+  chattingResponseSaga,
+  playersResponseSaga,
 } from "./chatting";
-import { emitGameRequestSaga, receieveGameResponse } from "./game";
+import { gameStartRequestSaga, gameStartResponseSaga } from "./game";
 import {
-  emitTradeCancelSaga,
-  emitTradeRefreshSaga,
-  emitTradeRequestSaga,
-  receieveTradeResponse,
+  tradeCancelSaga,
+  tradeRefreshSaga,
+  tradeRequestSaga,
+  tradeResponseSaga,
 } from "./trade";
 
 export function* handleIO() {
@@ -21,23 +21,23 @@ export function* handleIO() {
 
   yield all([
     // chatting
-    receieveMessage(socket),
-    receivePlayers(socket),
-    emitJoinSaga(socket),
-    emitMessageSaga(socket),
+    chattingJoinSaga(socket),
+    chattingRequestSaga(socket),
+    chattingResponseSaga(socket),
+    playersResponseSaga(socket),
 
     // trade
-    emitTradeRequestSaga(socket),
-    emitTradeCancelSaga(socket),
-    emitTradeRefreshSaga(socket),
-    receieveTradeResponse(socket),
+    tradeRequestSaga(socket),
+    tradeCancelSaga(socket),
+    tradeRefreshSaga(socket),
+    tradeResponseSaga(socket),
 
     // chart
-    emitChartRequestSaga(socket),
-    receiveChart(socket),
+    chartRequestSaga(socket),
+    chartResponseSaga(socket),
 
     // game
-    emitGameRequestSaga(socket),
-    receieveGameResponse(socket),
+    gameStartRequestSaga(socket),
+    gameStartResponseSaga(socket),
   ]);
 }

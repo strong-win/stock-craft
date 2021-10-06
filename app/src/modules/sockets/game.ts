@@ -10,19 +10,19 @@ type startResponseType = {
   corps: { corpId: string; corpName: string }[];
 };
 
-export const emitGameRequest = createAction(
+export const gameStartRequest = createAction(
   GAME_START_REQUEST,
   (payload: { room: string }) => ({ payload })
 );
 
-export function* emitGameRequestSaga(socket: Socket) {
+export function* gameStartRequestSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(emitGameRequest.type);
+    const { payload } = yield take(GAME_START_REQUEST);
     yield apply(socket, socket.emit, [GAME_START_REQUEST, payload]);
   }
 }
 
-const createGameResponseChannel = (socket: Socket) => {
+const createGameStartResponseChannel = (socket: Socket) => {
   return eventChannel<startResponseType>((emit) => {
     socket.on(GAME_START_RESPONSE, (payload: startResponseType) => {
       emit(payload);
@@ -32,9 +32,9 @@ const createGameResponseChannel = (socket: Socket) => {
   });
 };
 
-export function* receieveGameResponse(socket: Socket) {
-  const channel: ReturnType<typeof createGameResponseChannel> = yield call(
-    createGameResponseChannel,
+export function* gameStartResponseSaga(socket: Socket) {
+  const channel: ReturnType<typeof createGameStartResponseChannel> = yield call(
+    createGameStartResponseChannel,
     socket
   );
   while (true) {
