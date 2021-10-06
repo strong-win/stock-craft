@@ -1,24 +1,31 @@
 version: '3'
 
 services:
-  nest:
-    container_name: nest
+  nestjs:
+    image: stockcraft_nestjs
     build:
-      context: ./
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: ./docker/Dockerfile.server
     volumes:
       - ./:/usr/proj/server
       - /usr/proj/server/node_modules
     ports:
       - '8080:8080'
     links:
-      - mongo
+      - mongodb
     depends_on:
-      - mongo
+      - mongodb
 
-  mongo:
+  mongodb:
     image: mongo
-    container_name: mongo
     restart: always
     ports:
       - '27017:27017'
+
+  mongodb_seed:
+    image: stockcraft_mongodb_seed
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.seed
+    links:
+      - mongodb
