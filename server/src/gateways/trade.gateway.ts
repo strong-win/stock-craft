@@ -32,7 +32,7 @@ export class TradeGateway {
       this.server.to(client.id).emit(TRADE_RESPONSE, player);
     } catch (e) {
       if (e.name === 'TradeException') {
-        console.log(e);
+        console.error(e);
         // To do
         // handle TradeException
       }

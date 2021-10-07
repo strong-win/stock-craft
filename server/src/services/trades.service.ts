@@ -19,7 +19,7 @@ export class TradesService {
     clientId: string,
     tradeRequestDto: TradeRequestDto,
   ): Promise<TradeResponseDto> {
-    const { room, week, day, tick, corpId, corpName, price, quantity, deal } =
+    const { room, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
 
     // find stock price
@@ -82,7 +82,6 @@ export class TradesService {
       tick,
       clientId,
       corpId,
-      corpName,
       price,
       quantity,
       deal,
@@ -103,7 +102,6 @@ export class TradesService {
         {
           _id: trade._id,
           corpId: trade.corpId,
-          corpName: trade.corpName,
           price: trade.price,
           quantity: trade.quantity,
           deal: trade.deal,
@@ -172,7 +170,6 @@ export class TradesService {
       );
     }
 
-    console.log(player);
     return {
       cash: player.cash,
       assets: player.assets,
@@ -180,7 +177,6 @@ export class TradesService {
       trades: tradesDisposed.map((trade) => ({
         _id: trade._id,
         corpId: trade.corpId,
-        corpName: trade.corpName,
         price: trade.price,
         quantity: trade.quantity,
         deal: trade.deal,
@@ -229,7 +225,6 @@ export class TradesService {
         {
           _id: trade._id,
           corpId: trade.corpId,
-          corpName: trade.corpName,
           price: trade.price,
           quantity: trade.quantity,
           deal: trade.deal,
