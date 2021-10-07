@@ -4,6 +4,7 @@ import queryString from "query-string";
 
 import { RootState } from "..";
 import ChattingWrapper from "../containers/ChattingWrapper";
+import ClockWrapper from "../containers/ClockWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
@@ -41,6 +42,7 @@ const Play = ({ location, history }: any) => {
       <ChattingWrapper name={name} />
       <PlayersWrapper room={room} />
       <TradeWrapper />
+      <ClockWrapper />
     </>
   ) : (
     <>
