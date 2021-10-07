@@ -4,6 +4,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { assetType } from 'src/schemas/players.schema';
 import { GamesService } from 'src/services/games.service';
 import { PlayersService } from 'src/services/players.service';
 import { GAME_START_REQUEST, GAME_START_RESPONSE } from './events';
@@ -24,9 +25,9 @@ export class GameGateway {
     const corps = await this.gameService.findCorpNames(room);
     const clients = await this.playersService.findByRoom(room);
 
-    const assets = [];
+    const assets: assetType[] = [];
     for (const corp of corps) {
-      assets.push({ corpId: corp.corpId, quantity: 0, isLock: false });
+      assets.push({ corpId: corp.corpId, quantity: 0 });
     }
 
     const clientIds = clients.map((client) => client.clientId);
