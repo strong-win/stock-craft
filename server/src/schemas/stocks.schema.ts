@@ -1,24 +1,29 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type StockDocument = Stock & Document;
 
-interface DayStock {
-  race: string;
-  tick: number;
-  price: number;
-}
-
 @Schema()
 export class Stock {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Player' })
-  roomId: string;
+  @Prop()
+  room: string;
 
   @Prop()
   week: number;
 
   @Prop()
-  days: DayStock[];
+  day: number;
+
+  @Prop()
+  tick: number;
+
+  @Prop()
+  corpId: string;
+
+  @Prop()
+  corpName: string;
+
+  @Prop()
+  price: number;
 }
 
-export const StockSchema = SchemaFactory.createForClass(Stock);
+export const StocksSchema = SchemaFactory.createForClass(Stock);

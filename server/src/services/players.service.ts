@@ -1,5 +1,5 @@
 import { CreatePlayerDto } from '../dto/create-player.dto';
-import { Player, PlayerDocument } from '../schemas/players.schema';
+import { assetType, Player, PlayerDocument } from '../schemas/players.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -21,6 +21,13 @@ export class PlayersService {
 
   async findByRoom(room: string): Promise<Player[]> {
     return this.playerModel.find({ room }).exec();
+  }
+
+  async updateAssetByClientId(clientIds: string[], assets: assetType[]) {
+    return this.playerModel.updateMany(
+      { clientId: { $in: clientIds } },
+      { assets },
+    );
   }
 
   async delete(clientId: string): Promise<void> {

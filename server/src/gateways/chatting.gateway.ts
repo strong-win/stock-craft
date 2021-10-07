@@ -10,15 +10,16 @@ import { Server, Socket } from 'socket.io';
 
 import { PlayersService } from '../services/players.service';
 import {
-  CHAT_SERVER_MESSAGE,
-  CHAT_CLIENT_MESSAGE,
-  CHAT_ROOM,
-  CHAT_JOIN,
-} from './events/index.events';
-import { response } from '../dto/response.dto';
+  CHATTING_SERVER_MESSAGE,
+  CHATTING_CLIENT_MESSAGE,
+  CHATTING_ROOM,
+  CHATTING_JOIN,
+} from './events';
 
 @WebSocketGateway({ cors: true })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChattingGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
@@ -39,50 +40,50 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const { clientId, name, room } = player;
       await this.playersService.delete(clientId);
 
-      this.server.to(room).emit(CHAT_SERVER_MESSAGE, {
+      this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',
         text: `${name} 님이 퇴장하였습니다.`,
       });
 
       const players = await this.playersService.findByRoom(room);
-      this.server.to(room).emit(CHAT_ROOM, players);
+      this.server.to(room).emit(CHATTING_ROOM, players);
     }
   }
 
-  @SubscribeMessage(CHAT_JOIN)
+  @SubscribeMessage(CHATTING_JOIN)
   async handleJoin(
     client: Socket,
-    payLoad: { name: string; room: string },
+    payload: { name: string; room: string },
   ): Promise<void> {
     const { name, room } = await this.playersService.create({
-      ...payLoad,
+      ...payload,
       clientId: client.id,
+      cash: 100_000,
+      assets: [],
     });
 
     client.join(room);
 
-    client.emit(CHAT_SERVER_MESSAGE, {
+    client.emit(CHATTING_SERVER_MESSAGE, {
       user: '관리자',
       text: `${name} 님, 입장을 환영합니다.`,
     });
 
-    client.broadcast.to(room).emit(CHAT_SERVER_MESSAGE, {
+    client.broadcast.to(room).emit(CHATTING_SERVER_MESSAGE, {
       user: '관리자',
       text: `${name} 님이 방에 입장하셨습니다.`,
     });
 
     const players = await this.playersService.findByRoom(room);
-    this.server.emit(CHAT_ROOM, players);
+    this.server.emit(CHATTING_ROOM, players);
   }
 
-  @SubscribeMessage(CHAT_CLIENT_MESSAGE)
-  async handleMessage(client: Socket, message: string): Promise<response> {
+  @SubscribeMessage(CHATTING_CLIENT_MESSAGE)
+  async handleMessage(client: Socket, message: string): Promise<void> {
     const { name, room } = await this.playersService.findByClientId(client.id);
 
     this.server
       .to(room)
-      .emit(CHAT_SERVER_MESSAGE, { user: name, text: message });
-
-    return { status: 'OK' };
+      .emit(CHATTING_SERVER_MESSAGE, { user: name, text: message });
   }
 }
