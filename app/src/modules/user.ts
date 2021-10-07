@@ -18,7 +18,6 @@ export type assetType = {
 export type tradeType = {
   _id: string;
   corpId: string;
-  corpName: string;
   price: number;
   quantity: number;
   deal: string;
