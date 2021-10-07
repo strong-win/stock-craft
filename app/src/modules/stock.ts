@@ -26,6 +26,9 @@ export const stockSlice = createSlice({
   initialState,
   reducers: {
     updateDayChart(state, action: PayloadAction<dayChartType>) {
+      state.corps.forEach((corp) => {
+        corp.totalChart = [...corp.totalChart, ...corp.todayChart];
+      });
       for (const corpId in action.payload) {
         state.corps.map((corp) =>
           corp.corpId === corpId
@@ -34,6 +37,7 @@ export const stockSlice = createSlice({
         );
       }
     },
+    updateTotalChart(state) {},
     initializeCharts(
       state,
       action: PayloadAction<{ corpId: string; corpName: string }[]>

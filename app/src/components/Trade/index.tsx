@@ -12,7 +12,6 @@ type TradeProps = {
   setTradeBill: React.Dispatch<React.SetStateAction<billType>>;
   handleDeal: React.MouseEventHandler<HTMLButtonElement>;
   handleCancel: React.MouseEventHandler<HTMLButtonElement>;
-  handleRefresh: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 const Trade = ({
@@ -22,12 +21,10 @@ const Trade = ({
   setTradeBill,
   handleDeal,
   handleCancel,
-  handleRefresh,
 }: TradeProps) => {
   return isLock ? (
     <>
       <h1>Input Container</h1>
-      <button onClick={handleRefresh}>refresh</button>
       <div className="trade">
         <div>Locked</div>
         <button onClick={handleCancel}>cancel</button>
@@ -36,7 +33,6 @@ const Trade = ({
   ) : (
     <>
       <h1>Input Container</h1>
-      <button onClick={handleRefresh}>refresh</button>
       <div className="trade">
         <TradeBoard
           stockBill={stockBill}
