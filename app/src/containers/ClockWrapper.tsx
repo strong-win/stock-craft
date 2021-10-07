@@ -30,20 +30,23 @@ const ClockWrapper = () => {
       );
 
       // refresh trade
-      dispatch(
-        tradeRefresh({
-          room,
-          week: weekChanged,
-          day: dayChanged,
-          tick: tickChanged,
-        })
-      );
+      if (day > 0) {
+        dispatch(
+          tradeRefresh({
+            room,
+            week: weekChanged,
+            day: dayChanged,
+            tick: tickChanged,
+          })
+        );
+      }
 
       // refresh todayChart
       if (day !== dayChanged) {
         dispatch(chartRequest({ room, week: weekChanged, day: dayChanged }));
       }
     }, 15000);
+    // eslint-disable-next-line
   }, [tick]);
 
   return <Clock week={week} day={day} tick={tick} />;

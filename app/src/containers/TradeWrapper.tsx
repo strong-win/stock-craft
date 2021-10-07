@@ -14,7 +14,7 @@ export type billType = {
 
 const TradeWrapper = () => {
   // redux state
-  const { room, assets, selectedCorpId } = useSelector(
+  const { room, assets, trades, selectedCorpId } = useSelector(
     (state: RootState) => state.user
   );
   const { corps } = useSelector((state: RootState) => state.stock);
@@ -29,7 +29,6 @@ const TradeWrapper = () => {
     price: 0,
     quantity: 0,
   });
-  const [isLock, setIsLock] = useState(false);
 
   useEffect(() => {
     const corpStock: chartType = corps.find(
@@ -39,14 +38,13 @@ const TradeWrapper = () => {
       (asset) => asset.corpId === selectedCorpId
     );
 
-    const { quantity, isLock } = corpAsset;
+    const { quantity } = corpAsset;
     const stockBill = {
-      price: corpStock.todayChart[tick * 4 - 1] || 0,
-      // price: corpStock.todayChart[tick - 1] || 0,
+      // price: corpStock.todayChart[tick * 4 - 1] || 0,
+      price: corpStock.todayChart[tick - 1] || 0,
       quantity,
     };
 
-    setIsLock(isLock);
     setStockBill(stockBill);
   }, [assets, selectedCorpId, corps, tick]);
 
@@ -67,13 +65,15 @@ const TradeWrapper = () => {
     );
   };
 
-  const handleCancel = (e: any) => {
-    dispatch(tradeCancel({ corpId: selectedCorpId }));
+  const handleCancel = (_id: string, corpId: string) => {
+    dispatch(tradeCancel({ _id, corpId }));
   };
 
   return (
     <Trade
-      isLock={isLock}
+      trades={trades}
+      corps={corps}
+      selectedCorpId={selectedCorpId}
       stockBill={stockBill}
       tradeBill={tradeBill}
       setTradeBill={setTradeBill}
