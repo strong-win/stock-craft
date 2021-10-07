@@ -13,16 +13,18 @@ import {
 
 type ChartProps = {
   corp: chartType;
+  tick: number;
   onClickBackButton: (id: string) => void;
 };
 
-const Chart = ({ corp, onClickBackButton }: ChartProps) => {
+const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
+  const ChartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
   return (
     <>
       <LineChart
         width={500}
         height={300}
-        data={corp?.todayChart.map((value, index) => ({ time: index, value }))}
+        data={ChartData.map((value, index) => ({ time: index, value }))}
         margin={{
           top: 5,
           right: 30,

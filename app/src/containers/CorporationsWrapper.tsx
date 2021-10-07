@@ -1,18 +1,17 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import { RootState } from "..";
 import Chart from "../components/Chart";
 import Corporations from "../components/Corporations";
-import { chartRequest } from "../modules/sockets/chart";
 import { chartType } from "../modules/stock";
-import { updateTime } from "../modules/time";
-import { calculateNext } from "../utils/calculate";
+import { updateSelectedCorpId } from "../modules/user";
 
 const CorporationsWrapper = () => {
   // redux state
-  const { room } = useSelector((state: RootState) => state.user);
   const { corps } = useSelector((state: RootState) => state.stock);
-  const { week, day } = useSelector((state: RootState) => state.time);
+  const { tick } = useSelector((state: RootState) => state.time);
+
   const dispatch = useDispatch();
 
   // container state
@@ -23,15 +22,10 @@ const CorporationsWrapper = () => {
     setSelectedCorpId(corpId);
     if (corps.find((corp: chartType) => corp.corpId === corpId) !== undefined) {
       setIsChartView(true);
+      dispatch(updateSelectedCorpId(corpId));
     } else {
       setIsChartView(false);
     }
-  };
-
-  const handleRefresh = (e: any) => {
-    const { nextWeek, nextDay } = calculateNext(week, day);
-    dispatch(chartRequest({ room, week: nextWeek, day: nextDay }));
-    dispatch(updateTime({ week: nextWeek, day: nextDay }));
   };
 
   return isChartView ? (
@@ -39,17 +33,14 @@ const CorporationsWrapper = () => {
       <h1>Chart Container</h1>
       <Chart
         corp={corps.find((corp: chartType) => corp.corpId === selectedCorpId)}
+        tick={tick}
         onClickBackButton={onClickCorpItem}
       />
     </>
   ) : (
     <>
       <h1>Corporation Container</h1>
-      <Corporations
-        corps={corps}
-        onClickCorpItem={onClickCorpItem}
-        handleRefresh={handleRefresh}
-      />
+      <Corporations corps={corps} onClickCorpItem={onClickCorpItem} />
     </>
   );
 };

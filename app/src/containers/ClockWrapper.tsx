@@ -1,24 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
+import { RootState } from "..";
 import Clock from "../components/Clock";
+import { updateTime } from "../modules/time";
+import { chartRequest } from "../modules/sockets/chart";
+import { tradeRefresh } from "../modules/sockets/trade";
+import { calculateNextTime } from "../utils/calculate";
 
 const ClockWrapper = () => {
-  const [week, setWeek] = useState<number>(1);
-  const [day, setDay] = useState<number>(1);
-  const [tick, setTick] = useState<number>(1);
+  const { room } = useSelector((state: RootState) => state.user);
+  const { week, day, tick } = useSelector((state: RootState) => state.time);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     setTimeout(() => {
-      if (tick < 4) {
-        setTick(tick + 1);
-      } else {
-        setTick(1);
-        if (day < 6) {
-          setDay(day + 1);
-        } else {
-          setDay(1);
-          setWeek(week + 1);
-        }
+      const { weekChanged, dayChanged, tickChanged } = calculateNextTime({
+        week,
+        day,
+        tick,
+      });
+
+      dispatch(
+        updateTime({
+          week: weekChanged,
+          day: dayChanged,
+          tick: tickChanged,
+        })
+      );
+
+      // refresh trade
+      dispatch(
+        tradeRefresh({
+          room,
+          week: weekChanged,
+          day: dayChanged,
+          tick: tickChanged,
+        })
+      );
+
+      // refresh todayChart
+      if (day !== dayChanged) {
+        dispatch(chartRequest({ room, week: weekChanged, day: dayChanged }));
       }
     }, 15000);
   }, [tick]);

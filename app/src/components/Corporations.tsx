@@ -1,19 +1,14 @@
 import React from "react";
-import { ListGroup, ListGroupItem, Button } from "reactstrap";
+import { ListGroup, ListGroupItem } from "reactstrap";
 
 import { chartType } from "../modules/stock";
 
 type CorperationsProps = {
   corps: chartType[];
   onClickCorpItem: (id: string) => void;
-  handleRefresh: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-const Corporations = ({
-  corps,
-  onClickCorpItem,
-  handleRefresh,
-}: CorperationsProps) => {
+const Corporations = ({ corps, onClickCorpItem }: CorperationsProps) => {
   const CorporationItems = corps.map((corp: chartType) => (
     <ListGroupItem
       tag="a"
@@ -28,7 +23,6 @@ const Corporations = ({
   return (
     <>
       <ListGroup>{CorporationItems}</ListGroup>
-      <Button onClick={handleRefresh}>Refresh</Button>
     </>
   );
 };

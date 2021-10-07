@@ -68,6 +68,9 @@ export const gameSlice = createSlice({
     updateStarted: (state, action: PayloadAction<boolean>) => {
       state.started = action.payload;
     },
+    updateSelectedCorpId: (state, action: PayloadAction<string>) => {
+      state.selectedCorpId = action.payload;
+    },
     initializeAssets: (
       state,
       action: PayloadAction<{ corpId: string; corpName: string }[]>
@@ -88,6 +91,7 @@ export const {
   updateAssets,
   updateCash,
   updateStarted,
+  updateSelectedCorpId,
   initializeAssets,
 } = gameSlice.actions;
 
