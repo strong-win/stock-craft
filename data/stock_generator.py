@@ -5,7 +5,8 @@ from pykrx import stock
 from datetime import date, timedelta
 from random import sample, randint
 from data_constant import KOSPI_200, TICKER_NAME, DATA_PATH, START_DATE, END_DATE
-	
+
+
 def get_random_date(train_days: int, init_days: int):
 	"""
 	return random date between START_DATE and END_DATE
