@@ -11,6 +11,7 @@ type chartRequestType = {
   room: string;
   week: number;
   day: number;
+  item: string;
 };
 
 export type dayChartType = {

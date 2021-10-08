@@ -43,7 +43,14 @@ const ClockWrapper = () => {
 
       // refresh todayChart
       if (day !== dayChanged) {
-        dispatch(chartRequest({ room, week: weekChanged, day: dayChanged }));
+        dispatch(
+          chartRequest({
+            room,
+            week: weekChanged,
+            day: dayChanged,
+            item: "example",
+          })
+        );
       }
     }, 15000);
     // eslint-disable-next-line
