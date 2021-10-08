@@ -31,7 +31,7 @@ def get_data_by_len(quantity: int = 5, duration: int = 365) -> 'numpy.ndarray':
 		max_val = len(df) - duration + 1
 		target_idx = randint(0, max_val-1)
 		res.append(df[target_idx:target_idx+1, :])
-	return res
+	return np.array(res)
 
 def get_data_by_datetime(quantity: int = 5, train_days: int = 365, init_days: int = 14) -> 'numpy.ndarray':
 	"""
@@ -41,17 +41,16 @@ def get_data_by_datetime(quantity: int = 5, train_days: int = 365, init_days: in
 	# 1. 날짜 랜덤 추출 (train_duration, init_duration 반영)
 	target_day = get_random_date(train_days, init_days)
 
-	# 2-1. import csv and convert into DataFrame
-
-	# 2. 이에 해당하는 날짜 이전에 상장된 기업 정보를 찾기 (using KOSPI200_info.csv)
-	df = pd.read_csv(DATA_PATH)
-	target_companies = df[df['ListingDate'] >= target_day]
-	# target_stocks = 
-
-	# 3. 찾았다면, 해당 정보를 numpy 배열에 append
-	# res.append()
-
-	# 4. quantity 개수만큼 찾았다면, 반환!
-	return res
-
-print(get_random_date(365, 14))
+	# 2. import csv and convert into DataFrame, 이에 해당하는 날짜 이전에 상장된 기업 정보를 찾기 (using KOSPI200_info.csv)
+	df = pd.read_csv("./kospi200_info.csv")
+	target_companies = df[df['ListingDate'] >= target_day].sample(n = 3) # TO-DO: set same data time
+	
+	for company in target_companies:
+		company_name = company['Name']
+		company_dataframe = pandas.read_csv(os.path.join(DATA_PATH, company_name + '.csv'))
+		company_dataframe = company_dataframe[company_dataframe['df']]
+		# 3. 찾았다면, 해당 정보를 numpy 배열에 append
+		res.append(company_data)
+	
+	# CHECK: 현재는 trains_days와 init_day를 한번에 보내는 상황인데, 이를 분리하는게 편한지?
+	return numpy.array(res)
