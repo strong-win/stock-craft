@@ -37,21 +37,21 @@ def get_data_by_datetime(quantity: int = 5, train_days: int = 365, init_days: in
 	"""
 	A function that returns ndarray with `quantity` stocks with `train_days` + `init_days`
 	"""
-	# res = []
-	# # 1. 날짜 랜덤 추출 (train_duration, init_duration 반영)
-	# target_day = get_random_date(train_days, init_days)
+	res = []
+	# 1. 날짜 랜덤 추출 (train_duration, init_duration 반영)
+	target_day = get_random_date(train_days, init_days)
 
-	# # 2-1. import csv and convert into DataFrame
+	# 2-1. import csv and convert into DataFrame
 
-	# # 2. 이에 해당하는 날짜 이전에 상장된 기업 정보를 찾기 (using KOSPI200_info.csv)
-	# df = pd.read_csv(DATA_PATH)
-	# target_companies = df[df['ListingDate'] >= target_day]
-	# # target_stocks = 
+	# 2. 이에 해당하는 날짜 이전에 상장된 기업 정보를 찾기 (using KOSPI200_info.csv)
+	df = pd.read_csv(DATA_PATH)
+	target_companies = df[df['ListingDate'] >= target_day]
+	# target_stocks = 
 
-	# # 3. 찾았다면, 해당 정보를 numpy 배열에 append
-	# # res.append()
+	# 3. 찾았다면, 해당 정보를 numpy 배열에 append
+	# res.append()
 
-	# # 4. quantity 개수만큼 찾았다면, 반환!
-	# return res
+	# 4. quantity 개수만큼 찾았다면, 반환!
+	return res
 
 print(get_random_date(365, 14))
