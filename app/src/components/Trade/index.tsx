@@ -31,7 +31,6 @@ const Trade = ({
 }: TradeProps) => {
   return (
     <>
-      <h1>Input Container</h1>
       <div className="trade">
         <TradeBoard
           stockBill={stockBill}

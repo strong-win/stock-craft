@@ -23,7 +23,6 @@ const Chatting = ({
 }: ChattingProps) => {
   return (
     <>
-      <h1>Chatting Container</h1>
       <div className="chatting">
         <div>name: {name}</div>
         <Messages name={name} messages={messages} />

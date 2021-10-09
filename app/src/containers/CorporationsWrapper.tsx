@@ -30,7 +30,6 @@ const CorporationsWrapper = () => {
 
   return isChartView ? (
     <>
-      <h1>Chart Container</h1>
       <Chart
         corp={corps.find((corp: chartType) => corp.corpId === selectedCorpId)}
         tick={tick}
@@ -39,7 +38,6 @@ const CorporationsWrapper = () => {
     </>
   ) : (
     <>
-      <h1>Corporation Container</h1>
       <Corporations corps={corps} onClickCorpItem={onClickCorpItem} />
     </>
   );
