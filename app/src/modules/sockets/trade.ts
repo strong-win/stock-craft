@@ -3,7 +3,13 @@ import { apply, call, put, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 
-import { assetType, updateAssets, updateCash } from "../user";
+import {
+  assetType,
+  tradeType,
+  updateAssets,
+  updateCash,
+  updateTrades,
+} from "../user";
 import {
   TRADE_CANCEL,
   TRADE_REFRESH,
@@ -32,6 +38,8 @@ type TradeRefreshType = {
 type TradeResponseType = {
   cash: number;
   assets: assetType[];
+  action: "request" | "refresh" | "cancel";
+  trades: tradeType[];
 };
 
 export const tradeRequest = createAction(
@@ -48,7 +56,7 @@ export function* tradeRequestSaga(socket: Socket) {
 
 export const tradeCancel = createAction(
   TRADE_CANCEL,
-  (payload: { corpId: string }) => ({ payload })
+  (payload: { _id: string; corpId: string }) => ({ payload })
 );
 
 export function* tradeCancelSaga(socket: Socket) {
@@ -87,11 +95,8 @@ export function* tradeResponseSaga(socket: Socket) {
   );
   while (true) {
     const payload: TradeResponseType = yield take(channel);
-    yield put(updateAssets(payload.assets));
     yield put(updateCash(payload.cash));
-
-    // To do
-    // update player asset and cash
-    // update trade container with lock
+    yield put(updateAssets(payload.assets));
+    yield put(updateTrades({ action: payload.action, trades: payload.trades }));
   }
 }

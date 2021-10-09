@@ -13,7 +13,15 @@ export type playerType = {
 export type assetType = {
   corpId: string;
   quantity: number;
-  isLock: boolean;
+};
+
+export type tradeType = {
+  _id: string;
+  corpId: string;
+  price: number;
+  quantity: number;
+  deal: string;
+  status: "pending" | "disposed" | "cancel";
 };
 
 export type gameType = {
@@ -23,6 +31,7 @@ export type gameType = {
   players: playerType[];
   cash: number;
   assets: assetType[];
+  trades: tradeType[];
   selectedCorpId: string;
   started: boolean;
 };
@@ -34,10 +43,13 @@ const initialState: gameType = {
   players: [],
   cash: 100_000,
   assets: [
-    // { corpId: "gyu", quantity: 0, isLock: false },
-    // { corpId: "kang", quantity: 0, isLock: false },
-    // { corpId: "han", quantity: 0, isLock: false },
-    // { corpId: "lee", quantity: 0, isLock: false },
+    // { corpId: "gyu", quantity: 0 },
+    // { corpId: "kang", quantity: 0 },
+    // { corpId: "han", quantity: 0 },
+    // { corpId: "lee", quantity: 0 },
+  ],
+  trades: [
+    // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
   selectedCorpId: "gyu",
   started: false,
@@ -71,13 +83,37 @@ export const gameSlice = createSlice({
     updateSelectedCorpId: (state, action: PayloadAction<string>) => {
       state.selectedCorpId = action.payload;
     },
+    updateTrades: (
+      state,
+      action: PayloadAction<{
+        action: "request" | "refresh" | "cancel";
+        trades: tradeType[];
+      }>
+    ) => {
+      switch (action.payload.action) {
+        case "request":
+          state.trades = [...state.trades, ...action.payload.trades];
+          break;
+        case "refresh":
+        case "cancel":
+          for (const trade of action.payload.trades) {
+            const { _id, status } = trade;
+            state.trades = state.trades.map((trade) =>
+              trade._id === _id ? { ...trade, status } : trade
+            );
+          }
+          break;
+        default:
+          break;
+      }
+    },
     initializeAssets: (
       state,
       action: PayloadAction<{ corpId: string; corpName: string }[]>
     ) => {
       for (const corp of action.payload) {
         const { corpId } = corp;
-        state.assets.push({ corpId, quantity: 0, isLock: false });
+        state.assets.push({ corpId, quantity: 0 });
       }
     },
   },
@@ -92,6 +128,7 @@ export const {
   updateCash,
   updateStarted,
   updateSelectedCorpId,
+  updateTrades,
   initializeAssets,
 } = gameSlice.actions;
 

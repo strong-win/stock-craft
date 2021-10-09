@@ -21,23 +21,26 @@ const TimeCard = ({ num, unit }: TimeCardProps) => {
 
 const Clock = ({ week, day, tick }: timeType) => {
   return (
-    <div className="d-flex flex-row">
-      <TimeCard num={week} unit="week" />
-      <TimeCard num={day} unit="day" />
-      <TimeCard num={tick} unit="tick" />
-      <CountdownCircleTimer
-        isPlaying
-        duration={15}
-        onComplete={() => [true, 0]}
-        colors={[
-          ["#008000", 0.5],
-          ["#ffa500", 0.25],
-          ["#ff0000", 0.25],
-        ]}
-      >
-        {({ remainingTime }) => remainingTime}
-      </CountdownCircleTimer>
-    </div>
+    <>
+      <h1>Clock Container</h1>
+      <div className="d-flex flex-row">
+        <TimeCard num={week} unit="week" />
+        <TimeCard num={day} unit="day" />
+        <TimeCard num={tick} unit="tick" />
+        <CountdownCircleTimer
+          isPlaying
+          duration={15}
+          onComplete={() => [true, 0]}
+          colors={[
+            ["#008000", 0.5],
+            ["#ffa500", 0.25],
+            ["#ff0000", 0.25],
+          ]}
+        >
+          {({ remainingTime }) => remainingTime}
+        </CountdownCircleTimer>
+      </div>
+    </>
   );
 };
 
