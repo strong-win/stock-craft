@@ -7,21 +7,22 @@
         "seed": 42
     },
     "dataset": {
-        "directory": "data/power",
-        "data_name": "sample_data",
+        "directory": "data",
+        "data_name": "sample",
 
-        "index_col": "timestamp",
+        "index_col": "날짜",
+        "index_format": "%Y-%m-%d",
+
         "year": "year",
         "month": "month",
         "weekday": "weekday",
 
-        "drops": ["drop col1", "drop col2", "drop col3", "drop col4"],
-        "targets": ["target col1", "target col2", "target col3", "target col4"],
+        "drops": [],
+        "targets": ["종가"],
+
         "stride": 1,
         "observed_len": 28,
         "forecast_len": 28,
-
-        "log": false,
 
         "split_rate": 0.9,
         "window_scale": 2,
@@ -35,7 +36,7 @@
     },
     "models": {
         "directory": "TIMEBAND/pretrained/",
-        "model_tag": "tag",
+        "model_tag": "stock",
         
         "load": true,
         "load_interval": 20,
@@ -51,8 +52,8 @@
     },
     "metric": {
         "zero_ignoring": true,
-        "gp_weight": 10,
-        "l1_weight": 100,
+        "gp_weight": 1,
+        "l1_weight": 1,
         "l2_weight": 1
     },
     "trainer": {
@@ -70,7 +71,16 @@
         "print": {
             "verbose": 1,
             "interval": 5
-        },
-        "visual": false
+        }
+    },
+    "dashboard": {
+        "visualize": false,
+        "scope": 36,
+        
+        "features_by_rows": 13,
+        "xinterval": 60,
+
+        "height": 10,
+        "width": 25
     }
 }
