@@ -192,7 +192,9 @@ class TIMEBANDDashboard:
                 ax.axvline(FRCST)
 
                 ax.axvspan(OBSRV - 1, PIVOT - 1, alpha=0.1, label="Observed window")
-                ax.axvspan(PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window")
+                ax.axvspan(
+                    PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window"
+                )
 
                 # Origin data
                 for idx in range(idx_s, idx_e):
@@ -203,8 +205,8 @@ class TIMEBANDDashboard:
                     alpha = 1.0 if feature_label in self.target_cols else 0.2
                     ax.plot(
                         np.arange(SCOPE, FRCST + 1),
-                        self.origin_data[SCOPE: FRCST + 1, idx],
-                        label=f"Real Value", # {feature_label}",
+                        self.origin_data[SCOPE : FRCST + 1, idx],
+                        label=f"Real Value",  # {feature_label}",
                         alpha=alpha,
                     )
                     ax.plot(
@@ -212,7 +214,7 @@ class TIMEBANDDashboard:
                         self.pred_data[SCOPE : FRCST + 1, col],
                         alpha=0.2,
                         linewidth=5,
-                        label=f"Pred Value", # {feature_label}"
+                        label=f"Pred Value",  # {feature_label}"
                     )
                     ax.fill_between(
                         np.arange(SCOPE, FRCST + 1),
