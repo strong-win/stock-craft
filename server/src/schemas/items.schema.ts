@@ -14,7 +14,13 @@ export class Item {
   week: number;
 
   @Prop()
-  item: number;
+  day: number;
+
+  @Prop()
+  item: string;
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
 }
 
-export const ItemSchema = SchemaFactory.createForClass(Item);
+export const ItemsSchema = SchemaFactory.createForClass(Item);

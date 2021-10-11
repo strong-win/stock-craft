@@ -32,22 +32,11 @@ export class TradeGateway {
       this.server.to(client.id).emit(TRADE_RESPONSE, player);
     } catch (e) {
       if (e.name === 'TradeException') {
+        console.error(e);
         // To do
         // handle TradeException
       }
     }
-  }
-
-  @SubscribeMessage(TRADE_CANCEL)
-  async receiveTradeCancel(
-    client: Socket,
-    payload: { corpId: string },
-  ): Promise<void> {
-    const player = await this.tradesService.handleTradeCancel(
-      client.id,
-      payload.corpId,
-    );
-    this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
 
   @SubscribeMessage(TRADE_REFRESH)
@@ -62,6 +51,19 @@ export class TradeGateway {
       week,
       day,
       tick,
+    );
+    this.server.to(client.id).emit(TRADE_RESPONSE, player);
+  }
+
+  @SubscribeMessage(TRADE_CANCEL)
+  async receiveTradeCancel(
+    client: Socket,
+    payload: { _id: string; corpId: string },
+  ): Promise<void> {
+    const player = await this.tradesService.handleTradeCancel(
+      client.id,
+      payload._id,
+      payload.corpId,
     );
     this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
