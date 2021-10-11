@@ -2,10 +2,10 @@ version: '3'
 
 services:
   nestjs:
-    image: stockcraft_nestjs
+    image: stockcraft_nestjs_dev
     build:
       context: .
-      dockerfile: ./docker/Dockerfile.server
+      dockerfile: ./docker/Dockerfile.dev
     volumes:
       - ./:/usr/proj/server
       - /usr/proj/server/node_modules

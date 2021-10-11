@@ -69,10 +69,10 @@ $ npm run start:prod
 
 ```bash
 # Running Nest.js/mongoDB background with docker-compose
-$ docker-compose -p stockcraft up -d
+$ docker-compose -f docker-compose.dev.yml -p stockcraft-dev up -d
 
 # Remove all containers created with docker-compose
-$ docker-compose -p stockcraft down
+$ docker-compose -f docker-compose.dev.yml -p stockcraft-dev down
 ```
 
 ## Test
