@@ -11,14 +11,33 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rc("font", family="Malgun Gothic")
 plt.rc("axes", unicode_minus=False)
 COLORS = [
-    "red", "orange", "yellow", "green",
-    "blue", "purple", "peru", "wheat",
-    "lime", "aqua", "indigo", "pink",
-    "grey", "saddlebrown", "darkkhaki",
-    "olivedrab", "teal", "skyblue", "royalblue",
-    "pink", "silver", "deepskyblue", "darkseagreen", "violet",
-    "darkred"
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "peru",
+    "wheat",
+    "lime",
+    "aqua",
+    "indigo",
+    "pink",
+    "grey",
+    "saddlebrown",
+    "darkkhaki",
+    "olivedrab",
+    "teal",
+    "skyblue",
+    "royalblue",
+    "pink",
+    "silver",
+    "deepskyblue",
+    "darkseagreen",
+    "violet",
+    "darkred",
 ]
+
 
 class TIMEBANDDashboard:
     def __init__(self, config: dict, dataset: TIMEBANDDataset) -> None:
@@ -150,7 +169,7 @@ class TIMEBANDDashboard:
                 axes[0].plot(
                     self.targets[PIVOT + self.idx : FRCST + self.idx, col],
                     alpha=0.5,
-                    label = label
+                    label=label,
                 )
                 axes[0].plot(
                     true_ticks,
@@ -205,21 +224,23 @@ class TIMEBANDDashboard:
                 ax.axvline(FRCST)
 
                 ax.axvspan(OBSRV - 1, PIVOT - 1, alpha=0.1, label="Observed window")
-                ax.axvspan(PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window")
+                ax.axvspan(
+                    PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window"
+                )
 
                 # Origin data
-                
+
                 for idx in range(idx_s, idx_e):
                     feature_label = self.origin_cols[idx]
                     if feature_label not in self.target_cols:
                         continue
-                    
+
                     alpha = 1.0 if feature_label in self.target_cols else 0.2
                     color = COLORS[target_col]
                     ax.plot(
                         np.arange(SCOPE, PIVOT),
-                        self.origin_data[SCOPE: PIVOT, idx],
-                        label=f"Real Value", # {feature_label}",
+                        self.origin_data[SCOPE:PIVOT, idx],
+                        label=f"Real Value",  # {feature_label}",
                         alpha=alpha,
                         color=color,
                     )
@@ -229,7 +250,7 @@ class TIMEBANDDashboard:
                         alpha=0.2,
                         linewidth=5,
                         color=color,
-                        label=f"Pred Value", # {feature_label}"
+                        label=f"Pred Value",  # {feature_label}"
                     )
                     ax.fill_between(
                         np.arange(SCOPE, FRCST + 1),

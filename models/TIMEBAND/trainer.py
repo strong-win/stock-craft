@@ -214,7 +214,7 @@ class TIMEBANDTrainer:
             # #######################
             pred_y = self.dataset.denormalize(fake_y.cpu())
             self.concat(real_x, pred_y)
-            
+
             losses["Score"] += self.metric.NMAE(pred_y, real_y).detach().numpy()
 
             # Losses Log
@@ -278,7 +278,7 @@ class TIMEBANDTrainer:
 
         self.predictions[-batch_size - future_len :] = torch.from_numpy(median)
         self.std[-batch_size - future_len :] = torch.from_numpy(std)
-        
+
         df = pd.DataFrame(
             np.concatenate(
                 [
