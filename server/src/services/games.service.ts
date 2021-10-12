@@ -37,4 +37,10 @@ export class GamesService {
 
     return { playerCount, waitCount: waits.length };
   }
+
+  async deleteClients(clientId: string, room: string): Promise<void> {
+    const game = await this.gameModel.findOne({ room });
+    const waits: string[] = game.waits.filter((wait) => wait !== clientId);
+    await this.gameModel.updateOne({ room }, { waits });
+  }
 }

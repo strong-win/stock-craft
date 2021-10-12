@@ -8,7 +8,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { PlayersService } from '../services/players.service';
+import { PlayersService } from 'src/services/players.service';
+import { GamesService } from 'src/services/games.service';
 import {
   CHATTING_SERVER_MESSAGE,
   CHATTING_CLIENT_MESSAGE,
@@ -25,7 +26,10 @@ export class ChattingGateway
 
   private logger: Logger = new Logger('AppGateway');
 
-  constructor(private playersService: PlayersService) {}
+  constructor(
+    private playersService: PlayersService,
+    private gamesService: GamesService,
+  ) {}
 
   handleConnection(client: Socket): void {
     this.logger.log(`Client connected: ${client.id}`);
@@ -47,6 +51,8 @@ export class ChattingGateway
 
       const players = await this.playersService.findByRoom(room);
       this.server.to(room).emit(CHATTING_ROOM, players);
+
+      await this.gamesService.deleteClients(client.id, room);
     }
   }
 
