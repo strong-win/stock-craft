@@ -65,7 +65,9 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Running the app with docker-compose
+## Running the app with docker
+
+### development
 
 ```bash
 # Running Nest.js/mongoDB background with docker-compose
@@ -75,7 +77,17 @@ $ docker-compose -f docker-compose.dev.yml -p stockcraft-dev up -d
 $ docker-compose -f docker-compose.dev.yml -p stockcraft-dev down
 ```
 
-## Test
+### production
+
+```bash
+# Running Nest.js/mongoDB background with docker-compose
+$ docker-compose -f docker-compose.prod.yml -p stockcraft-prod up -d
+
+# Remove all containers created with docker-compose
+$ docker-compose -f docker-compose.prod.yml -p stockcraft-prod down
+```
+
+<!-- ## Test
 
 ```bash
 # unit tests
@@ -88,7 +100,7 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
-<!-- ## Support
+## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
 
