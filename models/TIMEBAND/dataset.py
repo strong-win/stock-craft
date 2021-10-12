@@ -99,6 +99,7 @@ class TIMEBANDDataset:
 
         # Preprocess
         self.scaler = config["scaler"]
+        self.impute = config["impute"]
         self.cutoff_min = config["cutoff"]["min"]
         self.cutoff_max = config["cutoff"]["max"]
 
@@ -172,7 +173,8 @@ class TIMEBANDDataset:
         decode_real = data[self.targets].copy()
 
         # Preprocess
-        data = self.impute_zero_value(data)
+        if self.impute:
+            data = self.impute_zero_value(data)
         data = self.normalize(data)
 
         # Timestamp information append
