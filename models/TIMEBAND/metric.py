@@ -39,15 +39,9 @@ class TIMEBANDMetric:
                 count += 1
         return score / count
 
-    def NMAE(self, pred, true, real_test=False):
-        if real_test:
-            pred = pred[:, [6, 13, 27]]
-            true = true[:, [6, 13, 27]]
-            pred, true = self._ignore_zero(pred, true)
-            return torch.mean(torch.abs((true - pred)) / (true))
-
+    def NMAE(self, pred, true):
         pred, true = self._ignore_zero(pred, true)
-        return torch.mean((true - pred) / (true))
+        return torch.mean(torch.abs(true - pred) / (true))
 
     def l1loss(self, pred, true):
         pred, true = self._ignore_zero(pred, true)
@@ -64,8 +58,8 @@ class TIMEBANDMetric:
     def _ignore_zero(self, pred, true):
         if self.zero_ignoring:
             target = torch.where(true != 0)
-            true = true[target]
             pred = pred[target]
+            true = true[target]
         return pred, true
 
     def _grad_penalty(self, pred, true):

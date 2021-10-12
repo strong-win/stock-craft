@@ -96,8 +96,7 @@ class TIMEBANDCore:
 
             logger.info(f"Done ({k + 1}/{self.dataset.window_sliding + 1}) ")
 
-        # return netD, netG
-        return None, None
+        return netD, netG
 
     def run(self, netG=None):
         self.runner = TIMEBANDRunner(

@@ -60,7 +60,7 @@ class TIMEBANDModel:
 
         self.hidden_dim = config["hidden_dim"]
 
-    def load_model(self, data_dims: tuple):
+    def init(self, data_dims: tuple):
         if self.netD is not None and self.netG is not None:
             return self.netD, self.netG
 
@@ -69,21 +69,22 @@ class TIMEBANDModel:
         dec_dim = data_dims["decoded"]
         device = self.device
 
-        try:
-            if self.load_option is True:
+        if self.load_option is True:
+            try:
                 self.netD, self.netG = self.load()
-                logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
-                return self.netD, self.netG
+                if self.netD is not None and self.netG is not None:
+                    logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
+                    return self.netD, self.netG
+            except FileNotFoundError:
+                pass
 
-        except FileNotFoundError:
+        self.netD = NetD(dec_dim, hidden_dim=hidden_dim, device=device).to(device)
+        self.netG = NetG(enc_dim, dec_dim, hidden_dim=hidden_dim, device=device).to(
+            device
+        )
 
-            self.netD = NetD(dec_dim, hidden_dim=hidden_dim, device=device).to(device)
-            self.netG = NetG(enc_dim, dec_dim, hidden_dim=hidden_dim, device=device).to(
-                device
-            )
-
-            logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
-            return self.netD, self.netG
+        logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
+        return self.netD, self.netG
 
     def load(self, postfix: str = "") -> tuple((NetD, NetG)):
         if self.load_option is False:
