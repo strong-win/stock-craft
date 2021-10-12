@@ -20,25 +20,6 @@ class TIMEBANDMetric:
     def GANloss(self, D, target_is_real):
         return self.criterion_adv(D, target_is_real)
 
-    def NMAE_onedim(self, pred, true):
-        score = 0
-        count = 0
-        for d in range(pred.shape[0] - 32):
-            _score = 0
-            _count = 0
-            for day in [6, 13, 27]:
-                _pred = pred[d + day]
-                _true = true[d + day]
-                _pred, _true = self._ignore_zero(_pred, _true)
-
-                _score += torch.mean(torch.abs((_true - _pred)) / (_true))
-                _count += 1
-
-            if _count > 0:
-                score += (_score) / (_count)
-                count += 1
-        return score / count
-
     def NMAE(self, pred, true):
         pred, true = self._ignore_zero(pred, true)
         return torch.mean(torch.abs(true - pred) / (true))
