@@ -4,6 +4,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { assetType } from 'src/schemas/players.schema';
 import { GamesService } from 'src/services/games.service';
 import { PlayersService } from 'src/services/players.service';
 import { GAME_START_REQUEST, GAME_START_RESPONSE } from './events';
@@ -14,24 +15,31 @@ export class GameGateway {
   server: Server;
 
   constructor(
-    private gameService: GamesService,
+    private gamesService: GamesService,
     private playersService: PlayersService,
   ) {}
 
   @SubscribeMessage(GAME_START_REQUEST)
   async gameStartRequest(client: Socket, payload: { room: string }) {
     const { room } = payload;
-    const corps = await this.gameService.findCorpNames(room);
-    const clients = await this.playersService.findByRoom(room);
+    const { playerCount, waitCount } = await this.gamesService.addClients(
+      client.id,
+      room,
+    );
 
-    const assets = [];
-    for (const corp of corps) {
-      assets.push({ corpId: corp.corpId, quantity: 0, isLock: false });
+    if (playerCount === waitCount) {
+      const corps = await this.gamesService.findCorpNames(room);
+      const clients = await this.playersService.findByRoom(room);
+
+      const assets: assetType[] = [];
+      for (const corp of corps) {
+        assets.push({ corpId: corp.corpId, quantity: 0 });
+      }
+
+      const clientIds = clients.map((client) => client.clientId);
+      await this.playersService.updateAssetByClientId(clientIds, assets);
+
+      this.server.to(room).emit(GAME_START_RESPONSE, { corps });
     }
-
-    const clientIds = clients.map((client) => client.clientId);
-    await this.playersService.updateAssetByClientId(clientIds, assets);
-
-    this.server.to(client.id).emit(GAME_START_RESPONSE, { corps });
   }
 }

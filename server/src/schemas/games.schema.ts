@@ -9,6 +9,10 @@ export class Game {
 
   @Prop()
   corps: { corpId: string; corpName: string }[];
+
+  // clientId Array waits on game start request
+  @Prop()
+  waits: string[];
 }
 
 export const GamesSchema = SchemaFactory.createForClass(Game);

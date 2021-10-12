@@ -9,4 +9,7 @@ export class ChartRequestDto {
 
   @IsNotEmpty()
   day: number;
+
+  @IsNotEmpty()
+  item: string;
 }

@@ -21,9 +21,6 @@ export class Trade {
   corpId: string;
 
   @Prop()
-  corpName: string;
-
-  @Prop()
   price: number;
 
   @Prop()

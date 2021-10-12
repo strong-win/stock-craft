@@ -17,9 +17,6 @@ export class TradeRequestDto {
   corpId: string;
 
   @IsNotEmpty()
-  corpName: string;
-
-  @IsNotEmpty()
   price: number;
 
   @IsNotEmpty()
