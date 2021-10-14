@@ -31,7 +31,6 @@ const Play = ({ location, history }: any) => {
     }
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
-      console.log("join here");
       dispatch(chattingJoin({ name: name || createdName, room: initRoom }));
     }
 
