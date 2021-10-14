@@ -31,9 +31,12 @@ const Play = ({ location, history }: any) => {
     }
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
+      console.log("join here");
       dispatch(chattingJoin({ name: name || createdName, room: initRoom }));
     }
-  }, [dispatch, history, name, initRoom]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, history, initRoom]);
 
   const onGameStart = (e: any) => {
     dispatch(gameStartRequest({ room }));
