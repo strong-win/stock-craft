@@ -77,7 +77,7 @@ class TIMEBANDRunner:
 
         # Models Setting
         models = self.models
-        self.netD, self.netG = models.load_model(self.dataset.dims)
+        self.netD, self.netG = models.init(self.dataset.dims)
 
         pred_tqdm = tqdm(dataset)
         output = self.inference_step(pred_tqdm)
