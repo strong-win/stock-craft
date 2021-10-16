@@ -1,25 +1,38 @@
 import React from "react";
-import { ListGroup, ListGroupItem } from "reactstrap";
+import { ListGroup, ListGroupItem, Row, Col } from "reactstrap";
 
 import { chartType } from "../modules/stock";
+import "../styles/Corporations.css";
 
 type CorperationsProps = {
+  tick: number;
   corps: chartType[];
   onClickCorpItem: (id: string) => void;
 };
 
-const Corporations = ({ corps, onClickCorpItem }: CorperationsProps) => {
-  const CorporationItems = corps.map((corp: chartType) => (
-    <ListGroupItem
-      tag="a"
-      key={corp.corpId}
-      href="#"
-      onClick={() => onClickCorpItem(corp.corpId)}
-      action
-    >
-      <div>{corp.corpName}</div>
-    </ListGroupItem>
-  ));
+const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
+  const CorporationItems = corps.map((corp: chartType) => {
+    const prevPrice = corp.totalChart.at(-1);
+    const nowPrice = corp.todayChart[tick - 1];
+    const rate = (nowPrice - prevPrice) / prevPrice;
+    return (
+      <ListGroupItem
+        tag="a"
+        key={corp.corpId}
+        href="#"
+        onClick={() => onClickCorpItem(corp.corpId)}
+        action
+      >
+        <Row>
+          <Col>{corp.corpName}</Col>
+          <Col className={rate >= 0 ? "stockRateUp" : "stockRateDown"}>
+            {rate}
+          </Col>
+          <Col>{corp.todayChart[tick - 1]}</Col>
+        </Row>
+      </ListGroupItem>
+    );
+  });
   return (
     <>
       <ListGroup>{CorporationItems}</ListGroup>

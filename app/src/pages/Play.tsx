@@ -56,7 +56,7 @@ const Play = ({ location, history }: any) => {
         </Col>
       </Row>
       <Row>
-        <Col>
+        <Col md="8">
           <TradeWrapper />
         </Col>
       </Row>

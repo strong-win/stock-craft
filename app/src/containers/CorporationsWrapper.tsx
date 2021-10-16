@@ -38,7 +38,11 @@ const CorporationsWrapper = () => {
     </>
   ) : (
     <>
-      <Corporations corps={corps} onClickCorpItem={onClickCorpItem} />
+      <Corporations
+        tick={tick}
+        corps={corps}
+        onClickCorpItem={onClickCorpItem}
+      />
     </>
   );
 };

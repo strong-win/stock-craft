@@ -1,9 +1,11 @@
 import React from "react";
-
+import { Card, CardHeader, CardBody, CardFooter } from "reactstrap";
 import { messageType } from "../../modules/user";
+import { FiUser } from "react-icons/fi";
+
 import "../../styles/Chatting.css";
 
-import Input from "./ChatInput";
+import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 
 type ChattingProps = {
@@ -22,17 +24,21 @@ const Chatting = ({
   sendMessage,
 }: ChattingProps) => {
   return (
-    <>
-      <div className="chatting">
-        <div>name: {name}</div>
+    <Card className="chatting">
+      <CardHeader>
+        <FiUser /> {name}
+      </CardHeader>
+      <CardBody className="chattingBody">
         <Messages name={name} messages={messages} />
-        <Input
+      </CardBody>
+      <CardFooter>
+        <ChatInput
           message={message}
           setMessage={setMessage}
           sendMessage={sendMessage}
         />
-      </div>
-    </>
+      </CardFooter>
+    </Card>
   );
 };
 

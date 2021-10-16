@@ -1,3 +1,5 @@
+import { Row, Card } from "reactstrap";
+
 import "../../styles/Trade.css";
 import { billType } from "../../containers/TradeWrapper";
 import { chartType } from "../../modules/stock";
@@ -31,23 +33,25 @@ const Trade = ({
 }: TradeProps) => {
   return (
     <>
-      <div className="trade">
-        <TradeBoard
-          stockBill={stockBill}
-          tradeBill={tradeBill}
-          setTradeBill={setTradeBill}
-        />
-        <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
-        <TradeButton handleDeal={handleDeal} />
-      </div>
-      <div>
+      <Card className="tradeCard">
+        <Row className="trade">
+          <TradeBoard
+            stockBill={stockBill}
+            tradeBill={tradeBill}
+            setTradeBill={setTradeBill}
+          />
+          <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
+          <TradeButton handleDeal={handleDeal} />
+        </Row>
+      </Card>
+      <Row>
         <TradeList
           trades={trades}
           corps={corps}
           selectedCorpId={selectedCorpId}
           handleCancel={handleCancel}
         />
-      </div>
+      </Row>
     </>
   );
 };

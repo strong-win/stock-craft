@@ -2,27 +2,53 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: #dddddd;
-  width: 50vh;
-  height: 50vh;
+  border-radius: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+.chattingBody {
+  height: 8rem;
+  overflow: auto;
 }
 
 .messages {
   padding: 5% 0;
   overflow: auto;
-  background: #ffffff;
+  background-color: white;
   margin: 5px;
   flex: auto;
 }
 
-.message {
+.messageWrapper {
   display: flex;
   padding: 0 5%;
   margin-top: 3px;
 }
 
+.message {
+  border-radius: 0.1rem 0.5rem 0.5rem 0.5rem;
+  padding: 0.3rem;
+  color: white;
+}
+
 .justifyStart {
   justify-content: flex-start;
+  flex-direction: column;
+}
+
+.myMessage {
+  background-color: rgb(75, 78, 251);
+  border-radius: 0.5rem 0.5rem 0.1rem 0.5rem;
+}
+
+.playerMessage {
+  background-color: rgb(100, 100, 100);
+  margin-right: auto;
+}
+
+.managerMessage {
+  background-color: rgb(235, 130, 44);
+  margin-right: auto;
 }
 
 .justifyEnd {
