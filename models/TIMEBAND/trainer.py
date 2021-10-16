@@ -183,7 +183,7 @@ class TIMEBANDTrainer:
             errD_real = self.metric.GANloss(Dx, target_is_real=True)
             errD_fake = self.metric.GANloss(Dy, target_is_real=False)
 
-            losses["D"] = errD_real + errD_fake
+            losses["D"] += errD_real + errD_fake
 
             if training:
                 errD = errD_real + errD_fake

@@ -10,6 +10,33 @@ from TIMEBAND.dataset import TIMEBANDDataset
 plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rc("font", family="Malgun Gothic")
 plt.rc("axes", unicode_minus=False)
+COLORS = [
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "blue",
+    "purple",
+    "peru",
+    "wheat",
+    "lime",
+    "aqua",
+    "indigo",
+    "pink",
+    "grey",
+    "saddlebrown",
+    "darkkhaki",
+    "olivedrab",
+    "teal",
+    "skyblue",
+    "royalblue",
+    "pink",
+    "silver",
+    "deepskyblue",
+    "darkseagreen",
+    "violet",
+    "darkred",
+]
 
 
 class TIMEBANDDashboard:
@@ -71,7 +98,8 @@ class TIMEBANDDashboard:
 
         plt.title("주가 데이터 Dashboard")
         fig, axes = plt.subplots(nrows, ncols, figsize=size, clear=True)
-        fig.tight_layout()
+        # fig.tight_layout()
+        # axes = [axes] if type(axes) != list else axes
         # axes[0].set_title("TARGET FEATURES")
 
         for i, ax in enumerate(axes[1:]):
@@ -113,7 +141,6 @@ class TIMEBANDDashboard:
             self.pred_data[-self.forecast_len - batchs :]
             - 2 * std[-self.forecast_len - batchs :]
         )
-
         for batch in range(batchs):
             fig, axes = self.reset_figure()
             PIVOT = 0
@@ -137,6 +164,7 @@ class TIMEBANDDashboard:
                 true_ticks = np.arange(PIVOT, OBSRV)
                 pred_ticks = np.arange(OBSRV - 1, FRCST)
                 label = self.target_cols[col]
+                color = COLORS[col]
 
                 axes[0].plot(
                     self.targets[PIVOT + self.idx : FRCST + self.idx, col],
@@ -146,6 +174,7 @@ class TIMEBANDDashboard:
                 axes[0].plot(
                     true_ticks,
                     self.targets[PIVOT + self.idx : OBSRV + self.idx, col],
+                    color=color,
                     label=f"Real {label}",
                 )
 
@@ -158,6 +187,7 @@ class TIMEBANDDashboard:
                         ]
                     ),
                     alpha=0.2,
+                    color=color,
                     linewidth=5,
                     label=f"Pred {label}",
                 )
@@ -166,6 +196,7 @@ class TIMEBANDDashboard:
                     self.lower[PIVOT + self.idx : FRCST + self.idx, col],
                     self.upper[PIVOT + self.idx : FRCST + self.idx, col],
                     alpha=0.2,
+                    color=color,
                     label=f"Prediciont Band {label}",
                 )
             axes[0].legend(loc="lower left")
@@ -179,6 +210,7 @@ class TIMEBANDDashboard:
             xticks = np.arange(SCOPE, FRCST)
             trueticks = np.arange(SCOPE, PIVOT)
             timelabel = [self.timestamp[x] for x in xticks]
+            target_col = 0
             for i, ax in enumerate(axes[1:]):
                 ax.set_xticks(xticks[:: self.xinterval])
                 ax.set_xticklabels(timelabel[:: self.xinterval], rotation=30)
@@ -197,32 +229,38 @@ class TIMEBANDDashboard:
                 )
 
                 # Origin data
+
                 for idx in range(idx_s, idx_e):
                     feature_label = self.origin_cols[idx]
                     if feature_label not in self.target_cols:
                         continue
 
                     alpha = 1.0 if feature_label in self.target_cols else 0.2
+                    color = COLORS[target_col]
                     ax.plot(
-                        np.arange(SCOPE, FRCST + 1),
-                        self.origin_data[SCOPE : FRCST + 1, idx],
+                        np.arange(SCOPE, PIVOT),
+                        self.origin_data[SCOPE:PIVOT, idx],
                         label=f"Real Value",  # {feature_label}",
                         alpha=alpha,
+                        color=color,
                     )
                     ax.plot(
                         np.arange(SCOPE, FRCST + 1),
-                        self.pred_data[SCOPE : FRCST + 1, col],
+                        self.pred_data[SCOPE : FRCST + 1, target_col],
                         alpha=0.2,
                         linewidth=5,
+                        color=color,
                         label=f"Pred Value",  # {feature_label}"
                     )
                     ax.fill_between(
                         np.arange(SCOPE, FRCST + 1),
-                        self.lower[SCOPE : FRCST + 1, col],
-                        self.upper[SCOPE : FRCST + 1, col],
+                        self.lower[SCOPE : FRCST + 1, target_col],
+                        self.upper[SCOPE : FRCST + 1, target_col],
                         label="Normal Band",
+                        color=color,
                         alpha=0.2,
                     )
+                    target_col += 1
                 ax.legend(loc="lower left")
 
             self.show_figure()
