@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
 import { updateName } from "../modules/user";
 import Main from "../components/Main";
+import { createName } from "../utils/create";
 
 const MainWrapper = () => {
   // redux state
@@ -11,6 +12,11 @@ const MainWrapper = () => {
 
   // react state
   const [room, setRoom] = useState<string>("");
+
+  useEffect(() => {
+    dispatch(updateName(createName()));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onChangeName = (e: any) => {
     dispatch(updateName(e.target.value));
