@@ -8,7 +8,7 @@ import ClockWrapper from "../containers/ClockWrapper";
 import PlayersWrapper from "../containers/PlayersWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
-import { updateRoom, updateName } from "../modules/user";
+import { updateName, updateRoom } from "../modules/user";
 import { chattingJoin } from "../modules/sockets/chatting";
 import { gameStartRequest } from "../modules/sockets/game";
 import { createName } from "../utils/create";
@@ -20,16 +20,21 @@ const Play = ({ location, history }: any) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const createdName = createName();
-    dispatch(updateName(createdName));
+    let createdName: string;
+    if (!name) {
+      createdName = createName();
+      dispatch(updateName(createdName));
+    }
 
     if (typeof initRoom === "undefined") {
       history.push("/");
     }
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
-      dispatch(chattingJoin({ name: createdName, room: initRoom }));
+      dispatch(chattingJoin({ name: name || createdName, room: initRoom }));
     }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
 
   const onGameStart = (e: any) => {
