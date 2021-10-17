@@ -1,9 +1,10 @@
 .trade {
   display: flex;
   justify-content: space-between;
-  background: #dddddd;
-  width: 50vh;
-  height: 12.5vh;
+}
+
+.tradeCard {
+  background-color: rgb(211, 211, 211);
 }
 
 .input {
@@ -19,9 +20,17 @@
 .buttonOuterContainer {
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 .buttonContainer {
   display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+
+.TradeBoard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  line-height: normal;
 }

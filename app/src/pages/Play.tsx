@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import queryString from "query-string";
+import { Container, Row, Col } from "reactstrap";
 
 import { RootState } from "..";
 import ChattingWrapper from "../containers/ChattingWrapper";
@@ -42,13 +43,29 @@ const Play = ({ location, history }: any) => {
   };
 
   return started ? (
-    <>
-      <CorporationsWrapper />
-      <ChattingWrapper name={name} />
-      <PlayersWrapper room={room} />
-      <TradeWrapper />
-      <ClockWrapper />
-    </>
+    <Container fluid={true}>
+      <Row>
+        <Col>
+          <ClockWrapper />
+        </Col>
+        <Col>
+          <PlayersWrapper room={room} />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="8">
+          <CorporationsWrapper />
+        </Col>
+        <Col md="4">
+          <ChattingWrapper name={name} />
+        </Col>
+      </Row>
+      <Row>
+        <Col md="8">
+          <TradeWrapper />
+        </Col>
+      </Row>
+    </Container>
   ) : (
     <>
       <button onClick={onGameStart}>START</button>

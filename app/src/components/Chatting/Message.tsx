@@ -8,13 +8,23 @@ type MessageProps = {
 
 const Message = ({ name, user, text }: MessageProps) => {
   const isMessageByUser: boolean = name === user ? true : false;
+  const isMessageByManager: boolean = user === "관리자";
   return isMessageByUser ? (
-    <div className="message justifyEnd">
-      {user} {text}
+    <div className="messageWrapper justifyEnd">
+      <div className="message myMessage">{text}</div>
     </div>
   ) : (
-    <div className="message justifyStart">
-      {text} {user}
+    <div className="messageWrapper justifyStart">
+      <div>{user}</div>
+      <div
+        className={
+          isMessageByManager
+            ? "message managerMessage"
+            : "message playerMessage"
+        }
+      >
+        {text}
+      </div>
     </div>
   );
 };

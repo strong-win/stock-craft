@@ -1,4 +1,5 @@
 import { billType } from "../../containers/TradeWrapper";
+import { FormGroup, Label, Col, Input } from "reactstrap";
 import "../../styles/Trade.css";
 
 type InputProps = {
@@ -20,24 +21,33 @@ const TradeInput = ({ tradeBill, setTradeBill }: InputProps) => {
   };
 
   return (
-    <div className="input">
-      <div>거래가</div>
-      <input
-        name="price"
-        placeholder="거래가"
-        type="number"
-        value={price}
-        onChange={onPriceChange}
-      />
-      <div>거래수량</div>
-      <input
-        name="quantity"
-        placeholder="거래수량"
-        type="number"
-        value={quantity}
-        onChange={onQuantityChange}
-      />
-    </div>
+    <Col className="input">
+      <FormGroup>
+        <Label for="price">거래가</Label>
+        <Input
+          name="price"
+          id="price"
+          placeholder="거래가"
+          type="number"
+          min={0}
+          value={price}
+          onChange={onPriceChange}
+        />
+      </FormGroup>
+      <FormGroup>
+        <Label for="quantity">거래수량</Label>
+        <Input
+          name="quantity"
+          id="quantity"
+          placeholder="거래수량"
+          value={quantity}
+          onChange={onQuantityChange}
+          min={0}
+          type="number"
+          step="1"
+        />
+      </FormGroup>
+    </Col>
   );
 };
 
