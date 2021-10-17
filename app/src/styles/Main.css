@@ -5,7 +5,7 @@
 }
 
 .headerContainer {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -16,7 +16,7 @@
 }
 
 .titleOuterContainer {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -37,7 +37,7 @@
 }
 
 .roomContainer {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   justify-content: center;
 }
@@ -57,7 +57,7 @@
 }
 
 .joinOuterContainer {
-  flex-grow: 2;
+  flex: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -85,7 +85,7 @@
 }
 
 .footerContainer {
-  flex-grow: 1;
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;

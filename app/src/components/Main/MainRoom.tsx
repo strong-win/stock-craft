@@ -13,6 +13,9 @@ const MainRoom = ({ room, onChangeRoom }: MainRoomProps) => {
       <div className="createOuterContainer">
         <div className="createInnerContainer">
           <h3>CREATE ROOM</h3>
+          {/**
+           * TODO : - 룸 코드 유효성 확인 과정 추가
+           */}
           <Link
             to={`/play?room=${Math.random()
               .toString(36)
@@ -33,6 +36,9 @@ const MainRoom = ({ room, onChangeRoom }: MainRoomProps) => {
             placeholder="코드를 입력하세요"
             onChange={onChangeRoom}
           />
+          {/**
+           * TODO : - 룸 코드 존재 여부 추가
+           */}
           <Link
             onClick={(e) => (!room ? e.preventDefault() : null)}
             to={`/play?room=${room}`}
