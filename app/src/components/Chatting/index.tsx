@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardHeader, CardBody, CardFooter } from "reactstrap";
-import { messageType } from "../../modules/user";
+import { MessageState } from "../../modules/user";
 import { FiUser } from "react-icons/fi";
 
 import "../../styles/Chatting.css";
@@ -13,7 +13,7 @@ type ChattingProps = {
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
-  messages: messageType[];
+  messages: MessageState[];
 };
 
 const Chatting = ({

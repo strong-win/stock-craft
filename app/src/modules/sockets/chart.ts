@@ -1,52 +1,81 @@
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { eventChannel } from "@redux-saga/core";
-import { apply, call, put, take } from "@redux-saga/core/effects";
+import { channel } from "@redux-saga/core";
+import { apply, put, take } from "@redux-saga/core/effects";
 
-import { updateDayChart } from "../stock";
+import { DayChartState, updateDayChart } from "../stock";
+import { DAY_END, DAY_START } from "./events";
 
-import { CHART_REQUEST, CHART_RESPONSE } from "./events";
-
-type chartRequestType = {
-  room: string;
+type DayEndRequest = {
+  gameId: string;
+  playerId: string;
   week: number;
   day: number;
-  item: string;
+  item: string[];
 };
 
-export type dayChartType = {
-  [key: string]: number[];
+type DayStartRequest = {
+  gameId: string;
+  week: number;
+  day: number;
 };
 
-export const chartRequest = createAction(
-  CHART_REQUEST,
-  (payload: chartRequestType) => ({ payload })
-);
+type DayStartResponse = {
+  dayChart: DayChartState;
+};
 
-export function* chartRequestSaga(socket: Socket) {
+export const sendDayEnd = createAction(DAY_END, (payload: DayEndRequest) => ({
+  payload,
+}));
+
+export function* sendDayEndSaga(socket: Socket) {
   while (true) {
-    const { payload } = yield take(CHART_REQUEST);
-    yield apply(socket, socket.emit, [CHART_REQUEST, payload]);
+    const { payload } = yield take(DAY_END);
+    yield apply(socket, socket.emit, [
+      DAY_END,
+      payload,
+      (payload: DayStartRequest) => {
+        sendDayStartChannel.put(payload);
+      },
+    ]);
   }
 }
 
-const createChartChannel = (socket: Socket) => {
-  return eventChannel<dayChartType>((emit) => {
-    socket.on(CHART_RESPONSE, (chart: dayChartType) => {
-      emit(chart);
-    });
+export const sendDayStart = createAction(
+  DAY_START,
+  (payload: DayStartRequest) => ({
+    payload,
+  })
+);
 
-    return () => {};
-  });
-};
+export const receiveDayStartChannel = channel<DayStartResponse>();
 
-export function* chartResponseSaga(socket: Socket) {
-  const channel: ReturnType<typeof createChartChannel> = yield call(
-    createChartChannel,
-    socket
-  );
+export function* sendDayStartSaga(socket: Socket) {
   while (true) {
-    let payload: dayChartType = yield take(channel);
-    yield put(updateDayChart(payload));
+    const { payload } = yield take(DAY_START);
+    yield apply(socket, socket.emit, [
+      DAY_START,
+      payload,
+      ({ dayChart }) => {
+        receiveDayStartChannel.put({ dayChart });
+      },
+    ]);
+  }
+}
+
+export function* receiveDayStartSaga() {
+  while (true) {
+    const payload: DayStartResponse = yield take(receiveDayStartChannel);
+    yield put(updateDayChart(payload.dayChart));
+  }
+}
+
+// temporary channel for sending DayStart after receiving DayEnd
+export const sendDayStartChannel = channel<DayStartRequest>();
+
+export function* sendDayStartChannelSaga() {
+  while (true) {
+    const payload: DayStartRequest = yield take(sendDayStartChannel);
+    yield put(sendDayStart(payload));
   }
 }

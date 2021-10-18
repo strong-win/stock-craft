@@ -6,12 +6,12 @@ import {
   DropdownItem,
 } from "reactstrap";
 
-import { playerType } from "../modules/user";
+import { PlayerState } from "../modules/user";
 import "../styles/Players.css";
 
 type PlayersProps = {
   room: string;
-  players: playerType[];
+  players: PlayerState[];
 };
 
 const RoomCode = ({ room }) => (

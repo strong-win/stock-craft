@@ -1,21 +1,29 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export type messageType = {
+export type PlayerStatus =
+  | "connected"
+  | "ready"
+  | "play"
+  | "finish"
+  | "disconnected";
+
+export type MessageState = {
   user: string;
   text: string;
+  statuses: PlayerStatus[];
 };
 
-export type playerType = {
+export type PlayerState = {
   clientId: string;
   name: string;
 };
 
-export type assetType = {
+export type AssetState = {
   corpId: string;
   quantity: number;
 };
 
-export type tradeType = {
+export type TradeState = {
   _id: string;
   corpId: string;
   price: number;
@@ -24,21 +32,26 @@ export type tradeType = {
   status: "pending" | "disposed" | "cancel";
 };
 
-export type gameType = {
+export type userState = {
   name: string;
   room: string;
-  messages: messageType[];
-  players: playerType[];
+  status: PlayerStatus;
+  playerId: string;
+  gameId: string;
+  messages: MessageState[];
+  players: PlayerState[];
   cash: number;
-  assets: assetType[];
-  trades: tradeType[];
+  assets: AssetState[];
+  trades: TradeState[];
   selectedCorpId: string;
-  started: boolean;
 };
 
-const initialState: gameType = {
+const initialState: userState = {
   name: "",
   room: "",
+  status: "connected",
+  playerId: "",
+  gameId: "",
   messages: [],
   players: [],
   cash: 100_000,
@@ -52,7 +65,6 @@ const initialState: gameType = {
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
   selectedCorpId: "gyu",
-  started: false,
 };
 
 export const gameSlice = createSlice({
@@ -65,20 +77,28 @@ export const gameSlice = createSlice({
     updateRoom(state, action: PayloadAction<string>) {
       state.room = action.payload;
     },
-    updatePlayers: (state, action: PayloadAction<playerType[]>) => {
+    updateStatus(state, action: PayloadAction<PlayerStatus>) {
+      state.status = action.payload;
+    },
+    updatePlayerId(state, action: PayloadAction<string>) {
+      state.playerId = action.payload;
+    },
+    updateGameId(state, action: PayloadAction<string>) {
+      state.gameId = action.payload;
+    },
+    updatePlayers: (state, action: PayloadAction<PlayerState[]>) => {
       state.players = action.payload;
     },
-    updateMessage: (state, action: PayloadAction<messageType>) => {
-      state.messages = [...state.messages, action.payload];
+    updateMessage: (state, action: PayloadAction<MessageState>) => {
+      if (action.payload.statuses.includes(state.status)) {
+        state.messages = [...state.messages, action.payload];
+      }
     },
-    updateAssets: (state, action: PayloadAction<assetType[]>) => {
+    updateAssets: (state, action: PayloadAction<AssetState[]>) => {
       state.assets = action.payload;
     },
     updateCash: (state, action: PayloadAction<number>) => {
       state.cash = action.payload;
-    },
-    updateStarted: (state, action: PayloadAction<boolean>) => {
-      state.started = action.payload;
     },
     updateSelectedCorpId: (state, action: PayloadAction<string>) => {
       state.selectedCorpId = action.payload;
@@ -87,7 +107,7 @@ export const gameSlice = createSlice({
       state,
       action: PayloadAction<{
         action: "request" | "refresh" | "cancel";
-        trades: tradeType[];
+        trades: TradeState[];
       }>
     ) => {
       switch (action.payload.action) {
@@ -107,29 +127,21 @@ export const gameSlice = createSlice({
           break;
       }
     },
-    initializeAssets: (
-      state,
-      action: PayloadAction<{ corpId: string; corpName: string }[]>
-    ) => {
-      for (const corp of action.payload) {
-        const { corpId } = corp;
-        state.assets.push({ corpId, quantity: 0 });
-      }
-    },
   },
 });
 
 export const {
   updateName,
   updateRoom,
+  updateStatus,
+  updatePlayerId,
+  updateGameId,
   updateMessage,
   updatePlayers,
   updateAssets,
   updateCash,
-  updateStarted,
   updateSelectedCorpId,
   updateTrades,
-  initializeAssets,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

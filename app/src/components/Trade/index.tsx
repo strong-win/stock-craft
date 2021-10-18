@@ -2,8 +2,8 @@ import { Row, Card } from "reactstrap";
 
 import "../../styles/Trade.css";
 import { billType } from "../../containers/TradeWrapper";
-import { chartType } from "../../modules/stock";
-import { tradeType } from "../../modules/user";
+import { ChartState } from "../../modules/stock";
+import { TradeState } from "../../modules/user";
 
 import TradeBoard from "./TradeBoard";
 import TradeButton from "./TradeButton";
@@ -11,8 +11,8 @@ import TradeInput from "./TradeInput";
 import TradeList from "./TradeList";
 
 type TradeProps = {
-  trades: tradeType[];
-  corps: chartType[];
+  trades: TradeState[];
+  corps: ChartState[];
   selectedCorpId: string;
   stockBill: billType;
   tradeBill: billType;

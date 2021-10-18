@@ -10,14 +10,15 @@ import PlayersWrapper from "../containers/PlayersWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import { updateName, updateRoom } from "../modules/user";
-import { chattingJoin } from "../modules/sockets/chatting";
-import { gameStartRequest } from "../modules/sockets/game";
 import { createName } from "../utils/create";
+import { sendJoinConnected, sendJoinReady } from "../modules/sockets/join";
 
 const Play = ({ location, history }: any) => {
   const { room: initRoom } = queryString.parse(location.search);
 
-  const { name, room, started } = useSelector((state: RootState) => state.user);
+  const { playerId, name, room, status } = useSelector(
+    (state: RootState) => state.user
+  );
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -32,17 +33,19 @@ const Play = ({ location, history }: any) => {
     }
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
-      dispatch(chattingJoin({ name: name || createdName, room: initRoom }));
+      dispatch(
+        sendJoinConnected({ name: name || createdName, room: initRoom })
+      );
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
 
   const onGameStart = (e: any) => {
-    dispatch(gameStartRequest({ room }));
+    dispatch(sendJoinReady({ playerId, room }));
   };
 
-  return started ? (
+  return status === "play" ? (
     <Container fluid={true}>
       <Row>
         <Col>
