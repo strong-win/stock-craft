@@ -1,13 +1,17 @@
+import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DayChart } from 'src/dto/day-start.dto';
 
-import { dayChartType } from 'src/dto/chart-response.dto';
 import { Stock, StockDocument } from 'src/schemas/stocks.schema';
 
-type tickType = {
+type SampleStock = {
+  week: number;
+  day: number;
   tick: number;
   corpId: string;
+  corpName: string;
   price: number;
 };
 
@@ -15,14 +19,15 @@ type tickType = {
 export class StocksService {
   constructor(
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
+    private configService: ConfigService,
   ) {}
 
   async findDayChart(
-    room: string,
+    gameId: string,
     week: number,
     day: number,
-  ): Promise<dayChartType> {
-    const stocks = await this.stockModel.find({ room, week, day }).exec();
+  ): Promise<DayChart> {
+    const stocks = await this.stockModel.find({ gameId, week, day }).exec();
 
     const dayChart = {};
     for (const stock of stocks) {
@@ -37,23 +42,38 @@ export class StocksService {
 
     for (const corpId in dayChart) {
       dayChart[corpId] = dayChart[corpId]
-        .sort((a: tickType, b: tickType) => a.tick - b.tick)
-        .map((tickChart: tickType) => tickChart.price);
+        .sort((a, b) => a.tick - b.tick)
+        .map((tickChart) => tickChart.price);
     }
-
     return dayChart;
   }
 
   async findPrice(
-    room: string,
+    gameId: string,
     week: number,
     day: number,
     tick: number,
     corpId: string,
   ): Promise<number> {
-    const stock = await this.stockModel
-      .findOne({ room, week, day, tick, corpId })
-      .exec();
+    const stock = await this.stockModel.findOne({
+      gameId,
+      week,
+      day,
+      tick,
+      corpId,
+    });
     return stock.price;
+  }
+
+  // method to add sample stock
+  async createStock(gameId: string, week: number, day: number) {
+    const sampleCharts: SampleStock[] =
+      this.configService.get<SampleStock[]>('stocks');
+
+    const dayCharts: Stock[] = sampleCharts
+      .filter((stock) => stock.week === week && stock.day === day)
+      .map((stock) => ({ ...stock, gameId }));
+
+    await this.stockModel.insertMany(dayCharts);
   }
 }

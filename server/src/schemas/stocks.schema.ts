@@ -5,7 +5,7 @@ export type StockDocument = Stock & Document;
 @Schema()
 export class Stock {
   @Prop()
-  room: string;
+  gameId: string;
 
   @Prop()
   week: number;
@@ -26,4 +26,4 @@ export class Stock {
   price: number;
 }
 
-export const StocksSchema = SchemaFactory.createForClass(Stock);
+export const StockSchema = SchemaFactory.createForClass(Stock);

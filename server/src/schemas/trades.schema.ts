@@ -6,7 +6,7 @@ export type TradeDocument = Trade & Document;
 @Schema()
 export class Trade {
   @Prop()
-  clientId: string;
+  playerId: string;
 
   @Prop()
   week: number;
@@ -36,4 +36,4 @@ export class Trade {
   status: 'pending' | 'cancel' | 'disposed';
 }
 
-export const TradesSchema = SchemaFactory.createForClass(Trade);
+export const TradeSchema = SchemaFactory.createForClass(Trade);

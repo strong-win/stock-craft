@@ -14,6 +14,8 @@ import {
 } from './events';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
 import { TradeRefreshDto } from 'src/dto/trade-refresh.dto';
+import { TradeResponseDto } from 'src/dto/trade-response.dto';
+import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
 
 @WebSocketGateway({ cors: true })
 export class TradeGateway {
@@ -28,11 +30,12 @@ export class TradeGateway {
     payload: TradeRequestDto,
   ): Promise<void> {
     try {
-      const player = await this.tradesService.handleTrade(client.id, payload);
+      const player = await this.tradesService.handleTrade(payload);
       this.server.to(client.id).emit(TRADE_RESPONSE, player);
     } catch (e) {
+      console.error(e);
+
       if (e.name === 'TradeException') {
-        console.error(e);
         // To do
         // handle TradeException
       }
@@ -44,13 +47,8 @@ export class TradeGateway {
     client: Socket,
     payload: TradeRefreshDto,
   ): Promise<void> {
-    const { room, week, day, tick } = payload;
-    const player = await this.tradesService.handleRefresh(
-      room,
-      client.id,
-      week,
-      day,
-      tick,
+    const player: TradeResponseDto = await this.tradesService.handleRefresh(
+      payload,
     );
     this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
@@ -58,13 +56,9 @@ export class TradeGateway {
   @SubscribeMessage(TRADE_CANCEL)
   async receiveTradeCancel(
     client: Socket,
-    payload: { _id: string; corpId: string },
+    payload: TradeCancelDto,
   ): Promise<void> {
-    const player = await this.tradesService.handleTradeCancel(
-      client.id,
-      payload._id,
-      payload.corpId,
-    );
+    const player = await this.tradesService.handleTradeCancel(payload);
     this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
 }

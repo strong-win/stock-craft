@@ -2,17 +2,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type GameDocument = Game & Document;
 
+export type Corp = { corpId: string; corpName: string };
+
 @Schema()
 export class Game {
   @Prop()
   room: string;
 
   @Prop()
-  corps: { corpId: string; corpName: string }[];
+  corps: Corp[];
 
-  // clientId Array waits on game start request
   @Prop()
-  waits: string[];
+  status: 'play' | 'finish';
 }
 
-export const GamesSchema = SchemaFactory.createForClass(Game);
+export const GameSchema = SchemaFactory.createForClass(Game);

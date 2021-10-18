@@ -5,10 +5,10 @@ export type ItemDocument = Item & Document;
 @Schema()
 export class Item {
   @Prop()
-  clientId: string;
+  gameId: string;
 
   @Prop()
-  room: string;
+  playerId: string;
 
   @Prop()
   week: number;
@@ -17,10 +17,10 @@ export class Item {
   day: number;
 
   @Prop()
-  item: string;
+  item: string[];
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
 }
 
-export const ItemsSchema = SchemaFactory.createForClass(Item);
+export const ItemSchema = SchemaFactory.createForClass(Item);

@@ -1,7 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
-import { assetType } from '../schemas/players.schema';
+import { Asset } from '../schemas/players.schema';
 
-type tradeType = {
+type Trade = {
   _id: string;
   corpId: string;
   price: number;
@@ -15,11 +15,11 @@ export class TradeResponseDto {
   cash: number;
 
   @IsNotEmpty()
-  assets: assetType[];
+  assets: Asset[];
 
   @IsNotEmpty()
   action: 'request' | 'refresh' | 'cancel';
 
   @IsNotEmpty()
-  trades: tradeType[];
+  trades: Trade[];
 }

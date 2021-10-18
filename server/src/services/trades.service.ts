@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
+import { TradeRefreshDto } from 'src/dto/trade-refresh.dto';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { Player, PlayerDocument } from 'src/schemas/players.schema';
@@ -16,15 +18,14 @@ export class TradesService {
   ) {}
 
   async handleTrade(
-    clientId: string,
     tradeRequestDto: TradeRequestDto,
   ): Promise<TradeResponseDto> {
-    const { room, week, day, tick, corpId, price, quantity, deal } =
+    const { playerId, gameId, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
 
     // find stock price
     const stock = await this.stockModel.findOne({
-      room,
+      gameId,
       week,
       day,
       tick,
@@ -32,7 +33,7 @@ export class TradesService {
     });
 
     // find player asset
-    const player = await this.playerModel.findOne({ clientId });
+    const player = await this.playerModel.findOne({ _id: playerId });
 
     let isDirect: boolean;
     if (deal === 'buy') {
@@ -80,7 +81,7 @@ export class TradesService {
       week,
       day,
       tick,
-      clientId,
+      playerId,
       corpId,
       price,
       quantity,
@@ -90,7 +91,7 @@ export class TradesService {
 
     // modify asset with new stocks
     await this.playerModel.updateOne(
-      { clientId },
+      { _id: playerId },
       { cash: player.cash, assets: player.assets },
     );
 
@@ -113,27 +114,29 @@ export class TradesService {
 
   // trade refresh
   async handleRefresh(
-    room: string,
-    clientId: string,
-    week: number,
-    day: number,
-    tick: number,
+    tradeRefreshDto: TradeRefreshDto,
   ): Promise<TradeResponseDto> {
-    const player = await this.playerModel.findOne({ clientId });
+    const { gameId, playerId, week, day, tick } = tradeRefreshDto;
+    console.log(tradeRefreshDto);
+    const player = await this.playerModel.findOne({ _id: playerId });
     const trades = await this.tradeModel
-      .find({ clientId, status: 'pending' })
+      .find({ playerId, status: 'pending' })
       .exec();
 
     const tradesDisposed = [];
     for (const trade of trades) {
       const { corpId } = trade;
+      console.log(corpId);
+
       const stock = await this.stockModel.findOne({
-        room,
+        gameId,
         week,
         day,
         tick,
         corpId,
       });
+
+      console.log(stock);
 
       if (trade.deal === 'buy') {
         if (trade.price >= stock.price) {
@@ -165,7 +168,7 @@ export class TradesService {
       }
 
       await this.playerModel.updateOne(
-        { clientId },
+        { _id: playerId },
         { cash: player.cash, assets: player.assets },
       );
     }
@@ -187,15 +190,14 @@ export class TradesService {
 
   // trade cancel
   async handleTradeCancel(
-    clientId: string,
-    _id: string,
-    corpId: string,
+    tradeCancelDto: TradeCancelDto,
   ): Promise<TradeResponseDto> {
-    const player = await this.playerModel.findOne({ clientId });
+    const { playerId, _id, corpId } = tradeCancelDto;
+    const player = await this.playerModel.findOne({ _id: playerId });
     const trade = await this.tradeModel.findOne({
       _id,
       corpId,
-      clientId,
+      playerId,
       status: 'pending',
     });
 
@@ -213,7 +215,7 @@ export class TradesService {
     trade.save();
 
     await this.playerModel.updateOne(
-      { clientId },
+      { _id: playerId },
       { cash: player.cash, assets: player.assets },
     );
 

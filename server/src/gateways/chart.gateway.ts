@@ -7,10 +7,13 @@ import { Server, Socket } from 'socket.io';
 
 import { StocksService } from 'src/services/stocks.service';
 import { ItemsService } from 'src/services/items.service';
-import { ChartRequestDto } from 'src/dto/chart-request.dto';
-import { dayChartType } from 'src/dto/chart-response.dto';
-
-import { CHART_REQUEST, CHART_RESPONSE } from './events';
+import { DAY_END, DAY_START } from './events';
+import { DayEndRequestDto } from 'src/dto/day-end.dto';
+import {
+  DayChart,
+  DayStartRequestDto,
+  DayStartResponseDto,
+} from 'src/dto/day-start.dto';
 
 @WebSocketGateway({ cors: true })
 export class ChartGateway {
@@ -22,29 +25,44 @@ export class ChartGateway {
     private itemsService: ItemsService,
   ) {}
 
-  @SubscribeMessage(CHART_REQUEST)
-  async handleChartRequest(
+  @SubscribeMessage(DAY_END)
+  async handleDayEnd(
     client: Socket,
-    payload: ChartRequestDto,
-  ): Promise<void> {
-    const { room, week, day, item } = payload;
-
+    payload: DayEndRequestDto,
+  ): Promise<DayStartRequestDto> {
     const { playerCount, itemCount } = await this.itemsService.createItem(
-      client.id,
-      room,
-      week,
-      day,
-      item,
+      payload,
     );
 
     if (playerCount === itemCount) {
-      const dayChart: dayChartType = await this.stocksService.findDayChart(
-        room,
-        week,
-        day,
-      );
+      // add sample stock document
+      const { gameId, week, day } = payload;
+      const { nextWeek, nextDay } = this.calculateNextDay(week, day);
 
-      this.server.to(room).emit(CHART_RESPONSE, dayChart);
+      await this.stocksService.createStock(gameId, nextWeek, nextDay);
+
+      return { gameId, week: nextWeek, day: nextDay };
     }
+  }
+
+  @SubscribeMessage(DAY_START)
+  async handDayStart(
+    client: Socket,
+    payload: DayStartRequestDto,
+  ): Promise<DayStartResponseDto> {
+    const { gameId, week, day } = payload;
+
+    const dayChart: DayChart = await this.stocksService.findDayChart(
+      gameId,
+      week,
+      day,
+    );
+    return { dayChart };
+  }
+
+  calculateNextDay(week: number, day: number) {
+    return day === 5
+      ? { nextWeek: week + 1, nextDay: 0 }
+      : { nextWeek: week, nextDay: day + 1 };
   }
 }
