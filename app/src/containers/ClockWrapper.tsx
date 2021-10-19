@@ -1,0 +1,62 @@
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { RootState } from "..";
+import Clock from "../components/Clock";
+import { updateTime } from "../modules/time";
+import { chartRequest } from "../modules/sockets/chart";
+import { tradeRefresh } from "../modules/sockets/trade";
+import { calculateNextTime } from "../utils/calculate";
+
+const ClockWrapper = () => {
+  const { room } = useSelector((state: RootState) => state.user);
+  const { week, day, tick } = useSelector((state: RootState) => state.time);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    setTimeout(() => {
+      const { weekChanged, dayChanged, tickChanged } = calculateNextTime({
+        week,
+        day,
+        tick,
+      });
+
+      dispatch(
+        updateTime({
+          week: weekChanged,
+          day: dayChanged,
+          tick: tickChanged,
+        })
+      );
+
+      // refresh trade
+      if (day > 0) {
+        dispatch(
+          tradeRefresh({
+            room,
+            week: weekChanged,
+            day: dayChanged,
+            tick: tickChanged,
+          })
+        );
+      }
+
+      // refresh todayChart
+      if (day !== dayChanged) {
+        dispatch(
+          chartRequest({
+            room,
+            week: weekChanged,
+            day: dayChanged,
+            item: "example",
+          })
+        );
+      }
+    }, 15000);
+    // eslint-disable-next-line
+  }, [tick]);
+
+  return <Clock week={week} day={day} tick={tick} />;
+};
+
+export default ClockWrapper;

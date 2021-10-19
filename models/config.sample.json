@@ -1,0 +1,86 @@
+{
+    "core":{
+        "mode": "train",
+
+        "workers": 2,
+        "batch_size": 28,
+        "seed": 42
+    },
+    "dataset": {
+        "directory": "data",
+        "data_name": "sample",
+
+        "index_col": "날짜",
+        "index_format": "%Y-%m-%d",
+
+        "year": "year",
+        "month": "month",
+        "weekday": "weekday",
+
+        "drops": [],
+        "targets": ["종가"],
+
+        "stride": 1,
+        "observed_len": 28,
+        "forecast_len": 28,
+
+        "split_rate": 0.9,
+        "window_scale": 2,
+        "window_sliding": 1,
+
+        "scaler": false,
+        "cutoff": {
+            "min": 0.01,
+            "max": 0
+        }
+    },
+    "models": {
+        "directory": "TIMEBAND/pretrained/",
+        "model_tag": "stock",
+        
+        "load": true,
+        "load_interval": 20,
+
+        "reload": true,
+        "reload_interval": 15,
+        
+        "save": true,
+        "save_interval": 2,
+        
+        "best_score": 2,
+        "hidden_dim": 128
+    },
+    "metric": {
+        "zero_ignoring": true,
+        "gp_weight": 1,
+        "l1_weight": 1,
+        "l2_weight": 1
+    },
+    "trainer": {
+        "epochs": {
+            "base": 0,
+            "iter": 10,
+            "critic": 5
+        },
+        "learning_rate": {
+            "base": 0.0002,
+            "gammaD": 1.0,
+            "gammaG": 0.5
+        },
+        "amplifier": 1.0,
+        "print": {
+            "verbose": 1,
+            "interval": 5
+        }
+    },
+    "dashboard": {
+        "visualize": false,
+        "scope": 36,
+        
+        "features_by_rows": 13,
+        "xinterval": 60,
+
+        "height": 10,
+        "width": 25
+    }
+}
