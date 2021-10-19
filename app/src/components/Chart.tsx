@@ -8,7 +8,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from "recharts";
 
 type ChartProps = {
@@ -19,10 +18,14 @@ type ChartProps = {
 
 const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
   const ChartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
+  const color =
+    ChartData[ChartData.length - 2] < ChartData[ChartData.length - 1]
+      ? "red"
+      : "blue";
   return (
     <>
       <LineChart
-        width={500}
+        width={700}
         height={300}
         data={ChartData.map((value, index) => ({ time: index, value }))}
         margin={{
@@ -36,8 +39,7 @@ const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
         <XAxis dataKey="time" />
         <YAxis />
         <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="value" stroke="red" />
+        <Line type="linear" dataKey="value" stroke={color} />
       </LineChart>
       <Button onClick={() => onClickBackButton("")}>뒤로가기</Button>
     </>

@@ -1,3 +1,4 @@
+import { Col, Button } from "reactstrap";
 import "../../styles/Trade.css";
 
 type ButtonProps = {
@@ -6,16 +7,14 @@ type ButtonProps = {
 
 const TradeButton = ({ handleDeal }: ButtonProps) => {
   return (
-    <div className="buttonOuterContainer">
-      <div className="buttonContainer">
-        <button name="buy" onClick={handleDeal}>
-          매수
-        </button>
-        <button name="sell" onClick={handleDeal}>
-          매도
-        </button>
-      </div>
-    </div>
+    <Col className="buttonContainer">
+      <Button name="buy" onClick={handleDeal}>
+        매수
+      </Button>
+      <Button name="sell" onClick={handleDeal}>
+        매도
+      </Button>
+    </Col>
   );
 };
 

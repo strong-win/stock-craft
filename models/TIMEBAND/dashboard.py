@@ -8,7 +8,6 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rc("font", family="Malgun Gothic")
 plt.rc("axes", unicode_minus=False)
 
-
 class TIMEBANDDashboard:
     def __init__(self, config: dict, dataset: TIMEBANDDataset) -> None:
         # Set Config
@@ -17,7 +16,6 @@ class TIMEBANDDashboard:
         # Dataset
         self.time_idx = 0
         self.dataset = dataset
-
         self.observed = dataset.observed
         self.target_cols = dataset.targets
         self.target_dims = len(self.target_cols)
@@ -101,6 +99,33 @@ class TIMEBANDDashboard:
         self.lower[update_idx:] = pred_data - self.std[update_idx:]
         self.upper[update_idx:] = pred_data + self.std[update_idx:]
 
+        reals = reals.detach().numpy()
+        preds = preds.detach().numpy()
+        predictions = predictions.detach().numpy()
+        std = std.detach().numpy()
+
+        if self.pred_data is None:
+            self.pred_data = self.origin_df[self.target_cols][: 2 * self.observed_len]
+            self.lower = self.origin_df[self.target_cols][: 2 * self.observed_len]
+            self.upper = self.origin_df[self.target_cols][: 2 * self.observed_len]
+
+        self.pred_data = np.concatenate(
+            [self.pred_data, np.zeros((batchs, self.target_dims))]
+        )
+        self.lower = np.concatenate([self.lower, np.zeros((batchs, self.target_dims))])
+        self.upper = np.concatenate([self.upper, np.zeros((batchs, self.target_dims))])
+
+        self.pred_data[-batchs - self.forecast_len : -1] = predictions[
+            -batchs - self.forecast_len : -1
+        ]
+        self.upper[-self.forecast_len - batchs :] = (
+            self.pred_data[-self.forecast_len - batchs :]
+            + 2 * std[-self.forecast_len - batchs :]
+        )
+        self.lower[-self.forecast_len - batchs :] = (
+            self.pred_data[-self.forecast_len - batchs :]
+            - 2 * std[-self.forecast_len - batchs :]
+        )
         for batch in range(batchs):
             fig, axes = self.reset_figure()
             # 하단 그래프
@@ -120,7 +145,6 @@ class TIMEBANDDashboard:
 
                 idx_s = i * self.feats_by_rows
                 idx_e = idx_s + min(self.target_dims - idx_s, self.feats_by_rows)
-
                 ax.axvline(SCOPE)
                 ax.axvline(PIVOT - 1)
                 ax.axvline(OBSRV - 1)
@@ -164,6 +188,7 @@ class TIMEBANDDashboard:
                 ax.relim()
             self.time_idx += 1
             self.show_figure()
+            self.idx += 1
 
     def reset_figure(self):
         # Clear previous figure

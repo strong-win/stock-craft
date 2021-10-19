@@ -2,6 +2,7 @@ import torch
 import numpy as np
 
 from tqdm import tqdm
+from torch import Tensor
 from torch.optim import RMSprop
 
 from utils.color import colorstr
@@ -185,7 +186,6 @@ class TIMEBANDTrainer:
 
             losses["Dr"] += errD_real
             losses["Df"] += errD_fake
-
             losses["D"] += errD_real + errD_fake
 
             if training:

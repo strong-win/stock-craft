@@ -1,0 +1,96 @@
+.mainContainer {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.headerContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.1rem;
+  border: 0.1rem solid black;
+  color: #ffffff;
+  background-color: #dddddd;
+}
+
+.titleOuterContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0.1rem;
+  border: 0.1rem solid;
+}
+
+.titleInnerContainer {
+  width: 50%;
+  text-align: center;
+}
+
+.titleInput {
+  margin-top: 1rem;
+  width: 70%;
+  text-align: center;
+}
+
+.roomContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.createOuterContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  margin: 0.1rem;
+  border: 0.1rem solid;
+}
+
+.createInnerContainer {
+  text-align: center;
+  width: 50%;
+}
+
+.joinOuterContainer {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50%;
+  margin: 0.1rem;
+  border: 0.1rem solid;
+}
+
+.joinInnerContainer {
+  text-align: center;
+  width: 50%;
+}
+
+.roomInput {
+  width: 100%;
+  text-align: center;
+}
+
+.roomButton {
+  color: #fff !important;
+  background: #000000;
+  width: 100%;
+  border: none;
+}
+
+.footerContainer {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0.1rem;
+  border: 0.1rem solid black;
+  color: #ffffff;
+  background-color: #dddddd;
+}

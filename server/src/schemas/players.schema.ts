@@ -5,7 +5,6 @@ export type PlayerDocument = Player & Document;
 export type assetType = {
   corpId: string;
   quantity: number;
-  isLock: boolean;
 };
 
 @Schema()
