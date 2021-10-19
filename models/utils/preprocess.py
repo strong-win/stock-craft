@@ -1,4 +1,3 @@
-import torch
 import numpy as np
 import pandas as pd
 
@@ -20,12 +19,3 @@ def onehot_encoding(cat_data: pd.Series, prefix="", postfix="") -> pd.DataFrame:
 
     df = pd.DataFrame(df, columns=column_names)
     return df
-
-
-# def one_hot_encoding(data):
-#     mapping_set = {}
-#     for i, d in enumerate(data.unique()):
-#         mapping_set[d] = i
-#     data = data.map(mapping_set)
-#     data = data.astype("float")
-#     return data
