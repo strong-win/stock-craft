@@ -3,43 +3,43 @@
         "mode": "train",
 
         "workers": 2,
-        "batch_size": 28,
+        "batch_size": 64,
         "seed": 42
     },
     "dataset": {
-        "directory": "data/power",
-        "data_name": "sample_data",
+        "directory": "data",
+        "data_name": "stock.sample",
 
-        "index_col": "timestamp",
-        "year": "year",
-        "month": "month",
-        "weekday": "weekday",
+        "time_index": "date",
+        "time_format": "%Y-%m-%d",
+        "time_encoding":{
+            "month": true,
+            "weekday": true
+        },
 
-        "drops": ["drop col1", "drop col2", "drop col3", "drop col4"],
-        "targets": ["target col1", "target col2", "target col3", "target col4"],
+        "drops": [],
+        "targets": ["open", "close"],
+
         "stride": 1,
-        "observed_len": 28,
-        "forecast_len": 28,
-
-        "log": false,
+        "observed_len": 14,
+        "forecast_len": 14,
 
         "split_rate": 0.9,
         "window_scale": 2,
-        "window_sliding": 1,
+        "window_sliding": 10,
 
         "scaler": false,
+        "impute": false,
         "cutoff": {
             "min": 0.01,
-            "max": 0
+            "max": 0.01
         }
     },
     "models": {
         "directory": "TIMEBAND/pretrained/",
-        "model_tag": "tag",
+        "model_tag": "sample",
         
         "load": true,
-        "load_interval": 20,
-
         "reload": true,
         "reload_interval": 15,
         
@@ -51,14 +51,14 @@
     },
     "metric": {
         "zero_ignoring": true,
-        "gp_weight": 10,
-        "l1_weight": 100,
+        "gp_weight": 1,
+        "l1_weight": 1,
         "l2_weight": 1
     },
     "trainer": {
         "epochs": {
             "base": 0,
-            "iter": 10,
+            "iter": 50,
             "critic": 5
         },
         "learning_rate": {
@@ -70,7 +70,16 @@
         "print": {
             "verbose": 1,
             "interval": 5
-        },
-        "visual": false
+        }
+    },
+    "dashboard": {
+        "visualize": false,
+        "scope": 180,
+        
+        "features_by_rows": 13,
+        "xinterval": 60,
+
+        "height": 10,
+        "width": 25
     }
 }
