@@ -76,7 +76,7 @@ class TIMEBANDTrainer:
 
         # Visual option
         self.print_cfg = config["print"]
-        
+
         # Model option
         self.netD, self.netG = self.models.netD, self.models.netG
 

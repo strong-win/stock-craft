@@ -68,7 +68,7 @@ class TIMEBANDModel:
                 self.netG = torch.load(netG_path)
             else:
                 logger.warn("Pretrained models are not exists !")
-                
+
         enc_dim = dims["encode"]
         dec_dim = dims["decode"]
 

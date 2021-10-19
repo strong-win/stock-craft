@@ -8,6 +8,7 @@ plt.rcParams["font.family"] = "Malgun Gothic"
 plt.rc("font", family="Malgun Gothic")
 plt.rc("axes", unicode_minus=False)
 
+
 class TIMEBANDDashboard:
     def __init__(self, config: dict, dataset: TIMEBANDDataset) -> None:
         # Set Config
@@ -80,7 +81,9 @@ class TIMEBANDDashboard:
             empty_forecast = np.empty(pred_data.shape)
 
             self.std = np.concatenate([np.zeros(self.observed.shape), zero_forecast])
-            self.reals = np.concatenate([self.observed, real_data[0, :-1], real_data[:, -1]])
+            self.reals = np.concatenate(
+                [self.observed, real_data[0, :-1], real_data[:, -1]]
+            )
             self.preds = np.concatenate([self.observed, empty_forecast])
             self.lower = self.preds.copy()
             self.upper = self.preds.copy()
@@ -151,7 +154,9 @@ class TIMEBANDDashboard:
                 ax.axvline(FRCST + 1)
 
                 ax.axvspan(OBSRV - 1, PIVOT - 1, alpha=0.1, label="Observed window")
-                ax.axvspan(PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window")
+                ax.axvspan(
+                    PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window"
+                )
 
                 for target_col in range(idx_s, idx_e):
                     feature_label = self.target_cols[target_col]

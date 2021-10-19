@@ -132,7 +132,7 @@ class TIMEBANDDataset:
         self.encode_shape = (self.batch_size, self.observed_len, self.encode_dim)
         self.decode_shape = (self.batch_size, self.forecast_len, self.decode_dim)
         self.dims = {"encode": self.encode_dim, "decode": self.decode_dim}
-        
+
         return data
 
     def load_dataset(self, k_step):
