@@ -1,11 +1,10 @@
 import torch
 import numpy as np
-import pandas as pd
 
 from tqdm import tqdm
 from torch.optim import RMSprop
-import matplotlib.pyplot as plt
 
+from utils.color import colorstr
 from utils.logger import Logger
 from TIMEBAND.model import TIMEBANDModel
 from TIMEBAND.metric import TIMEBANDMetric
@@ -37,7 +36,10 @@ class TIMEBANDTrainer:
         config = self.set_config(config=config)
 
         self.data = None
+        self.reals = None
+        self.preds = None
         self.answer = None
+        self.predictions = None
         self.future_data = None
 
         self.true_data = None
@@ -73,14 +75,15 @@ class TIMEBANDTrainer:
 
         # Visual option
         self.print_cfg = config["print"]
+        
+        # Model option
+        self.netD, self.netG = self.models.netD, self.models.netG
 
     def train(self, trainset, validset):
         logger.info("Train the model")
 
         # Models Setting
         models = self.models
-        self.netD, self.netG = models.load_model(self.dataset.dims)
-
         self.optimD = RMSprop(self.netD.parameters(), lr=self.lr * self.lr_gammaD)
         self.optimG = RMSprop(self.netG.parameters(), lr=self.lr * self.lr_gammaG)
 
@@ -88,8 +91,14 @@ class TIMEBANDTrainer:
         train_score_plot = []
         valid_score_plot = []
         EPOCHS = self.base_epochs + self.iter_epochs
+
         for epoch in range(self.base_epochs, EPOCHS):
+            self.preds = None
+            self.data = None
+            self.answer = None
+
             # Dashboard
+            self.pred_initate()
             self.dashboard.init_figure()
 
             # Train Section
@@ -110,10 +119,11 @@ class TIMEBANDTrainer:
             # Best Model save
             self.netD, self.netG = models.update(self.netD, self.netG, valid_score)
 
+            self.dashboard.clear_figure()
+
         best_score = models.best_score
         netD_best, netG_best = models.load(postfix=f"{best_score:.4f}")
         models.save(netD_best, netG_best)
-
         return self.netD, self.netG
 
     def train_step(self, tqdm, epoch, training=True):
@@ -121,36 +131,44 @@ class TIMEBANDTrainer:
             return self.netD(x).to(self.device)
 
         def generate(x):
-            return self.netG(x).to(self.device)
+            # FIXME
+            # 현재 Obeserved Len은 forecast Len보다 크거나 같아야함.
+            fake_y = self.netG(x)[:, : self.dataset.forecast_len]
+            return fake_y.to(self.device)
 
-        self.data = None
-        self.answer = None
-
+        i = 0
         losses = init_loss()
+        amplifier = self.amplifier
         TAG = "Train" if training else "Valid"
         for i, data in enumerate(tqdm):
+            # #######################
+            # Critic
+            # #######################
             if training:
                 for _ in range(self.iter_critic):
+                    # Data Load
                     true_x, true_y = self.dataset.get_random()
                     fake_y = generate(true_x)
 
-                    Dx = discriminate(true_y)
-                    Dy = discriminate(fake_y)
+                    # Optimizer initialize
                     self.optimD.zero_grad()
 
-                    loss_GP = self.metric.grad_penalty(fake_y, true_y)
-                    loss_D_ = Dy.mean() - Dx.mean()
+                    Dx = discriminate(true_y)
+                    Dy = discriminate(fake_y)
 
-                    loss_D = loss_D_ + loss_GP
-                    loss_D.backward()
+                    errD_real = self.metric.GANloss(Dx, target_is_real=True)
+                    errD_fake = self.metric.GANloss(Dy, target_is_real=False)
+                    errGP = self.metric.grad_penalty(fake_y, true_y)
+
+                    errD = errD_real + errD_fake + errGP
+                    errD.backward()
                     self.optimD.step()
 
             # Data
             true_x = data["encoded"].to(self.device)
             true_y = data["decoded"].to(self.device)
-            real_x = data["observed"]
             real_y = data["forecast"]
-            batchs = true_y.shape[0]
+            fake_y = generate(true_x)
 
             # Optimizer initialize
             self.optimD.zero_grad()
@@ -160,253 +178,157 @@ class TIMEBANDTrainer:
             # Discriminator Training
             # #######################
             Dx = discriminate(true_y)
-            errD_real = self.metric.GANloss(Dx, target_is_real=True)
-
-            fake_y = generate(true_x)
-
             Dy = discriminate(fake_y)
+
+            errD_real = self.metric.GANloss(Dx, target_is_real=True)
             errD_fake = self.metric.GANloss(Dy, target_is_real=False)
-            errD = errD_real + errD_fake
+
+            losses["Dr"] += errD_real
+            losses["Df"] += errD_fake
+
+            losses["D"] += errD_real + errD_fake
 
             if training:
-                errD_real.backward(retain_graph=True)
-                errD_fake.backward(retain_graph=True)
+                errD = errD_real + errD_fake
+                errD.backward(retain_graph=True)
                 self.optimD.step()
-
-            # Discriminator Loss
-            losses["D"] += errD
 
             # #######################
             # Generator Trainining
             # #######################
+            fake_y = generate(true_x)
             Dy = self.netD(fake_y)
-            err_G = self.metric.GANloss(Dy, target_is_real=False)
-            err_l1 = self.metric.l1loss(true_y, fake_y)
-            err_l2 = self.metric.l2loss(true_y, fake_y)
-            err_gp = self.metric.grad_penalty(true_y, fake_y)
-            errG = err_G + err_l1 + err_l2 + err_gp
+            errG_ = self.metric.GANloss(Dy, target_is_real=False)
+            errl1 = self.metric.l1loss(fake_y, true_y)
+            errl2 = self.metric.l2loss(fake_y, true_y)
+            errGP = self.metric.grad_penalty(fake_y, true_y)
+            errG = errG_ + errl1 + errl2 + errGP
+
+            losses["G"] += errG_
+            losses["l1"] += errl1
+            losses["l2"] += errl2
+            losses["GP"] += errGP
 
             if training:
-                errG.backward(retain_graph=True)
+                errG.backward()
                 self.optimG.step()
-
-            # Generator Loss
-            losses["G"] += err_G
-            losses["l1"] += err_l1
-            losses["l2"] += err_l2
-            losses["GP"] += err_gp
 
             # #######################
             # Scoring
             # #######################
             pred_y = self.dataset.denormalize(fake_y.cpu())
-            # for f in range(self.dataset.decode_dims):
-            #     pred_y[:, :, f] = pred_y[:, :, f] * self.data_gamma[f]
+            (batchs, forecast_len, target_dims) = true_y.shape
+            self.pred_concat(pred_y, real_y)
 
-            self.data_concat(real_x, real_y, pred_y)
-            self.predict(pred_y)
+            losses["Score"] += (
+                self.metric.NMAE(
+                    torch.from_numpy(self.pred_ans[-batchs - forecast_len :])
+                    * self.amplifier,
+                    torch.from_numpy(self.real_ans[-batchs - forecast_len :]),
+                )
+                .detach()
+                .numpy()
+            )
 
-            score = self.metric.NMAE(pred_y, real_y, real_test=True).detach().numpy()
-            score_all = self.metric.NMAE(pred_y, real_y).detach().numpy()
+            losses["RMSE"] += self.metric.RMSE(pred_y, real_y).detach().numpy()
+            losses["Score_raw"] += self.metric.NMAE(pred_y, real_y).detach().numpy()
+            nme = self.metric.NME(pred_y * self.amplifier, real_y).detach().numpy()
 
+            if training and i > 150:
+                amplifier += nme * amplifier * (batchs / self.dataset.data_length) * 0.1
+
+            losses["NME"] += nme
             # Losses Log
-            losses["Score"] += score
-            losses["ScoreAll"] += score_all
-
             tqdm.set_description(loss_info(TAG, epoch, losses, i))
-            # if not training and self.visual is True:
-            #     self.dashboard.initalize(window)
-            self.data_process(real_x)
+            # if not training:
+            self.dashboard.visualize(
+                batchs,
+                real_y,
+                pred_y,
+                self.pred_ans[-batchs - forecast_len :],
+                self.pred_std[-batchs - forecast_len :],
+            )
 
-            self.dashboard.visualize(batchs, self.true_data)
-
-        self.result(real_y, training)
+        if training:
+            print(f"Amplifier {self.amplifier:2.5f}, {amplifier:2.5f}")
+            self.amplifier = self.amplifier + (amplifier - self.amplifier) * 0.1
 
         return losses["Score"] / (i + 1)
 
-    def data_process(self, real):
-        batch_size = real.shape[0]
+    def pred_initate(self):
+        decoded_shape = self.dataset.decode_shape
+        (batch_size, forecast_len, target_dims) = decoded_shape
 
-        if self.true_data is None:
-            self.true_data = real[0, :-1, :]
+        init_shape3 = (forecast_len - 1, forecast_len, target_dims)
+        init_shape2 = (forecast_len - 1, target_dims)
+
+        self.pred_idx = 0
+
+        self.pred_data = np.empty(init_shape3)
+        self.pred_data[:] = np.nan
+
+        self.real_ans = np.zeros(init_shape2)
+
+        self.pred_ans = np.empty(init_shape2)
+        self.pred_ans[:] = np.nan
+
+        self.pred_std = np.zeros(init_shape2)
+
+    def pred_concat(self, pred, reals):
+        (batch_size, forecast_len, target_dims) = pred.shape
+        pred = pred.detach().numpy()
+
+        nan_shape3 = np.empty((batch_size, forecast_len, target_dims))
+        nan_shape3[:] = np.nan
+        nan_shape2 = np.empty((batch_size, target_dims))
+        nan_shape2[:] = np.nan
+
+        self.pred_data = np.concatenate([self.pred_data, nan_shape3])
+        if self.real_ans.shape[0] < forecast_len:
+            self.real_ans[: forecast_len - 1] = reals[0, :-1]
+        self.real_ans = np.concatenate([self.real_ans, nan_shape2])
+
+        self.pred_ans = np.concatenate([self.pred_ans, nan_shape2])
+        self.pred_std = np.concatenate([self.pred_std, nan_shape2])
+
+        # Concat predictions
+        for f in range(forecast_len):
+            idx_s = self.pred_idx + f
+            idx_e = self.pred_idx + batch_size + f
+            self.pred_data[idx_s:idx_e, f] = pred[:, f]
 
         for b in range(batch_size):
-            self.true_data = np.concatenate([self.true_data, real[b, -1:, :]])
+            self.real_ans[-batch_size + b] = reals[b, -1]
 
-    def data_concat(self, real, true, pred):
-        batch_size = pred.shape[0]
-        window_size = pred.shape[1]
-        future_size = pred.shape[1]
-        feature_dim = pred.shape[2]
+        update_idx = -batch_size - forecast_len
+        self.pred_ans[update_idx:] = np.nanmedian(self.pred_data[update_idx:], axis=1)
+        self.pred_std[update_idx:] = np.nanstd(self.pred_data[update_idx:], axis=1)
 
-        real = real.reshape((-1, window_size, feature_dim))
-        true = true.reshape((-1, future_size, feature_dim))
-        pred = pred.reshape((-1, future_size, feature_dim))
+        for f in range(forecast_len - 1, 0, -1):
+            gamma = (forecast_len - f) / (forecast_len - 1)
+            self.pred_std[-f] += self.pred_std[-f - 1] * gamma
 
-        if self.data is None:
-            empty = torch.empty(pred.shape)
-            self.data = {
-                "real": torch.cat([real[0, :-1], real[:, -1]]),
-                "true": torch.cat([true[0, :-1], true[:, -1]]),
-                "pred": torch.cat([empty, pred]),
-            }
-            return
-
-        self.data["real"] = torch.cat([self.data["real"], real[:, -1]])
-        self.data["true"] = torch.cat([self.data["true"], true[:, -1]])
-        self.data["pred"] = torch.cat([self.data["pred"], pred])
-
-    def predict(self, pred):
-        batch_size = pred.shape[0]
-        future_size = pred.shape[1]
-        feature_dim = pred.shape[2]
-
-        pred = pred.reshape((-1, future_size, feature_dim))
-
-        preds = np.concatenate(
-            [
-                self.data["pred"][-batch_size - future_size :].detach().numpy(),
-                np.zeros((batch_size, future_size, feature_dim)),
-            ]
-        )
-
-        if self.answer is None:
-            self.answer = np.zeros(
-                (batch_size + future_size - 1, future_size, feature_dim)
-            )
-            self.index = 0
-        else:
-            self.answer = np.concatenate(
-                [self.answer, np.zeros((batch_size, future_size, feature_dim))],
-            )
-
-        for f in range(future_size):
-            self.answer[self.index + f : self.index + f + batch_size, f] = preds[
-                batch_size : 2 * batch_size, f
-            ]
-
-        self.index += batch_size
-
-    def result(self, y_pred, training=False):
-        #### Result
-
-        results = None
-        for f in range(y_pred.shape[2]):
-            data = self.answer[:, :, f]
-            data[data == 0] = np.nan
-
-            predict_mean = np.nanmean(data, axis=1).reshape((-1, 1))
-            predict_median = np.nanmedian(data, axis=1).reshape((-1, 1))
-
-            true = self.data["true"][:, f : f + 1]
-
-            mean = torch.tensor(predict_mean)
-            median = torch.tensor(predict_median)
-            week1 = torch.tensor(data[:, 6:7])
-            week2 = torch.tensor(data[:, 13:14])
-            week4 = torch.tensor(data[:, 27:28])
-
-            target = torch.where(true != 0)
-            mean[target] = (true[target] - mean[target]) / true[target]
-            median[target] = (true[target] - median[target]) / true[target]
-            week1[target] = (true[target] - week1[target]) / true[target]
-            week2[target] = (true[target] - week2[target]) / true[target]
-            week4[target] = (true[target] - week4[target]) / true[target]
-
-            target = torch.where(true == 0)
-            mean[target] = 0
-            median[target] = 0
-            week1[target] = 0
-            week1[target] = 0
-            week2[target] = 0
-            week4[target] = 0
-
-            mean_score = torch.sum(torch.abs(mean)) / torch.count_nonzero(true)
-            median_score = torch.sum(torch.abs(median)) / torch.count_nonzero(true)
-            week1_score = torch.sum(
-                torch.abs(week1[~torch.any(week1.isnan(), dim=1)])
-            ) / torch.count_nonzero(true[~torch.any(week1.isnan(), dim=1)])
-            week2_score = torch.sum(
-                torch.abs(week2[~torch.any(week2.isnan(), dim=1)])
-            ) / torch.count_nonzero(true[~torch.any(week2.isnan(), dim=1)])
-            week4_score = torch.sum(
-                torch.abs(week4[~torch.any(week4.isnan(), dim=1)])
-            ) / torch.count_nonzero(true[~torch.any(week4.isnan(), dim=1)])
-
-            _mean_score = torch.sum(mean) / torch.count_nonzero(true)
-            _median_score = torch.sum(median) / torch.count_nonzero(true)
-            _week1_score = torch.sum(
-                week1[~torch.any(week1.isnan(), dim=1)]
-            ) / torch.count_nonzero(true[~torch.any(week1.isnan(), dim=1)])
-            _week2_score = torch.sum(
-                week2[~torch.any(week2.isnan(), dim=1)]
-            ) / torch.count_nonzero(true[~torch.any(week2.isnan(), dim=1)])
-            _week4_score = torch.sum(
-                week4[~torch.any(week4.isnan(), dim=1)]
-            ) / torch.count_nonzero(true[~torch.any(week4.isnan(), dim=1)])
-
-            abs_mean_err = np.array(
-                [
-                    [
-                        mean_score,
-                        median_score,
-                        (week1_score + week2_score + week4_score) / 3,
-                        week1_score,
-                        week2_score,
-                        week4_score,
-                    ]
-                ]
-            )
-
-            mean_err = np.array(
-                [
-                    [
-                        _mean_score,
-                        _median_score,
-                        (_week1_score + _week2_score + _week4_score) / 3,
-                        _week1_score,
-                        _week2_score,
-                        _week4_score,
-                    ]
-                ]
-            )
-
-            mean_err = mean_err.reshape(-1, 1)
-            abs_mean_err = abs_mean_err.reshape(-1, 1)
-            # if training is True:
-            #     self.data_gamma[f] += mean_err[3] * abs_mean_err[3] * 0.1
-
-            abs_mean_err = np.concatenate([abs_mean_err, mean_err], axis=1)
-            if results is None:
-                results = pd.DataFrame(abs_mean_err)
-            else:
-                results = pd.DataFrame(np.concatenate([results, abs_mean_err], axis=1))
-
-        mean = results.mean(axis=1).values.reshape((-1, 1))
-        results = pd.DataFrame(np.concatenate([results, mean], axis=1))
-        results = results.set_axis(
-            ["Mean", "Median", "Week124", "Week1", "Week2", "Week4"], axis=0
-        )
-        # logger.info(f"\n{results}")
-
-        # data_gamma_df = pd.DataFrame(self.data_gamma).set_axis(["DataGamma"], axis=0)
-        # logger.info(f"\n{data_gamma_df.T}")
-        # self.data_gamma = next_gamma
+        self.pred_idx += batch_size
 
 
 def loss_info(process, epoch, losses=None, i=0):
     if losses is None:
         losses = init_loss()
 
+    score = f"{losses['Score'] / (i + 1):7.5f}"
     return (
         f"[{process} e{epoch + 1:4d}]"
-        f"Score {losses['Score']/(i+1):7.4f}("
-        f"all {losses['ScoreAll']/(i+1):5.2f} "
-        f"D {losses['D']/(i+1):7.3f} "
-        f"G {losses['G']/(i+1):7.3f} "
+        f"Score {losses['Score_raw']/(i+1):7.5f} / "
+        f"{colorstr(score)} / "
+        f"{losses['RMSE']/(i+1):7.5f} / "
+        f"{losses['NME']/(i+1):7.4f}  ("
+        f"D {losses['D']/(i+1):6.3f} "
+        f"(R {losses['Dr']/(i+1):6.3f}, "
+        f"F {losses['Df']/(i+1):6.3f}) "
+        f"G {losses['G']/(i+1):6.3f} "
         f"L1 {losses['l1']/(i+1):6.3f} "
         f"L2 {losses['l2']/(i+1):6.3f} "
-        f"GP {losses['GP']/(i+1):7.3f} "
+        f"GP {losses['GP']/(i+1):6.3f} "
     )
 
 
@@ -414,9 +336,13 @@ def init_loss() -> dict:
     return {
         "G": 0,
         "D": 0,
+        "Dr": 0,
+        "Df": 0,
         "l1": 0,
         "l2": 0,
         "GP": 0,
+        "NME": 0,
+        "RMSE": 0,
         "Score": 0,
-        "ScoreAll": 0,
+        "Score_raw": 0,
     }
