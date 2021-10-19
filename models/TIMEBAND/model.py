@@ -47,43 +47,37 @@ class TIMEBANDModel:
             os.mkdir(self.model_dir)
 
         self.load_option = config["load"]
-        self.load_interval = config["load_interval"]
+        self.reload_option = config["reload"]
+        self.reload_interval = config["reload_interval"]
 
         self.save_option = config["save"]
         self.save_interval = config["save_interval"]
 
-        self.reload_option = config["reload"]
-        self.reload_interval = config["reload_interval"]
-
         self.best_score = config["best_score"]
-        self.current_counts = 0
+        self.reload_count = 0
 
         self.hidden_dim = config["hidden_dim"]
 
-    def load_model(self, data_dims: tuple):
-        if self.netD is not None and self.netG is not None:
-            return self.netD, self.netG
+    def init_models(self, dims: dict):
+        if self.load_option:
+            netD_path = self.get_path("netD")
+            netG_path = self.get_path("netG")
+            if os.path.exists(netD_path) and os.path.exists(netG_path):
+                logger.info(f" - Loaded netD : {netD_path}, netG: {netG_path}")
+                self.netD = torch.load(netD_path)
+                self.netG = torch.load(netG_path)
+            else:
+                logger.warn("Pretrained models are not exists !")
+                
+        enc_dim = dims["encode"]
+        dec_dim = dims["decode"]
 
-        hidden_dim = self.hidden_dim
-        enc_dim = data_dims["encoded"]
-        dec_dim = data_dims["decoded"]
-        device = self.device
+        netD = NetD(dec_dim, hidden_dim=self.hidden_dim, device=self.device)
+        netG = NetG(enc_dim, dec_dim, hidden_dim=self.hidden_dim, device=self.device)
 
-        try:
-            if self.load_option is True:
-                self.netD, self.netG = self.load()
-                logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
-                return self.netD, self.netG
-
-        except FileNotFoundError:
-
-            self.netD = NetD(dec_dim, hidden_dim=hidden_dim, device=device).to(device)
-            self.netG = NetG(enc_dim, dec_dim, hidden_dim=hidden_dim, device=device).to(
-                device
-            )
-
-            logger.info(f"   - Network : \n{self.netG} \n{self.netD}")
-            return self.netD, self.netG
+        self.netD = netD.to(self.device)
+        self.netG = netG.to(self.device)
+        logger.info(f" - Initiated netD : {netD_path}, netG: {netG_path}")
 
     def load(self, postfix: str = "") -> tuple((NetD, NetG)):
         if self.load_option is False:
@@ -92,8 +86,11 @@ class TIMEBANDModel:
         netD_path = self.get_path("netD", postfix)
         netG_path = self.get_path("netG", postfix)
 
-        logger.info(f" - Loaded netD : {netD_path}, netG: {netG_path}")
-        netD, netG = torch.load(netD_path), torch.load(netG_path)
+        try:
+            netD, netG = torch.load(netD_path), torch.load(netG_path)
+            logger.info(f" - Loaded netD : {netD_path}, netG: {netG_path}")
+        except:
+            netD, netG = self.load()
 
         return netD, netG
 
@@ -108,8 +105,6 @@ class TIMEBANDModel:
         torch.save(netG, netG_path)
 
     def update(self, netD: NetD, netG: NetG, score: float) -> tuple((NetD, NetG)):
-        if self.reload_option is False:
-            return netD, netG
 
         if score < self.best_score:
             self.best_score = score
@@ -117,16 +112,17 @@ class TIMEBANDModel:
             logger.info(f"*** BEST SCORE MODEL ({score_tag}) IS SAVED ***")
 
             self.save(netD, netG, postfix=score_tag)
-            self.current_counts = 0
+            self.reload_count = 0
             return netD, netG
 
-        self.current_counts += 1
-        if self.current_counts >= self.reload_interval:
-            score_tag = f"{self.best_score:.4f}"
-            logger.info(f"*** BEST SCORE MODEL ({score_tag}) IS RELOADED ***")
+        if self.reload_option is True:
+            self.reload_count += 1
+            if self.reload_count >= self.reload_interval:
+                score_tag = f"{self.best_score:.4f}"
+                logger.info(f"*** BEST SCORE MODEL ({score_tag}) IS RELOADED ***")
 
-            netD, netG = self.load(postfix=score_tag)
-            self.current_counts = 0
+                self.reload_count = 0
+                netD, netG = self.load(postfix=score_tag)
 
         return netD, netG
 
