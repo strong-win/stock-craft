@@ -13,6 +13,7 @@ import { updateName, updateRoom } from "../modules/user";
 import { chattingJoin } from "../modules/sockets/chatting";
 import { gameStartRequest } from "../modules/sockets/game";
 import { createName } from "../utils/create";
+import WaitingRoom from "./WaitingRoom";
 
 const Play = ({ location, history }: any) => {
   const { room: initRoom } = queryString.parse(location.search);
@@ -35,7 +36,6 @@ const Play = ({ location, history }: any) => {
       dispatch(chattingJoin({ name: name || createdName, room: initRoom }));
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
 
   const onGameStart = (e: any) => {
@@ -67,9 +67,7 @@ const Play = ({ location, history }: any) => {
       </Row>
     </Container>
   ) : (
-    <>
-      <button onClick={onGameStart}>START</button>
-    </>
+    <WaitingRoom name={name} room={room}/>
   );
 };
 

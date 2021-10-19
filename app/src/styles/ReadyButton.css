@@ -1,0 +1,10 @@
+.readyButtonWrapper{
+    text-align: center;
+    font-size: 1.2rem;
+}
+
+.readyButton{
+    margin: 3rem;
+    width: 11.25rem;
+    font-size: 1.5rem;
+}
