@@ -1,10 +1,13 @@
 import { JoinService } from './../services/join.service';
 import {
   CHATTING_SERVER_MESSAGE,
+  JOIN_CANCEL,
   JOIN_CONNECTED,
+  JOIN_HOST,
   JOIN_PLAY,
   JOIN_PLAYERS,
   JOIN_READY,
+  JOIN_START,
 } from './events';
 import { Logger } from '@nestjs/common';
 import {
@@ -17,6 +20,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/players.schema';
 import { PlayersService } from 'src/services/players.service';
+import { GamesService } from 'src/services/games.service';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -28,6 +32,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(
     private playersService: PlayersService,
     private joinService: JoinService,
+    private gamesService: GamesService,
   ) {}
 
   handleConnection(client: Socket): void {
@@ -44,7 +49,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     if (player) {
-      const { _id: playerId, name, room, status } = player;
+      const { _id: playerId, name, room, status, isHost } = player;
       await this.playersService.updateByPlayerId(playerId, {
         status: 'disconnected',
       });
@@ -59,33 +64,29 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         room,
         this.getStatuses('all'),
       );
+      const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
+        name,
+        status,
+      }));
 
-      // check if players can start game
-      const { playersInfo, gameInfo, start } =
-        await this.joinService.createGame(room, players);
-
-      if (start) {
-        this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
-
-        this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
+      if (isHost && players.length) {
+        const newHost = players[0];
+        this.server.to(newHost.clientId).emit(JOIN_HOST, { isHost: true });
+        this.server.to(newHost.clientId).emit(CHATTING_SERVER_MESSAGE, {
           user: '관리자',
-          text: '게임을 시작합니다.',
-          statuses: this.getStatuses('play'),
+          text: `${newHost.name} 님이 새로운 방장이 되었습니다.`,
+          statuses: this.getStatuses(status),
         });
-
-        // emit corps to game start
-        this.server.to(room).emit(JOIN_PLAY, gameInfo);
-      } else {
-        // emit playersInfo to wait room
-        this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
       }
+      // emit playersInfo to wait room
+      this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
     }
   }
 
   @SubscribeMessage(JOIN_CONNECTED)
   async receiveJoinConnected(
     client: Socket,
-    payload: { name: string; room: string },
+    payload: { name: string; room: string; isHost: boolean },
   ): Promise<{ playerId: string }> {
     const {
       _id: playerId,
@@ -136,16 +137,49 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room,
       this.getStatuses('all'),
     );
+    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
+      name,
+      status,
+    }));
+    this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
+  }
 
-    const { playersInfo, gameInfo, start } = await this.joinService.createGame(
+  @SubscribeMessage(JOIN_CANCEL)
+  async receiveJoinCancel(
+    client: Socket,
+    payload: { playerId: string; room: string },
+  ): Promise<void> {
+    const { playerId, room } = payload;
+    await this.playersService.updateByPlayerId(playerId, {
+      status: 'connected',
+    });
+
+    const players: Player[] = await this.playersService.findByRoomAndStatuses(
       room,
-      players,
+      this.getStatuses('all'),
+    );
+
+    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
+      name,
+      status,
+    }));
+    this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
+  }
+
+  @SubscribeMessage(JOIN_START)
+  async receiveJoinStart(
+    client: Socket,
+    payload: { playerId: string; room: string },
+  ): Promise<void> {
+    const { playerId, room } = payload;
+    const { playersInfo, gameInfo, start } = await this.joinService.startGame(
+      playerId,
+      room,
     );
 
     if (start) {
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
-      // emit corps to game start
       this.server.to(room).emit(JOIN_PLAY, gameInfo);
 
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
@@ -153,9 +187,14 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         text: '게임을 시작합니다.',
         statuses: this.getStatuses('play'),
       });
+
+      this.gamesService.createGame(gameInfo.gameId.toString(), room);
     } else {
-      // emit playersInfo to wait room
-      this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
+      this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
+        user: '관리자',
+        text: '모든 유저가 레디 상태가 아니므로 게임을 시작할 수 없습니다.',
+        statuses: this.getStatuses('connected'),
+      });
     }
   }
 

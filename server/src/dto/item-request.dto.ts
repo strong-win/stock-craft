@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class DayEndRequestDto {
+export class ItemRequestDto {
   @IsNotEmpty()
   gameId: string;
 

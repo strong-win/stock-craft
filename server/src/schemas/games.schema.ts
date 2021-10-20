@@ -11,9 +11,6 @@ export class Game {
 
   @Prop()
   corps: Corp[];
-
-  @Prop()
-  status: 'play' | 'finish';
 }
 
 export const GameSchema = SchemaFactory.createForClass(Game);

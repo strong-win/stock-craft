@@ -8,6 +8,7 @@ import {
   Player,
   PlayerDocument,
   PlayerInfo,
+  PlayerStatus,
 } from 'src/schemas/players.schema';
 
 @Injectable()
@@ -19,34 +20,41 @@ export class JoinService {
     private configService: ConfigService,
   ) {}
 
-  async createGame(
+  async startGame(
+    playerId: string,
     room: string,
-    players: Player[],
   ): Promise<{
     playersInfo: PlayerInfo[];
     gameInfo?: { gameId: string; corps: Corp[]; assets: Asset[] };
     start: boolean;
   }> {
-    // check if all players are ready
-    const readies: Player[] = players.filter(
-      (player) => player.status === 'ready',
-    );
+    const players = await this.playerModel
+      .find({
+        room,
+        status: { $in: this.getStatuses('all') },
+      })
+      .exec();
 
-    if (readies.length === players.length) {
-      // get sample data
-      const cash = 100_000;
-      const corps: Corp[] = this.configService.get<Corp[]>('corps');
-      const assets: Asset[] = corps.map(({ corpId }) => ({
-        corpId,
-        quantity: 0,
-      }));
+    // check if all players are ready
+    const numHost: number = players.filter(
+      (player) =>
+        player.status === 'connected' && player._id.toString() === playerId,
+    ).length;
+
+    const numGuest: number = players.filter(
+      (player) =>
+        player.status === 'ready' && player._id.toString() !== playerId,
+    ).length;
+
+    if (numHost + numGuest === players.length) {
+      const { cash, corps, assets } = this.getSampleData();
 
       // create game
       const { _id: gameId } = await this.gameModel.create({ room, corps });
 
       // update player
       await this.playerModel.updateMany(
-        { room, status: 'ready' },
+        { room, status: { $in: ['connected', 'ready'] } },
         {
           status: 'play',
           gameId,
@@ -66,6 +74,30 @@ export class JoinService {
         status,
       }));
       return { playersInfo, start: false };
+    }
+  }
+
+  getSampleData() {
+    // get sample data from config
+    const cash = 100_000;
+    const corps: Corp[] = this.configService.get<Corp[]>('corps');
+    const assets: Asset[] = corps.map(({ corpId }) => ({
+      corpId,
+      quantity: 0,
+    }));
+
+    return { cash, corps, assets };
+  }
+
+  getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
+    if (status == 'all') {
+      return ['connected', 'ready', 'play'];
+    }
+    if (status === 'connected' || status === 'ready') {
+      return ['connected', 'ready'];
+    }
+    if (status === 'play') {
+      return ['play'];
     }
   }
 }

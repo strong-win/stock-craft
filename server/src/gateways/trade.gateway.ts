@@ -6,15 +6,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import {
-  TRADE_CANCEL,
-  TRADE_REFRESH,
-  TRADE_REQUEST,
-  TRADE_RESPONSE,
-} from './events';
+import { TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from './events';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
-import { TradeRefreshDto } from 'src/dto/trade-refresh.dto';
-import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
 
 @WebSocketGateway({ cors: true })
@@ -40,17 +33,6 @@ export class TradeGateway {
         // handle TradeException
       }
     }
-  }
-
-  @SubscribeMessage(TRADE_REFRESH)
-  async receiveTradeRefresh(
-    client: Socket,
-    payload: TradeRefreshDto,
-  ): Promise<void> {
-    const player: TradeResponseDto = await this.tradesService.handleRefresh(
-      payload,
-    );
-    this.server.to(client.id).emit(TRADE_RESPONSE, player);
   }
 
   @SubscribeMessage(TRADE_CANCEL)

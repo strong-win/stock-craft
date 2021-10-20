@@ -1,36 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { DayEndRequestDto } from 'src/dto/day-end.dto';
+import { ItemRequestDto } from 'src/dto/item-request.dto';
 
 import { Item, ItemDocument } from 'src/schemas/items.schema';
-import { Player, PlayerDocument } from 'src/schemas/players.schema';
+import { GamesService } from './games.service';
 
 @Injectable()
 export class ItemsService {
   constructor(
     @InjectModel(Item.name) private itemModel: mongoose.Model<ItemDocument>,
-    @InjectModel(Player.name)
-    private playerModel: mongoose.Model<PlayerDocument>,
+    private gamesService: GamesService,
   ) {}
 
-  async createItem(
-    dayEndRequestDto: DayEndRequestDto,
-  ): Promise<{ playerCount: number; itemCount: number }> {
-    const { playerId, gameId, week, day, item } = dayEndRequestDto;
-    await this.itemModel.create({ playerId, gameId, week, day, item });
+  async create(
+    itemRequestDto: ItemRequestDto,
+  ): Promise<Item & Document & mongoose.Document<any, any, ItemDocument>> {
+    const { playerId, gameId, week, day, item } = itemRequestDto;
+    const time = this.gamesService.getTime(gameId);
 
-    const playerCount: number = await this.playerModel.countDocuments({
-      gameId,
-      status: 'play',
-    });
+    if (time.week !== week || time.day !== day) {
+      const timeError = new Error('아이템 사용시간이 불일치합니다.');
+      timeError.name = 'timeException';
+      throw timeError;
+    }
 
-    const itemCount: number = await this.itemModel.countDocuments({
-      gameId,
-      week,
-      day,
-    });
+    return this.itemModel.create({ playerId, gameId, week, day, item });
+  }
 
-    return { playerCount, itemCount };
+  findByGameIdAndTime(
+    gameId: string,
+    week: number,
+    day: number,
+  ): Promise<(Item & Document & mongoose.Document<any, any, ItemDocument>)[]> {
+    return this.itemModel.find({ gameId, week, day }).exec();
   }
 }

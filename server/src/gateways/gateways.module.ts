@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { ServicesModule } from 'src/services/services.module';
 import { ChattingGateway } from './chatting.gateway';
 import { TradeGateway } from './trade.gateway';
-import { ChartGateway } from './chart.gateway';
 import { JoinGateway } from './join.gateway';
 import { ConfigModule } from '@nestjs/config';
+import { GameGateway } from './game.gateway';
 
 @Module({
   imports: [ServicesModule, ConfigModule],
-  providers: [ChattingGateway, TradeGateway, ChartGateway, JoinGateway],
+  providers: [ChattingGateway, TradeGateway, JoinGateway, GameGateway],
 })
 export class GatewaysModule {}

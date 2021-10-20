@@ -34,6 +34,9 @@ export class Player {
   status: PlayerStatus;
 
   @Prop()
+  isHost: boolean;
+
+  @Prop()
   gameId?: string;
 
   @Prop()
@@ -41,6 +44,9 @@ export class Player {
 
   @Prop()
   assets?: Asset[];
+
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

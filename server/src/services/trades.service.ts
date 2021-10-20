@@ -8,6 +8,7 @@ import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { Player, PlayerDocument } from 'src/schemas/players.schema';
 import { Stock, StockDocument } from 'src/schemas/stocks.schema';
 import { Trade, TradeDocument } from 'src/schemas/trades.schema';
+import { GamesService, TimeState } from './games.service';
 
 @Injectable()
 export class TradesService {
@@ -15,6 +16,7 @@ export class TradesService {
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    private gamesService: GamesService,
   ) {}
 
   async handleTrade(
@@ -22,6 +24,22 @@ export class TradesService {
   ): Promise<TradeResponseDto> {
     const { playerId, gameId, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
+
+    const time: TimeState = this.gamesService.getTime(gameId);
+
+    if (
+      time.week !== week ||
+      time.day !== day ||
+      time.tick !== tick ||
+      time.tick > 3 ||
+      day < 1
+    ) {
+      const timeError = new Error(
+        '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
+      );
+      timeError.name = 'TimeException';
+      throw timeError;
+    }
 
     // find stock price
     const stock = await this.stockModel.findOne({
@@ -39,9 +57,9 @@ export class TradesService {
     if (deal === 'buy') {
       // check if player can trade
       if (player.cash < price * quantity) {
-        const error = new Error('유저 계좌 잔액이 부족합니다');
-        error.name = 'TradeException';
-        throw error;
+        const tradeError = new Error('유저 계좌 잔액이 부족합니다');
+        tradeError.name = 'TradeException';
+        throw tradeError;
       }
 
       // check if player can directly trade
@@ -65,9 +83,9 @@ export class TradesService {
         if (asset.corpId === corpId) {
           // check if player can trade
           if (asset.quantity < quantity) {
-            const error = new Error('유저 자산 수량이 부족합니다');
-            error.name = 'TradeException';
-            throw error;
+            const tradeError = new Error('유저 계좌 잔액이 부족합니다');
+            tradeError.name = 'TradeException';
+            throw tradeError;
           }
           asset.quantity = asset.quantity - quantity;
         }
@@ -117,7 +135,6 @@ export class TradesService {
     tradeRefreshDto: TradeRefreshDto,
   ): Promise<TradeResponseDto> {
     const { gameId, playerId, week, day, tick } = tradeRefreshDto;
-    console.log(tradeRefreshDto);
     const player = await this.playerModel.findOne({ _id: playerId });
     const trades = await this.tradeModel
       .find({ playerId, status: 'pending' })
@@ -126,7 +143,6 @@ export class TradesService {
     const tradesDisposed = [];
     for (const trade of trades) {
       const { corpId } = trade;
-      console.log(corpId);
 
       const stock = await this.stockModel.findOne({
         gameId,
@@ -135,8 +151,6 @@ export class TradesService {
         tick,
         corpId,
       });
-
-      console.log(stock);
 
       if (trade.deal === 'buy') {
         if (trade.price >= stock.price) {

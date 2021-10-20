@@ -13,6 +13,7 @@ import { StocksService } from './stocks.service';
 import { TradesService } from './trades.service';
 import { ItemsService } from './items.service';
 import { JoinService } from './join.service';
+import { GamesService } from './games.service';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { JoinService } from './join.service';
     TradesService,
     ItemsService,
     JoinService,
+    GamesService,
   ],
   exports: [
     PlayersService,
@@ -36,6 +38,7 @@ import { JoinService } from './join.service';
     TradesService,
     ItemsService,
     JoinService,
+    GamesService,
   ],
 })
 export class ServicesModule {}

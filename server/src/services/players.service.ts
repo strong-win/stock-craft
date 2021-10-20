@@ -35,8 +35,18 @@ export class PlayersService {
   async findByRoomAndStatuses(
     room: string,
     statuses: PlayerStatus[],
-  ): Promise<Player[]> {
-    return this.playerModel.find({ room, status: { $in: statuses } }).exec();
+  ): Promise<(Player & Document & Document<any, any, PlayerDocument>)[]> {
+    return this.playerModel
+      .find({ room, status: { $in: statuses } })
+      .sort({ createdAt: 1 })
+      .exec();
+  }
+
+  async findByGameIdAndStatuses(
+    gameId: string,
+    statuses: PlayerStatus[],
+  ): Promise<(Player & Document & Document<any, any, PlayerDocument>)[]> {
+    return this.playerModel.find({ gameId, status: { $in: statuses } }).exec();
   }
 
   async updateByPlayerId(playerId: string, playerUpdateDto: PlayerUpdateDto) {
