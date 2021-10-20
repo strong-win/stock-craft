@@ -1,4 +1,4 @@
-import { AssetState, updateGameId } from "./../user";
+import { AssetState, updateGameId, updateIsHost } from "./../user";
 import { channel, eventChannel } from "@redux-saga/core";
 import { apply, call, put, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
@@ -11,11 +11,19 @@ import {
   updatePlayers,
   updateStatus,
 } from "../user";
-import { JOIN_CONNECTED, JOIN_PLAY, JOIN_PLAYERS, JOIN_READY } from "./events";
+import {
+  JOIN_CANCEL,
+  JOIN_CONNECTED,
+  JOIN_HOST,
+  JOIN_PLAY,
+  JOIN_PLAYERS,
+  JOIN_READY,
+  JOIN_START,
+} from "./events";
 
 export const sendJoinConnected = createAction(
   JOIN_CONNECTED,
-  (payload: { name: string; room: string }) => ({ payload })
+  (payload: { name: string; room: string; isHost: boolean }) => ({ payload })
 );
 
 const receiveJoinConnectedChannel = channel<string>();
@@ -75,6 +83,30 @@ export function* sendJoinReadySaga(socket: Socket) {
   }
 }
 
+export const sendJoinStart = createAction(
+  JOIN_START,
+  (payload: { playerId: string; room: string }) => ({ payload })
+);
+
+export function* sendJoinStartSaga(socket: Socket) {
+  while (true) {
+    const { payload } = yield take(JOIN_START);
+    yield apply(socket, socket.emit, [JOIN_START, payload]);
+  }
+}
+
+export const sendJoinCancel = createAction(
+  JOIN_CANCEL,
+  (payload: { playerId: string; room: string }) => ({ payload })
+);
+
+export function* sendJoinCancelSaga(socket: Socket) {
+  while (true) {
+    const { payload } = yield take(JOIN_CANCEL);
+    yield apply(socket, socket.emit, [JOIN_CANCEL, payload]);
+  }
+}
+
 const receiveJoinPlayChannel = (socket: Socket) => {
   return eventChannel<CorpState[]>((emit) => {
     socket.on(JOIN_PLAY, (corps: CorpState[]) => {
@@ -101,5 +133,26 @@ export function* receiveJoinPlaySaga(socket: Socket) {
     yield put(updateAssets(payload.assets));
     yield put(updateGameId(payload.gameId));
     yield put(updateStatus("play"));
+  }
+}
+
+const receiveJoinHostChannel = (socket: Socket) => {
+  return eventChannel<boolean>((emit) => {
+    socket.on(JOIN_HOST, ({ isHost }: { isHost: boolean }) => {
+      emit(isHost);
+    });
+
+    return () => {};
+  });
+};
+
+export function* receiveJoinHostSaga(socket: Socket) {
+  const channel: ReturnType<typeof receiveJoinHostChannel> = yield call(
+    receiveJoinHostChannel,
+    socket
+  );
+  while (true) {
+    const payload: boolean = yield take(channel);
+    yield put(updateIsHost(payload));
   }
 }

@@ -11,12 +11,17 @@ import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import { updateName, updateRoom } from "../modules/user";
 import { createName } from "../utils/create";
-import { sendJoinConnected, sendJoinReady } from "../modules/sockets/join";
+import {
+  sendJoinCancel,
+  sendJoinConnected,
+  sendJoinReady,
+  sendJoinStart,
+} from "../modules/sockets/join";
 
 const Play = ({ location, history }: any) => {
   const { room: initRoom } = queryString.parse(location.search);
 
-  const { playerId, name, room, status } = useSelector(
+  const { playerId, name, room, status, isHost } = useSelector(
     (state: RootState) => state.user
   );
   const dispatch = useDispatch();
@@ -34,15 +39,21 @@ const Play = ({ location, history }: any) => {
     if (typeof initRoom === "string") {
       dispatch(updateRoom(initRoom));
       dispatch(
-        sendJoinConnected({ name: name || createdName, room: initRoom })
+        sendJoinConnected({ name: name || createdName, room: initRoom, isHost })
       );
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
 
-  const onGameStart = (e: any) => {
-    dispatch(sendJoinReady({ playerId, room }));
+  const onClickReady = (isHost: boolean) => {
+    isHost
+      ? dispatch(sendJoinStart({ playerId, room }))
+      : dispatch(sendJoinReady({ playerId, room }));
+  };
+
+  const onClickCancel = (e: any) => {
+    dispatch(sendJoinCancel({ playerId, room }));
   };
 
   return status === "play" ? (
@@ -71,7 +82,13 @@ const Play = ({ location, history }: any) => {
     </Container>
   ) : (
     <>
-      <button onClick={onGameStart}>START</button>
+      <div>
+        <button onClick={() => onClickReady(isHost)}>
+          {isHost ? "START" : "READY"}
+        </button>
+        <button onClick={onClickCancel}>CANCEL</button>
+      </div>
+      <PlayersWrapper room={room} />
     </>
   );
 };

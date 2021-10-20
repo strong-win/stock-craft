@@ -2,27 +2,20 @@ import { all, call } from "@redux-saga/core/effects";
 import { Socket } from "socket.io-client";
 
 import connectSocket from "../../configs/socket";
-import {
-  receiveDayStartSaga,
-  sendDayEndSaga,
-  sendDayStartChannelSaga,
-  sendDayStartSaga,
-} from "./chart";
-
 import { receiveChattingSaga, sendChattingSaga } from "./chatting";
+import { receiveGameTimeResponseSaga, sendGameTimeRequestSaga } from "./game";
+import { sendItemRequestSaga } from "./items";
 import {
   receiveJoinConnectedSaga,
+  receiveJoinHostSaga,
   receiveJoinPlayersSaga,
   receiveJoinPlaySaga,
+  sendJoinCancelSaga,
   sendJoinConnectedSaga,
   sendJoinReadySaga,
+  sendJoinStartSaga,
 } from "./join";
-import {
-  tradeCancelSaga,
-  tradeRefreshSaga,
-  tradeRequestSaga,
-  tradeResponseSaga,
-} from "./trade";
+import { tradeCancelSaga, tradeRequestSaga, tradeResponseSaga } from "./trade";
 
 export function* handleIO() {
   const socket: Socket = yield call(connectSocket);
@@ -34,21 +27,24 @@ export function* handleIO() {
     receiveJoinPlayersSaga(socket),
     sendJoinReadySaga(socket),
     receiveJoinPlaySaga(socket),
+    sendJoinStartSaga(socket),
+    sendJoinCancelSaga(socket),
+    receiveJoinHostSaga(socket),
 
     // chatting
     sendChattingSaga(socket),
     receiveChattingSaga(socket),
 
-    // day
-    sendDayEndSaga(socket),
-    sendDayStartSaga(socket),
-    receiveDayStartSaga(),
-    sendDayStartChannelSaga(),
-
     // trade
     tradeRequestSaga(socket),
     tradeCancelSaga(socket),
-    tradeRefreshSaga(socket),
     tradeResponseSaga(socket),
+
+    // game
+    sendGameTimeRequestSaga(socket),
+    receiveGameTimeResponseSaga(socket),
+
+    // item
+    sendItemRequestSaga(socket),
   ]);
 }

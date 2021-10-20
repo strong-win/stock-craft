@@ -14,8 +14,8 @@ export type MessageState = {
 };
 
 export type PlayerState = {
-  clientId: string;
   name: string;
+  status: PlayerStatus;
 };
 
 export type AssetState = {
@@ -36,6 +36,7 @@ export type userState = {
   name: string;
   room: string;
   status: PlayerStatus;
+  isHost: boolean;
   playerId: string;
   gameId: string;
   messages: MessageState[];
@@ -50,6 +51,7 @@ const initialState: userState = {
   name: "",
   room: "",
   status: "connected",
+  isHost: false,
   playerId: "",
   gameId: "",
   messages: [],
@@ -79,6 +81,9 @@ export const gameSlice = createSlice({
     },
     updateStatus(state, action: PayloadAction<PlayerStatus>) {
       state.status = action.payload;
+    },
+    updateIsHost(state, action: PayloadAction<boolean>) {
+      state.isHost = action.payload;
     },
     updatePlayerId(state, action: PayloadAction<string>) {
       state.playerId = action.payload;
@@ -134,6 +139,7 @@ export const {
   updateName,
   updateRoom,
   updateStatus,
+  updateIsHost,
   updatePlayerId,
   updateGameId,
   updateMessage,

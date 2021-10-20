@@ -36,9 +36,9 @@ const Players = ({ room, players }: PlayersProps) => {
     setDropdownOpen(false);
   };
 
-  const playerComponent = players.map(({ clientId, name }, index) => (
+  const playerComponent = players.map(({ name, status }, index) => (
     <DropdownItem key={index}>
-      {name}({clientId})
+      {name}({status})
     </DropdownItem>
   ));
 

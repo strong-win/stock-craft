@@ -10,12 +10,7 @@ import {
   updateCash,
   updateTrades,
 } from "../user";
-import {
-  TRADE_CANCEL,
-  TRADE_REFRESH,
-  TRADE_REQUEST,
-  TRADE_RESPONSE,
-} from "./events";
+import { TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from "./events";
 
 type TradeRequest = {
   gameId: string;
@@ -27,14 +22,6 @@ type TradeRequest = {
   price: number;
   quantity: number;
   deal: string;
-};
-
-type TradeRefresh = {
-  gameId: string;
-  playerId: string;
-  week: number;
-  day: number;
-  tick: number;
 };
 
 type TradeCancel = {
@@ -71,18 +58,6 @@ export function* tradeCancelSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(TRADE_CANCEL);
     yield apply(socket, socket.emit, [TRADE_CANCEL, payload]);
-  }
-}
-
-export const tradeRefresh = createAction(
-  TRADE_REFRESH,
-  (payload: TradeRefresh) => ({ payload })
-);
-
-export function* tradeRefreshSaga(socket: Socket) {
-  while (true) {
-    const { payload } = yield take(TRADE_REFRESH);
-    yield apply(socket, socket.emit, [TRADE_REFRESH, payload]);
   }
 }
 
