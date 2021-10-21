@@ -1,5 +1,5 @@
 import { IsOptional } from 'class-validator';
-import { PlayerStatus, Asset } from './../schemas/players.schema';
+import { PlayerStatus, Asset } from '../schemas/player.schema';
 
 export class PlayerUpdateDto {
   @IsOptional()

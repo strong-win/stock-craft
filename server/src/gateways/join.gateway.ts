@@ -18,9 +18,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/players.schema';
-import { PlayersService } from 'src/services/players.service';
-import { GamesService } from 'src/services/games.service';
+import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
+import { PlayerService } from 'src/services/player.service';
+import { GameService } from 'src/services/game.service';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -30,9 +30,9 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('AppGateway');
 
   constructor(
-    private playersService: PlayersService,
+    private playerService: PlayerService,
     private joinService: JoinService,
-    private gamesService: GamesService,
+    private gameService: GameService,
   ) {}
 
   handleConnection(client: Socket): void {
@@ -43,14 +43,14 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client Disconnected: ${client.id}`);
 
     // find player with clientId only
-    const player = await this.playersService.findByClientIdAndStatuses(
+    const player = await this.playerService.findByClientIdAndStatuses(
       client.id,
       this.getStatuses('all'),
     );
 
     if (player) {
       const { _id: playerId, name, room, status, isHost } = player;
-      await this.playersService.updateByPlayerId(playerId, {
+      await this.playerService.updateByPlayerId(playerId, {
         status: 'disconnected',
       });
 
@@ -60,7 +60,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses(status),
       });
 
-      const players = await this.playersService.findByRoomAndStatuses(
+      const players = await this.playerService.findByRoomAndStatuses(
         room,
         this.getStatuses('all'),
       );
@@ -92,7 +92,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       _id: playerId,
       name,
       room,
-    } = await this.playersService.create({
+    } = await this.playerService.create({
       ...payload,
       clientId: client.id,
       status: 'connected',
@@ -112,7 +112,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       statuses: this.getStatuses('connected'),
     });
 
-    const players: Player[] = await this.playersService.findByRoomAndStatuses(
+    const players: Player[] = await this.playerService.findByRoomAndStatuses(
       room,
       this.getStatuses('all'),
     );
@@ -122,7 +122,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }));
     this.server.emit(JOIN_PLAYERS, playersInfo);
 
-    return { playerId };
+    return { playerId: playerId.toString() };
   }
 
   @SubscribeMessage(JOIN_READY)
@@ -131,9 +131,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     payload: { playerId: string; room: string },
   ): Promise<void> {
     const { playerId, room } = payload;
-    await this.playersService.updateByPlayerId(playerId, { status: 'ready' });
+    await this.playerService.updateByPlayerId(playerId, {
+      status: 'ready',
+    });
 
-    const players: Player[] = await this.playersService.findByRoomAndStatuses(
+    const players: Player[] = await this.playerService.findByRoomAndStatuses(
       room,
       this.getStatuses('all'),
     );
@@ -150,11 +152,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     payload: { playerId: string; room: string },
   ): Promise<void> {
     const { playerId, room } = payload;
-    await this.playersService.updateByPlayerId(playerId, {
+    await this.playerService.updateByPlayerId(playerId, {
       status: 'connected',
     });
 
-    const players: Player[] = await this.playersService.findByRoomAndStatuses(
+    const players: Player[] = await this.playerService.findByRoomAndStatuses(
       room,
       this.getStatuses('all'),
     );
@@ -188,7 +190,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('play'),
       });
 
-      this.gamesService.createGame(gameInfo.gameId.toString(), room);
+      this.gameService.createGame(gameInfo.gameId, room);
     } else {
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',

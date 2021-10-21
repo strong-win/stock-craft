@@ -4,9 +4,9 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PlayerStatus } from 'src/schemas/players.schema';
+import { PlayerStatus } from 'src/schemas/player.schema';
 
-import { PlayersService } from 'src/services/players.service';
+import { PlayerService } from 'src/services/player.service';
 import { CHATTING_SERVER_MESSAGE, CHATTING_CLIENT_MESSAGE } from './events';
 
 @WebSocketGateway({ cors: true })
@@ -14,7 +14,7 @@ export class ChattingGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(private playersService: PlayersService) {}
+  constructor(private playerService: PlayerService) {}
 
   @SubscribeMessage(CHATTING_CLIENT_MESSAGE)
   async handleMessage(
@@ -22,7 +22,7 @@ export class ChattingGateway {
     payload: { playerId: string; message: string },
   ): Promise<void> {
     const { playerId, message } = payload;
-    const { name, room, status } = await this.playersService.findByPlayerId(
+    const { name, room, status } = await this.playerService.findByPlayerId(
       playerId,
     );
 

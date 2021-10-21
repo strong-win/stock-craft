@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
-import { TradeRefreshDto } from 'src/dto/trade-refresh.dto';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
-import { Player, PlayerDocument } from 'src/schemas/players.schema';
-import { Stock, StockDocument } from 'src/schemas/stocks.schema';
-import { Trade, TradeDocument } from 'src/schemas/trades.schema';
-import { GamesService, TimeState } from './games.service';
+import { Player, PlayerDocument } from 'src/schemas/player.schema';
+import { Stock, StockDocument } from 'src/schemas/stock.schema';
+import { Trade, TradeDocument } from 'src/schemas/trade.schema';
+import { GameService, TimeState } from './game.service';
 
 @Injectable()
-export class TradesService {
+export class TradeService {
   constructor(
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
-    private gamesService: GamesService,
+    private gameService: GameService,
   ) {}
 
   async handleTrade(
@@ -25,7 +24,7 @@ export class TradesService {
     const { playerId, gameId, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
 
-    const time: TimeState = this.gamesService.getTime(gameId);
+    const time: TimeState = this.gameService.getTime(gameId);
 
     if (
       time.week !== week ||
@@ -43,7 +42,7 @@ export class TradesService {
 
     // find stock price
     const stock = await this.stockModel.findOne({
-      gameId,
+      game: Types.ObjectId(gameId),
       week,
       day,
       tick,
@@ -51,7 +50,9 @@ export class TradesService {
     });
 
     // find player asset
-    const player = await this.playerModel.findOne({ _id: playerId });
+    const player = await this.playerModel.findOne({
+      _id: Types.ObjectId(playerId),
+    });
 
     let isDirect: boolean;
     if (deal === 'buy') {
@@ -96,10 +97,10 @@ export class TradesService {
 
     // add to trade collection if player cannot directly trade
     const trade = await this.tradeModel.create({
+      player,
       week,
       day,
       tick,
-      playerId,
       corpId,
       price,
       quantity,
@@ -109,8 +110,12 @@ export class TradesService {
 
     // modify asset with new stocks
     await this.playerModel.updateOne(
-      { _id: playerId },
-      { cash: player.cash, assets: player.assets },
+      { _id: Types.ObjectId(playerId) },
+      {
+        cash: player.cash,
+        assets: player.assets,
+        trades: [...player.trades, trade],
+      },
     );
 
     return {
@@ -130,76 +135,95 @@ export class TradesService {
     };
   }
 
-  // trade refresh
   async handleRefresh(
-    tradeRefreshDto: TradeRefreshDto,
-  ): Promise<TradeResponseDto> {
-    const { gameId, playerId, week, day, tick } = tradeRefreshDto;
-    const player = await this.playerModel.findOne({ _id: playerId });
-    const trades = await this.tradeModel
-      .find({ playerId, status: 'pending' })
+    gameId: string,
+    week: number,
+    day: number,
+    tick: number,
+  ): Promise<TradeResponseDto[]> {
+    const players = await this.playerModel
+      .find({ game: Types.ObjectId(gameId) })
+      .populate({ path: 'trades', match: { status: 'pending' } })
       .exec();
 
-    const tradesDisposed = [];
-    for (const trade of trades) {
-      const { corpId } = trade;
-
-      const stock = await this.stockModel.findOne({
-        gameId,
+    const stocks = await this.stockModel
+      .find({
+        game: Types.ObjectId(gameId),
         week,
         day,
         tick,
-        corpId,
-      });
+      })
+      .exec();
 
-      if (trade.deal === 'buy') {
-        if (trade.price >= stock.price) {
-          for (const asset of player.assets) {
-            if (asset.corpId === corpId) {
-              asset.quantity += trade.quantity;
-            }
-          }
-          await this.tradeModel.updateOne(
-            { _id: trade._id },
-            { $set: { status: 'disposed' } },
-          );
-          trade.status = 'disposed';
-          tradesDisposed.push(trade);
+    const playersResponse: TradeResponseDto[] = [];
+    const tradesResponse: Trade[] = [];
+
+    for (const player of players) {
+      for (const trade of player.trades) {
+        const isTrade = (trade: Types.ObjectId | Trade): trade is Trade => {
+          return (<Trade>trade)._id !== undefined;
+        };
+
+        if (!isTrade(trade)) {
+          const typeGuardError = Error('타입이 일치하지 않습니다.');
+          typeGuardError.name = 'TypeGuardError';
+          throw typeGuardError;
         }
-      }
 
-      if (trade.deal === 'sell') {
-        if (trade.price <= stock.price) {
-          player.cash += trade.price * trade.quantity;
+        const stock = stocks.find((stock) => stock.corpId === trade.corpId);
 
-          await this.tradeModel.updateOne(
-            { _id: trade._id },
-            { $set: { status: 'disposed' } },
-          );
-          trade.status = 'disposed';
-          tradesDisposed.push(trade);
+        if (trade.deal === 'buy') {
+          if (trade.price >= stock.price) {
+            for (const asset of player.assets) {
+              if (asset.corpId === trade.corpId) {
+                asset.quantity += trade.quantity;
+              }
+            }
+            await this.tradeModel.updateOne(
+              { _id: trade._id },
+              { $set: { status: 'disposed' } },
+            );
+            trade.status = 'disposed';
+            tradesResponse.push(trade);
+          }
+        }
+
+        if (trade.deal === 'sell') {
+          if (trade.price <= stock.price) {
+            player.cash += trade.price * trade.quantity;
+
+            await this.tradeModel.updateOne(
+              { _id: trade._id },
+              { $set: { status: 'disposed' } },
+            );
+            trade.status = 'disposed';
+            tradesResponse.push(trade);
+          }
         }
       }
 
       await this.playerModel.updateOne(
-        { _id: playerId },
+        { _id: player._id },
         { cash: player.cash, assets: player.assets },
       );
+
+      playersResponse.push({
+        cash: player.cash,
+        assets: player.assets,
+        clientId: player.clientId,
+        action: 'refresh',
+        trades: tradesResponse.map((trade: Trade) => ({
+          _id: trade._id,
+          corpId: trade.corpId,
+          price: trade.price,
+          quantity: trade.quantity,
+          deal: trade.deal,
+          status: trade.status,
+        })),
+      });
     }
 
-    return {
-      cash: player.cash,
-      assets: player.assets,
-      action: 'refresh',
-      trades: tradesDisposed.map((trade) => ({
-        _id: trade._id,
-        corpId: trade.corpId,
-        price: trade.price,
-        quantity: trade.quantity,
-        deal: trade.deal,
-        status: trade.status,
-      })),
-    };
+    return playersResponse;
   }
 
   // trade cancel
@@ -207,13 +231,10 @@ export class TradesService {
     tradeCancelDto: TradeCancelDto,
   ): Promise<TradeResponseDto> {
     const { playerId, _id, corpId } = tradeCancelDto;
-    const player = await this.playerModel.findOne({ _id: playerId });
-    const trade = await this.tradeModel.findOne({
-      _id,
-      corpId,
-      playerId,
-      status: 'pending',
+    const player = await this.playerModel.findOne({
+      _id: Types.ObjectId(playerId),
     });
+    const trade = await this.tradeModel.findOne({ _id: Types.ObjectId(_id) });
 
     if (trade.deal === 'buy') {
       player.cash += trade.price * trade.quantity;
@@ -229,7 +250,7 @@ export class TradesService {
     trade.save();
 
     await this.playerModel.updateOne(
-      { _id: playerId },
+      { _id: Types.ObjectId(playerId) },
       { cash: player.cash, assets: player.assets },
     );
 

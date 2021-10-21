@@ -13,7 +13,7 @@ export type GameState = {
 };
 
 @Injectable()
-export class GamesService {
+export class GameService {
   private games: GameState[] = [];
 
   createGame(gameId: string, room: string) {

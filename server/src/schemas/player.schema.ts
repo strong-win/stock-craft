@@ -1,4 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Date, Types } from 'mongoose';
+import { Game } from './game.schema';
+import { Trade } from './trade.schema';
 
 export type PlayerDocument = Player & Document;
 
@@ -21,6 +24,8 @@ export type PlayerInfo = {
 
 @Schema()
 export class Player {
+  _id: Types.ObjectId;
+
   @Prop()
   room: string;
 
@@ -36,8 +41,11 @@ export class Player {
   @Prop()
   isHost: boolean;
 
-  @Prop()
-  gameId?: string;
+  @Prop({ type: Date, default: Date.now })
+  createdAt: Date;
+
+  @Prop({ type: Types.ObjectId, ref: 'Game' })
+  game: Types.ObjectId | Game;
 
   @Prop()
   cash?: number;
@@ -45,8 +53,8 @@ export class Player {
   @Prop()
   assets?: Asset[];
 
-  @Prop({ type: Date, default: Date.now })
-  createdAt: Date;
+  @Prop({ type: [Types.ObjectId], ref: 'Trade' })
+  trades?: (Types.ObjectId | Trade)[];
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

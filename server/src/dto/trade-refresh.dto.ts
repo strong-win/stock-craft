@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class TradeRefreshDto {
+export class TradeRefreshRequestDto {
   @IsNotEmpty()
   gameId: string;
 

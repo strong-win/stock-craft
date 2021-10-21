@@ -1,19 +1,19 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { Stock, StockSchema } from '../schemas/stocks.schema';
-import { Player, PlayerSchema } from '../schemas/players.schema';
-import { Trade, TradeSchema } from '../schemas/trades.schema';
-import { Game, GameSchema } from 'src/schemas/games.schema';
-import { Item, ItemSchema } from 'src/schemas/items.schema';
+import { Stock, StockSchema } from '../schemas/stock.schema';
+import { Player, PlayerSchema } from '../schemas/player.schema';
+import { Trade, TradeSchema } from '../schemas/trade.schema';
+import { Game, GameSchema } from 'src/schemas/game.schema';
+import { Item, ItemSchema } from 'src/schemas/item.schema';
 import { ConfigModule } from '@nestjs/config';
 
-import { PlayersService } from './players.service';
-import { StocksService } from './stocks.service';
-import { TradesService } from './trades.service';
-import { ItemsService } from './items.service';
+import { PlayerService } from './player.service';
+import { StockService } from './stock.service';
+import { TradeService } from './trade.service';
+import { ItemService } from './item.service';
 import { JoinService } from './join.service';
-import { GamesService } from './games.service';
+import { GameService } from './game.service';
 
 @Module({
   imports: [
@@ -25,20 +25,20 @@ import { GamesService } from './games.service';
     ConfigModule,
   ],
   providers: [
-    PlayersService,
-    StocksService,
-    TradesService,
-    ItemsService,
+    PlayerService,
+    StockService,
+    TradeService,
+    ItemService,
     JoinService,
-    GamesService,
+    GameService,
   ],
   exports: [
-    PlayersService,
-    StocksService,
-    TradesService,
-    ItemsService,
+    PlayerService,
+    StockService,
+    TradeService,
+    ItemService,
     JoinService,
-    GamesService,
+    GameService,
   ],
 })
 export class ServicesModule {}

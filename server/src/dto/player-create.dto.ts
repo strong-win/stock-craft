@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
-import { Asset, PlayerStatus } from 'src/schemas/players.schema';
+import { Asset, PlayerStatus } from 'src/schemas/player.schema';
 
 export class PlayerCreateDto {
   @IsNotEmpty()

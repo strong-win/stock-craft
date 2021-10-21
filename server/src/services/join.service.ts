@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { Corp, Game, GameDocument } from 'src/schemas/games.schema';
+import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
   Player,
   PlayerDocument,
   PlayerInfo,
   PlayerStatus,
-} from 'src/schemas/players.schema';
+} from 'src/schemas/player.schema';
 
 @Injectable()
 export class JoinService {
@@ -28,7 +28,7 @@ export class JoinService {
     gameInfo?: { gameId: string; corps: Corp[]; assets: Asset[] };
     start: boolean;
   }> {
-    const players = await this.playerModel
+    const players: Player[] = await this.playerModel
       .find({
         room,
         status: { $in: this.getStatuses('all') },
@@ -50,14 +50,18 @@ export class JoinService {
       const { cash, corps, assets } = this.getSampleData();
 
       // create game
-      const { _id: gameId } = await this.gameModel.create({ room, corps });
+      const { _id: gameId } = await this.gameModel.create({
+        room,
+        corps,
+        players,
+      });
 
       // update player
       await this.playerModel.updateMany(
         { room, status: { $in: ['connected', 'ready'] } },
         {
           status: 'play',
-          gameId,
+          game: gameId,
           cash,
           assets,
         },
@@ -67,7 +71,11 @@ export class JoinService {
         name,
         status: 'play',
       }));
-      return { playersInfo, gameInfo: { gameId, corps, assets }, start: true };
+      return {
+        playersInfo,
+        gameInfo: { gameId: gameId.toString(), corps, assets },
+        start: true,
+      };
     } else {
       const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
         name,

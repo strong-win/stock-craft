@@ -9,13 +9,12 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { GamesService, TimeState } from 'src/services/games.service';
+import { GameService, TimeState } from 'src/services/game.service';
 import { DayChart } from 'src/dto/chart-response.dto';
-import { PlayersService } from 'src/services/players.service';
-import { TradesService } from 'src/services/trades.service';
+import { TradeService } from 'src/services/trade.service';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
-import { StocksService } from 'src/services/stocks.service';
-import { ItemsService } from 'src/services/items.service';
+import { StockService } from 'src/services/stock.service';
+import { ItemService } from 'src/services/item.service';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -23,11 +22,10 @@ export class GameGateway {
   private server: Server;
 
   constructor(
-    private gamesService: GamesService,
-    private playersService: PlayersService,
-    private tradesService: TradesService,
-    private stocksService: StocksService,
-    private itemsService: ItemsService,
+    private gamesService: GameService,
+    private tradeService: TradeService,
+    private stockService: StockService,
+    private itemService: ItemService,
   ) {}
 
   @SubscribeMessage(GAME_TIME_REQUEST)
@@ -40,55 +38,47 @@ export class GameGateway {
     }: { room: string; time: TimeState; timeChanged: TimeState } =
       this.gamesService.updateTime(gameId);
 
-    if (
-      time.tick !== timeChanged.tick &&
-      timeChanged.day > 0 &&
-      timeChanged.tick < 4
-    ) {
-      // find players
-      const players = await this.playersService.findByGameIdAndStatuses(
-        gameId,
-        ['play'],
-      );
-
-      // TO DO - DB connection 횟수 축소 필요
-      for (const player of players) {
-        const { _id: playerId, gameId, clientId } = player;
-        const tradeResponse: TradeResponseDto =
-          await this.tradesService.handleRefresh({
-            gameId,
-            playerId,
-            week: timeChanged.week,
-            day: timeChanged.day,
-            tick: timeChanged.tick,
-          });
-
-        if (tradeResponse)
-          this.server.to(clientId).emit(TRADE_RESPONSE, tradeResponse);
-      }
-    }
-
     let dayChart: DayChart;
     // TO DO - timeChanged.day > 0 && timeChanged.tick === 5 로 조건 변경 필요
     if (time.day !== timeChanged.day && timeChanged.day > 0) {
       // find Items
-      const items = await this.itemsService.findByGameIdAndTime(
+      const items = await this.itemService.findByGameIdAndTime(
         gameId,
         timeChanged.week,
         timeChanged.day,
       );
       // Create Stock By request with items
-      await this.stocksService.createStock(
+      await this.stockService.createStock(
         gameId,
         timeChanged.week,
         timeChanged.day,
       );
       // find Day Chart
-      dayChart = await this.stocksService.findDayChart(
+      dayChart = await this.stockService.findDayChart(
         gameId,
         timeChanged.week,
         timeChanged.day,
       );
+    }
+
+    if (
+      time.tick !== timeChanged.tick &&
+      timeChanged.day > 0 &&
+      timeChanged.tick < 4
+    ) {
+      const tradesResponse: TradeResponseDto[] =
+        await this.tradeService.handleRefresh(
+          gameId,
+          timeChanged.week,
+          timeChanged.day,
+          timeChanged.tick,
+        );
+
+      for (const tradeResponse of tradesResponse) {
+        this.server
+          .to(tradeResponse.clientId)
+          .emit(TRADE_RESPONSE, tradeResponse);
+      }
     }
 
     this.server

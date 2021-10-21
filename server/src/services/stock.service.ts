@@ -1,10 +1,10 @@
 import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { DayChart } from 'src/dto/chart-response.dto';
 
-import { Stock, StockDocument } from 'src/schemas/stocks.schema';
+import { Stock, StockDocument } from 'src/schemas/stock.schema';
 
 type SampleStock = {
   week: number;
@@ -16,7 +16,7 @@ type SampleStock = {
 };
 
 @Injectable()
-export class StocksService {
+export class StockService {
   constructor(
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     private configService: ConfigService,
@@ -27,7 +27,9 @@ export class StocksService {
     week: number,
     day: number,
   ): Promise<DayChart> {
-    const stocks = await this.stockModel.find({ gameId, week, day }).exec();
+    const stocks = await this.stockModel
+      .find({ game: Types.ObjectId(gameId), week, day })
+      .exec();
 
     const dayChart = {};
     for (const stock of stocks) {
@@ -56,7 +58,7 @@ export class StocksService {
     corpId: string,
   ): Promise<number> {
     const stock = await this.stockModel.findOne({
-      gameId,
+      game: Types.ObjectId(gameId),
       week,
       day,
       tick,
@@ -72,7 +74,7 @@ export class StocksService {
 
     const dayCharts: Stock[] = sampleCharts
       .filter((stock) => stock.week === week && stock.day === day)
-      .map((stock) => ({ ...stock, gameId }));
+      .map((stock) => ({ ...stock, game: Types.ObjectId(gameId) }));
 
     await this.stockModel.insertMany(dayCharts);
   }
