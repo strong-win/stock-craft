@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
-import { updateName } from "../modules/user";
+import { updateIsHost, updateName } from "../modules/user";
 import Main from "../components/Main";
 import { createName } from "../utils/create";
 
@@ -26,12 +26,17 @@ const MainWrapper = () => {
     setRoom(e.target.value);
   };
 
+  const onCreateRoom = (e: any) => {
+    dispatch(updateIsHost(true));
+  };
+
   return (
     <Main
       name={name}
       room={room}
       onChangeName={onChangeName}
       onChangeRoom={onChangeRoom}
+      onCreateRoom={onCreateRoom}
     />
   );
 };

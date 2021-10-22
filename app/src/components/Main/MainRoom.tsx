@@ -5,9 +5,10 @@ import "../../styles/Main.css";
 type MainRoomProps = {
   room: string;
   onChangeRoom: (e: any) => void;
+  onCreateRoom: React.MouseEventHandler<HTMLButtonElement>;
 };
 
-const MainRoom = ({ room, onChangeRoom }: MainRoomProps) => {
+const MainRoom = ({ room, onChangeRoom, onCreateRoom }: MainRoomProps) => {
   return (
     <div className="roomContainer">
       <div className="createOuterContainer">
@@ -22,7 +23,7 @@ const MainRoom = ({ room, onChangeRoom }: MainRoomProps) => {
               .toUpperCase()
               .slice(2, 8)}`}
           >
-            <button className="roomButton" type="submit">
+            <button className="roomButton" type="submit" onClick={onCreateRoom}>
               방 생성하기
             </button>
           </Link>

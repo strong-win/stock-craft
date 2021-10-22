@@ -1,4 +1,4 @@
-import { timeType } from "../modules/time";
+import { TimeState } from "../modules/time";
 
 export const calculateNextDay = (week: number, day: number) => {
   return day === 5
@@ -6,7 +6,7 @@ export const calculateNextDay = (week: number, day: number) => {
     : { nextWeek: week, nextDay: day + 1 };
 };
 
-export const calculateNextTime = ({ week, day, tick }: timeType) => {
+export const calculateNextTime = ({ week, day, tick }: TimeState) => {
   const tickChanged = tick + 1;
   const dayChanged = tickChanged === 5 ? day + 1 : day;
   const weekChanged = dayChanged === 6 ? week + 1 : week;

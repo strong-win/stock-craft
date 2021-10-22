@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Trade from "../components/Trade";
-import { assetType } from "../modules/user";
+import { AssetState } from "../modules/user";
 import { tradeCancel, tradeRequest } from "../modules/sockets/trade";
-import { chartType } from "../modules/stock";
+import { ChartState } from "../modules/stock";
 
 export type billType = {
   price: number;
@@ -14,7 +14,7 @@ export type billType = {
 
 const TradeWrapper = () => {
   // redux state
-  const { room, assets, trades, selectedCorpId } = useSelector(
+  const { gameId, playerId, assets, trades, selectedCorpId } = useSelector(
     (state: RootState) => state.user
   );
   const { corps } = useSelector((state: RootState) => state.stock);
@@ -31,10 +31,10 @@ const TradeWrapper = () => {
   });
 
   useEffect(() => {
-    const corpStock: chartType = corps.find(
+    const corpStock: ChartState = corps.find(
       (chart) => chart.corpId === selectedCorpId
     );
-    const corpAsset: assetType = assets.find(
+    const corpAsset: AssetState = assets.find(
       (asset) => asset.corpId === selectedCorpId
     );
 
@@ -55,7 +55,8 @@ const TradeWrapper = () => {
     dispatch(
       tradeRequest({
         ...tradeBill,
-        room,
+        gameId,
+        playerId,
         week,
         day,
         tick,
@@ -66,7 +67,7 @@ const TradeWrapper = () => {
   };
 
   const handleCancel = (_id: string, corpId: string) => {
-    dispatch(tradeCancel({ _id, corpId }));
+    dispatch(tradeCancel({ playerId, _id, corpId }));
   };
 
   return (

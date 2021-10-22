@@ -4,21 +4,17 @@ import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 
 import {
-  assetType,
-  tradeType,
+  AssetState,
+  TradeState,
   updateAssets,
   updateCash,
   updateTrades,
 } from "../user";
-import {
-  TRADE_CANCEL,
-  TRADE_REFRESH,
-  TRADE_REQUEST,
-  TRADE_RESPONSE,
-} from "./events";
+import { TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from "./events";
 
-type TradeRequestType = {
-  room: string;
+type TradeRequest = {
+  gameId: string;
+  playerId: string;
   week: number;
   day: number;
   tick: number;
@@ -28,23 +24,22 @@ type TradeRequestType = {
   deal: string;
 };
 
-type TradeRefreshType = {
-  room: string;
-  week: number;
-  day: number;
-  tick: number;
+type TradeCancel = {
+  playerId: string;
+  _id: string;
+  corpId: string;
 };
 
-type TradeResponseType = {
+type TradeResponse = {
   cash: number;
-  assets: assetType[];
+  assets: AssetState[];
   action: "request" | "refresh" | "cancel";
-  trades: tradeType[];
+  trades: TradeState[];
 };
 
 export const tradeRequest = createAction(
   TRADE_REQUEST,
-  (payload: TradeRequestType) => ({ payload })
+  (payload: TradeRequest) => ({ payload })
 );
 
 export function* tradeRequestSaga(socket: Socket) {
@@ -56,7 +51,7 @@ export function* tradeRequestSaga(socket: Socket) {
 
 export const tradeCancel = createAction(
   TRADE_CANCEL,
-  (payload: { _id: string; corpId: string }) => ({ payload })
+  (payload: TradeCancel) => ({ payload })
 );
 
 export function* tradeCancelSaga(socket: Socket) {
@@ -66,21 +61,9 @@ export function* tradeCancelSaga(socket: Socket) {
   }
 }
 
-export const tradeRefresh = createAction(
-  TRADE_REFRESH,
-  (payload: TradeRefreshType) => ({ payload })
-);
-
-export function* tradeRefreshSaga(socket: Socket) {
-  while (true) {
-    const { payload } = yield take(TRADE_REFRESH);
-    yield apply(socket, socket.emit, [TRADE_REFRESH, payload]);
-  }
-}
-
 const createTradeResponseChannel = (socket: Socket) => {
-  return eventChannel<TradeResponseType>((emit) => {
-    socket.on(TRADE_RESPONSE, (payload: TradeResponseType) => {
+  return eventChannel<TradeResponse>((emit) => {
+    socket.on(TRADE_RESPONSE, (payload: TradeResponse) => {
       emit(payload);
     });
 
@@ -94,7 +77,7 @@ export function* tradeResponseSaga(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: TradeResponseType = yield take(channel);
+    const payload: TradeResponse = yield take(channel);
     yield put(updateCash(payload.cash));
     yield put(updateAssets(payload.assets));
     yield put(updateTrades({ action: payload.action, trades: payload.trades }));

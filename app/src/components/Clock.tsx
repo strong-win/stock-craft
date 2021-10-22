@@ -2,7 +2,7 @@ import React from "react";
 import { Jumbotron } from "reactstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
-import { timeType } from "../modules/time";
+import { TimeState } from "../modules/time";
 import "../styles/Clock.css";
 
 type TimeCardProps = {
@@ -20,7 +20,7 @@ const TimeCard = ({ num, unit }: TimeCardProps) => {
   );
 };
 
-const Clock = ({ week, day, tick }: timeType) => {
+const Clock = ({ week, day, tick }: TimeState) => {
   return (
     <>
       <div className="d-flex flex-row">

@@ -6,11 +6,11 @@ import {
 } from "reactstrap";
 import {BsFillCircleFill} from "react-icons/bs";
 
-import { playerType } from "../modules/user";
+import { PlayerState } from "../modules/user";
 import "../styles/Players.css";
 
 type PlayersProps = {
-  players: playerType[];
+  players: PlayerState[];
 };
 
 const Players = ({ players }: PlayersProps) => {
