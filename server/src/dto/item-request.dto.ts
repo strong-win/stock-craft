@@ -1,8 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class ChartRequestDto {
+export class ItemRequestDto {
   @IsNotEmpty()
-  room: string;
+  gameId: string;
+
+  @IsNotEmpty()
+  playerId: string;
 
   @IsNotEmpty()
   week: number;
@@ -11,5 +14,5 @@ export class ChartRequestDto {
   day: number;
 
   @IsNotEmpty()
-  item: string;
+  item: string[];
 }

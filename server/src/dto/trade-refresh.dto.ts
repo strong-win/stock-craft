@@ -1,8 +1,11 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class TradeRefreshDto {
+export class TradeRefreshRequestDto {
   @IsNotEmpty()
-  room: string;
+  gameId: string;
+
+  @IsNotEmpty()
+  playerId: string;
 
   @IsNotEmpty()
   week: number;
