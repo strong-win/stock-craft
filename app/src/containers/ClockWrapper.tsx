@@ -13,7 +13,7 @@ const ClockWrapper = () => {
   useEffect(() => {
     setTimeout(() => {
       if (isHost) dispatch(sendGameTimeRequest({ gameId }));
-    }, 5000);
+    }, 15000);
 
     /**
      * TO DO - host 가 퇴장하고 다른 guest 가 host 가 되었을 때, 연속적인 time request 필요

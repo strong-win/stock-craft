@@ -30,7 +30,7 @@ const Clock = ({ week, day, tick }: TimeState) => {
         <div className="m-3">
           <CountdownCircleTimer
             isPlaying
-            duration={5}
+            duration={15}
             onComplete={() => [true, 0]}
             colors={[
               ["#008000", 0.5],
