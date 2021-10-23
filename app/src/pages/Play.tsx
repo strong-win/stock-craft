@@ -13,10 +13,7 @@ import { updateName, updateRoom } from "../modules/user";
 import { createName } from "../utils/create";
 import WaitingRoom from "./WaitingRoom";
 import {
-  sendJoinCancel,
   sendJoinConnected,
-  sendJoinReady,
-  sendJoinStart,
 } from "../modules/sockets/join";
 
 const Play = ({ location, history }: any) => {
@@ -46,15 +43,6 @@ const Play = ({ location, history }: any) => {
 
   }, [dispatch, history, initRoom]);
 
-  const onClickReady = (isHost: boolean) => {
-    isHost
-      ? dispatch(sendJoinStart({ playerId, room }))
-      : dispatch(sendJoinReady({ playerId, room }));
-  };
-
-  const onClickCancel = (e: any) => {
-    dispatch(sendJoinCancel({ playerId, room }));
-  };
 
   return status === "play" ? (
     <Container fluid={true}>
@@ -62,16 +50,13 @@ const Play = ({ location, history }: any) => {
         <Col>
           <ClockWrapper />
         </Col>
-        <Col>
-          <PlayersWrapper room={room} />
-        </Col>
       </Row>
       <Row>
         <Col md="8">
           <CorporationsWrapper />
         </Col>
         <Col md="4">
-          <ChattingWrapper name={name} />
+          <ChattingWrapper room={room} name={name} />
         </Col>
       </Row>
       <Row>

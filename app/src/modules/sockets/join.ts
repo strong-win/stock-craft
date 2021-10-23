@@ -104,6 +104,7 @@ export function* sendJoinCancelSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(JOIN_CANCEL);
     yield apply(socket, socket.emit, [JOIN_CANCEL, payload]);
+    yield put(updateStatus("connected"));
   }
 }
 

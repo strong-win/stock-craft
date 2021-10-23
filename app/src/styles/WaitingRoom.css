@@ -2,14 +2,6 @@
     height: 100vh;
 }
 
-.header{
-    height: 10%;
-    color: #F0E583;
-    background-color: #615F54;
-    font-size: 3.125rem;
-    font-family: "Chakra Petch";
-    justify-content: center;
-}
 
 .body{
     height: 90%;

@@ -18,15 +18,15 @@ const WaitingRoom = ({room, name}: WaitingRoomProps) => {
     <Container className="WaitingRoomContainer" fluid={true}>
 			<Header/>
 			<Row className="body">
-				<Col md="8">
+				<Col md="8" className="p-0">
 					<Row><Tutorial/></Row>
 					<Row>
 						<Col><PlayersWrapper room={room} /></Col> 
 						<Col><ReadyWrapper /></Col>
 					</Row>
 				</Col>
-				<Col md="4">
-					<ChattingWrapper name={name}/>
+				<Col md="4" className="p-0">
+					<ChattingWrapper room={room} name={name}/>
 				</Col>
 			</Row>
 		</Container>

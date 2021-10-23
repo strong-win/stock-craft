@@ -1,11 +1,11 @@
 import { Row } from "reactstrap"
 
-import "../styles/WaitingRoom.css"
+import "../styles/Header.css"
 
 export default function Header(){
     return(
         <Row className="header">
-            STOCKCRAFT
+            <p className="m-0"><b>STOCK</b>CRAFT</p>
         </Row>
     )
 }
