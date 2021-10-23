@@ -2,13 +2,18 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  border-radius: 0.5rem;
+  border: none;
   width: 100%;
   height: 100%;
 }
 .chattingBody {
   height: 8rem;
   overflow: auto;
+}
+.chattingHeader {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-betweenㄹ;
 }
 
 .messages {
