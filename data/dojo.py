@@ -34,4 +34,4 @@ procedure that returns kospi200 indicies
 """
 # TO-DO : add exchange_rate between 2000-01-04 and 2021-09-17
 df = stock.get_index_ohlcv_by_date("20000101", "20210917", "1001")
-df.to_csv('./stock_data_0922/kospi.csv')
+df.to_csv("./stock_data_0922/kospi.csv")
