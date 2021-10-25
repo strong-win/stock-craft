@@ -57,4 +57,4 @@ def get_rate(x):
     return op
 
 df['Rate'] = df['DateTime'].apply(get_rate)
-print(df)
+df.to_csv('./exchange_rate.csv')
