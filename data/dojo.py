@@ -37,6 +37,7 @@ import glob
 procedure that returns kospi200 indicies
 """
 # TO-DO : add exchange_rate between 2000-01-04 and 2021-09-17
+<<<<<<< HEAD
 # df = stock.get_index_ohlcv_by_date("20000101", "20210917", "1001")
 # df.to_csv('./stock_data_0922/kospi.csv')
 
@@ -58,3 +59,7 @@ def get_rate(x):
 
 df['Rate'] = df['DateTime'].apply(get_rate)
 df.to_csv('./exchange_rate.csv')
+=======
+df = stock.get_index_ohlcv_by_date("20000101", "20210917", "1001")
+df.to_csv("./stock_data_0922/kospi.csv")
+>>>>>>> 0ce58e58d7e75f8f6b68923ea064d17e31e44710
