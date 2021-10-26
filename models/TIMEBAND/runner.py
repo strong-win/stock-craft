@@ -83,55 +83,6 @@ class TIMEBANDRunner:
         output = self.inference_step(pred_tqdm)
 
         return output
-        # self.data = None
-        # self.answer = None
-        # for i, data in enumerate(pred_tqdm):
-        #     true_x = data["encoded"].to(self.device)
-        #     fake_y = generate(true_x)
-
-        #     pred = self.dataset.denormalize(fake_y.cpu())
-        #     # for f in range(self.dataset.decode_dims):
-        #     #     pred[:, :, f] = pred[:, :, f] * self.data_gamma[f]
-
-        #     self.eval(pred)
-        #     # self.predict(pred_y)
-
-        #     batch_size = pred.shape[0]
-        #     future_size = pred.shape[1]
-        #     feature_dim = pred.shape[2]
-        #     pred = pred.reshape((-1, future_size, feature_dim))
-        #     preds = np.concatenate(
-        #         [
-        #             self.future_data[-batch_size - future_size :].detach().numpy(),
-        #             np.zeros((batch_size, future_size, feature_dim)),
-        #         ]
-        #     )
-
-        #     if self.answer is None:
-        #         self.answer = np.zeros(
-        #             (batch_size + future_size - 1, future_size, feature_dim)
-        #         )
-        #         self.index = 0
-        #     else:
-        #         self.answer = np.concatenate(
-        #             [self.answer, np.zeros((batch_size, future_size, feature_dim))],
-        #         )
-
-        #     for f in range(future_size):
-        #         self.answer[self.index + f : self.index + f + batch_size, f] = preds[
-        #             batch_size : 2 * batch_size, f
-        #         ]
-        #     self.index += batch_size
-
-        # answer = self.answer.reshape(-1, future_size)
-        # answer[answer == 0] = np.nan
-        # mean_value = np.nanmean(answer, axis=1).reshape((-1, 1))
-
-        # times = pd.DataFrame(self.dataset.preds_times.reshape(-1, 1))
-        # output = pd.DataFrame(mean_value)
-        # mean_output = pd.concat([times, output], axis=1)
-
-        # return mean_output, output
 
     def inference_step(self, pred_tqdm: tqdm):
         def discriminate(x):
