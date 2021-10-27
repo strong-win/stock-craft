@@ -3,57 +3,22 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
 import Clock from "../components/Clock";
-import { updateTime } from "../modules/time";
-import { chartRequest } from "../modules/sockets/chart";
-import { tradeRefresh } from "../modules/sockets/trade";
-import { calculateNextTime } from "../utils/calculate";
+import { sendGameTimeRequest } from "../modules/sockets/game";
 
 const ClockWrapper = () => {
-  const { room } = useSelector((state: RootState) => state.user);
+  const { isHost, gameId } = useSelector((state: RootState) => state.user);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();
 
   useEffect(() => {
     setTimeout(() => {
-      const { weekChanged, dayChanged, tickChanged } = calculateNextTime({
-        week,
-        day,
-        tick,
-      });
-
-      dispatch(
-        updateTime({
-          week: weekChanged,
-          day: dayChanged,
-          tick: tickChanged,
-        })
-      );
-
-      // refresh trade
-      if (day > 0) {
-        dispatch(
-          tradeRefresh({
-            room,
-            week: weekChanged,
-            day: dayChanged,
-            tick: tickChanged,
-          })
-        );
-      }
-
-      // refresh todayChart
-      if (day !== dayChanged) {
-        dispatch(
-          chartRequest({
-            room,
-            week: weekChanged,
-            day: dayChanged,
-            item: "example",
-          })
-        );
-      }
+      if (isHost) dispatch(sendGameTimeRequest({ gameId }));
     }, 15000);
-    // eslint-disable-next-line
+
+    /**
+     * TO DO - host 가 퇴장하고 다른 guest 가 host 가 되었을 때, 연속적인 time request 필요
+     */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tick]);
 
   return <Clock week={week} day={day} tick={tick} />;

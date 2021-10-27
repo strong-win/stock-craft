@@ -6,12 +6,12 @@ import {
   DropdownItem,
 } from "reactstrap";
 
-import { playerType } from "../modules/user";
+import { PlayerState } from "../modules/user";
 import "../styles/Players.css";
 
 type PlayersProps = {
   room: string;
-  players: playerType[];
+  players: PlayerState[];
 };
 
 const RoomCode = ({ room }) => (
@@ -36,9 +36,9 @@ const Players = ({ room, players }: PlayersProps) => {
     setDropdownOpen(false);
   };
 
-  const playerComponent = players.map(({ clientId, name }, index) => (
+  const playerComponent = players.map(({ name, status }, index) => (
     <DropdownItem key={index}>
-      {name}({clientId})
+      {name}({status})
     </DropdownItem>
   ));
 

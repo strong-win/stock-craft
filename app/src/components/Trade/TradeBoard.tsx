@@ -35,7 +35,7 @@ const TradeBoard = ({ stockBill, tradeBill, setTradeBill }: BoardProps) => {
       </Row>
       <Row>
         <Col>
-          <Label for="quantity">보유수량</Label>
+          <Label for="quantity">거래가능 보유수량</Label>
         </Col>
         <Col>
           <Button
