@@ -86,7 +86,7 @@ class TIMEBANDRunner:
             reals = self.dataset.forecast[self.idx : self.idx + pred_len].numpy()
             masks = self.dataset.missing[self.idx : self.idx + pred_len]
 
-            outputs = np.concatenate([outputs[:1-forecast_len], reals])
+            outputs = np.concatenate([outputs[: 1 - forecast_len], reals])
             target = self.adjust(outputs, preds, masks, lower, upper)
             outputs[-pred_len:] = target
 

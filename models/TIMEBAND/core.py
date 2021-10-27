@@ -108,7 +108,6 @@ class TIMEBANDCore:
             self.dashboard,
         )
 
-
         dataset = self.dataset.prepare_testset()
         dataset = self.loader(dataset)
 
