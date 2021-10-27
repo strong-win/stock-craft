@@ -106,7 +106,7 @@ def get_data_by_datetime_in_one_row(
     kospi = kospi[kospi['날짜'] > target_day][: train_days + init_days]["종가"]
     res.append(kospi.reset_index(drop=True))
 
-    # 5. Dollar Exchange Rate 정보 추가 - '종가'를 기준으로 함
+    # 5. Dollar Exchange Rate 정보 추가
     exchange_rate = pd.read_csv(os.path.join(DATA_PATH, "exchange_rate.csv"))
     exchange_rate['DateTime'] = pd.to_datetime(exchange_rate['DateTime']).dt.date
     exchange_rate = exchange_rate.drop(["Unnamed: 0"], axis=1)
