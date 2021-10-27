@@ -1,12 +1,11 @@
 import torch
 import numpy as np
-import pandas as pd
 
 from tqdm import tqdm
 from torch import Tensor
 from torch.optim import RMSprop
-import matplotlib.pyplot as plt
 
+from utils.color import colorstr
 from utils.logger import Logger
 from TIMEBAND.model import TIMEBANDModel
 from TIMEBAND.metric import TIMEBANDMetric
@@ -78,13 +77,14 @@ class TIMEBANDTrainer:
         # Visual option
         self.print_cfg = config["print"]
 
+        # Model option
+        self.netD, self.netG = self.models.netD, self.models.netG
+
     def train(self, trainset, validset):
         logger.info("Train the model")
 
         # Models Setting
         models = self.models
-        self.netD, self.netG = models.init(self.dataset.dims)
-
         self.optimD = RMSprop(self.netD.parameters(), lr=self.lr * self.lr_gammaD)
         self.optimG = RMSprop(self.netG.parameters(), lr=self.lr * self.lr_gammaG)
 
@@ -92,12 +92,14 @@ class TIMEBANDTrainer:
         train_score_plot = []
         valid_score_plot = []
         EPOCHS = self.base_epochs + self.iter_epochs
+
         for epoch in range(self.base_epochs, EPOCHS):
             self.preds = None
             self.data = None
             self.answer = None
 
             # Dashboard
+            self.pred_initate()
             self.dashboard.init_figure()
 
             # Train Section
@@ -135,7 +137,9 @@ class TIMEBANDTrainer:
             fake_y = self.netG(x)[:, : self.dataset.forecast_len]
             return fake_y.to(self.device)
 
+        i = 0
         losses = init_loss()
+        amplifier = self.amplifier
         TAG = "Train" if training else "Valid"
         for i, data in enumerate(tqdm):
             # #######################
@@ -158,17 +162,14 @@ class TIMEBANDTrainer:
                     errGP = self.metric.grad_penalty(fake_y, true_y)
 
                     errD = errD_real + errD_fake + errGP
-                    errD.backward(retain_graph=True)
+                    errD.backward()
                     self.optimD.step()
 
             # Data
             true_x = data["encoded"].to(self.device)
             true_y = data["decoded"].to(self.device)
-            real_x = data["observed"]
             real_y = data["forecast"]
             fake_y = generate(true_x)
-
-            batchs = true_y.shape[0]
 
             # Optimizer initialize
             self.optimD.zero_grad()
@@ -183,6 +184,8 @@ class TIMEBANDTrainer:
             errD_real = self.metric.GANloss(Dx, target_is_real=True)
             errD_fake = self.metric.GANloss(Dy, target_is_real=False)
 
+            losses["Dr"] += errD_real
+            losses["Df"] += errD_fake
             losses["D"] += errD_real + errD_fake
 
             if training:
@@ -193,6 +196,7 @@ class TIMEBANDTrainer:
             # #######################
             # Generator Trainining
             # #######################
+            fake_y = generate(true_x)
             Dy = self.netD(fake_y)
             errG_ = self.metric.GANloss(Dy, target_is_real=False)
             errl1 = self.metric.l1loss(fake_y, true_y)
@@ -206,101 +210,121 @@ class TIMEBANDTrainer:
             losses["GP"] += errGP
 
             if training:
-                errG.backward(retain_graph=True)
+                errG.backward()
                 self.optimG.step()
 
             # #######################
             # Scoring
             # #######################
             pred_y = self.dataset.denormalize(fake_y.cpu())
-            self.concat(real_x, pred_y)
+            (batchs, forecast_len, target_dims) = true_y.shape
+            self.pred_concat(pred_y, real_y)
 
-            losses["Score"] += self.metric.NMAE(pred_y, real_y).detach().numpy()
+            losses["Score"] += (
+                self.metric.NMAE(
+                    torch.from_numpy(self.pred_ans[-batchs - forecast_len :])
+                    * self.amplifier,
+                    torch.from_numpy(self.real_ans[-batchs - forecast_len :]),
+                )
+                .detach()
+                .numpy()
+            )
 
+            losses["RMSE"] += self.metric.RMSE(pred_y, real_y).detach().numpy()
+            losses["Score_raw"] += self.metric.NMAE(pred_y, real_y).detach().numpy()
+            nme = self.metric.NME(pred_y * self.amplifier, real_y).detach().numpy()
+
+            if training and i > 150:
+                amplifier += nme * amplifier * (batchs / self.dataset.data_length) * 0.1
+
+            losses["NME"] += nme
             # Losses Log
             tqdm.set_description(loss_info(TAG, epoch, losses, i))
+            # if not training:
             self.dashboard.visualize(
-                batchs, self.reals, self.preds, self.predictions, self.std
+                batchs,
+                real_y,
+                pred_y,
+                self.pred_ans[-batchs - forecast_len :],
+                self.pred_std[-batchs - forecast_len :],
             )
+
+        if training:
+            print(f"Amplifier {self.amplifier:2.5f}, {amplifier:2.5f}")
+            self.amplifier = self.amplifier + (amplifier - self.amplifier) * 0.1
 
         return losses["Score"] / (i + 1)
 
-    def data_process(self, real):
-        batch_size = real.shape[0]
+    def pred_initate(self):
+        decoded_shape = self.dataset.decode_shape
+        (batch_size, forecast_len, target_dims) = decoded_shape
 
-        if self.true_data is None:
-            self.true_data = real[0, :-1, :]
+        init_shape3 = (forecast_len - 1, forecast_len, target_dims)
+        init_shape2 = (forecast_len - 1, target_dims)
+
+        self.pred_idx = 0
+
+        self.pred_data = np.empty(init_shape3)
+        self.pred_data[:] = np.nan
+
+        self.real_ans = np.zeros(init_shape2)
+
+        self.pred_ans = np.empty(init_shape2)
+        self.pred_ans[:] = np.nan
+
+        self.pred_std = np.zeros(init_shape2)
+
+    def pred_concat(self, pred, reals):
+        (batch_size, forecast_len, target_dims) = pred.shape
+        pred = pred.detach().numpy()
+
+        nan_shape3 = np.empty((batch_size, forecast_len, target_dims))
+        nan_shape3[:] = np.nan
+        nan_shape2 = np.empty((batch_size, target_dims))
+        nan_shape2[:] = np.nan
+
+        self.pred_data = np.concatenate([self.pred_data, nan_shape3])
+        if self.real_ans.shape[0] < forecast_len:
+            self.real_ans[: forecast_len - 1] = reals[0, :-1]
+        self.real_ans = np.concatenate([self.real_ans, nan_shape2])
+
+        self.pred_ans = np.concatenate([self.pred_ans, nan_shape2])
+        self.pred_std = np.concatenate([self.pred_std, nan_shape2])
+
+        # Concat predictions
+        for f in range(forecast_len):
+            idx_s = self.pred_idx + f
+            idx_e = self.pred_idx + batch_size + f
+            self.pred_data[idx_s:idx_e, f] = pred[:, f]
 
         for b in range(batch_size):
-            self.true_data = np.concatenate([self.true_data, real[b, -1:, :]])
+            self.real_ans[-batch_size + b] = reals[b, -1]
 
-    def concat(self, real_x: Tensor, pred_y: Tensor):
-        batch_size = pred_y.shape[0]
-        future_len = pred_y.shape[1]
-        target_dim = pred_y.shape[2]
+        update_idx = -batch_size - forecast_len
+        self.pred_ans[update_idx:] = np.nanmedian(self.pred_data[update_idx:], axis=1)
+        self.pred_std[update_idx:] = np.nanstd(self.pred_data[update_idx:], axis=1)
 
-        if self.preds is None:
-            observe_len = real_x.shape[1]
-            origin_dim = real_x.shape[2]
+        for f in range(forecast_len - 1, 0, -1):
+            gamma = (forecast_len - f) / (forecast_len - 1)
+            self.pred_std[-f] += self.pred_std[-f - 1] * gamma
 
-            self.index = 0
-            self.reals = torch.zeros((future_len, observe_len, origin_dim))
-            self.preds = torch.zeros((future_len, future_len, target_dim))
-
-            self.answer = torch.zeros((future_len, future_len, target_dim))
-            self.predictions = torch.zeros((future_len, target_dim))
-            self.std = torch.zeros((future_len, target_dim))
-
-        zeros_3 = torch.zeros((batch_size, future_len, target_dim))
-        zeros_2 = torch.zeros((batch_size, target_dim))
-
-        self.reals = torch.cat([self.reals, real_x])
-        self.preds = torch.cat([self.preds, pred_y])
-
-        self.answer = torch.cat([self.answer, zeros_3])
-        self.predictions = torch.cat([self.predictions, zeros_2])
-        self.std = torch.cat([self.std, zeros_2])
-
-        for f in range(future_len):
-            idx_s = self.index + f
-            self.answer[idx_s : idx_s + batch_size, f] = self.preds[-batch_size:, f]
-
-        ans = self.answer[-batch_size - future_len :].detach().numpy()
-        ans[:-1][ans[:-1] == 0] = np.nan
-        median = np.nanmedian(ans, axis=1)
-        std = np.nanstd(ans, axis=1)  # / np.count_nonzero(~np.isnan(ans), axis=1)
-
-        GAMMA = (batch_size - 1) / batch_size
-        for f in range(future_len):
-            std[f - future_len] = (
-                std[f - future_len] + std[f - future_len - 1]
-            ) * GAMMA
-
-        self.predictions[-batch_size - future_len :] = torch.from_numpy(median)
-        self.std[-batch_size - future_len :] = torch.from_numpy(std)
-
-        df = pd.DataFrame(
-            np.concatenate(
-                [
-                    self.predictions[-batch_size - future_len :],
-                    median[-batch_size - future_len :],
-                    std[-batch_size - future_len :],
-                ],
-                axis=1,
-            )
-        )
-
-        self.index += batch_size
+        self.pred_idx += batch_size
 
 
 def loss_info(process, epoch, losses=None, i=0):
     if losses is None:
         losses = init_loss()
 
+    score = f"{losses['Score'] / (i + 1):7.5f}"
     return (
         f"[{process} e{epoch + 1:4d}]"
-        f"Score {losses['Score']/(i+1):7.5f}("
+        f"Score {losses['Score_raw']/(i+1):7.5f} / "
+        f"{colorstr(score)} / "
+        f"{losses['RMSE']/(i+1):7.5f} / "
+        f"{losses['NME']/(i+1):7.4f}  ("
         f"D {losses['D']/(i+1):6.3f} "
+        f"(R {losses['Dr']/(i+1):6.3f}, "
+        f"F {losses['Df']/(i+1):6.3f}) "
         f"G {losses['G']/(i+1):6.3f} "
         f"L1 {losses['l1']/(i+1):6.3f} "
         f"L2 {losses['l2']/(i+1):6.3f} "
@@ -312,8 +336,13 @@ def init_loss() -> dict:
     return {
         "G": 0,
         "D": 0,
+        "Dr": 0,
+        "Df": 0,
         "l1": 0,
         "l2": 0,
         "GP": 0,
+        "NME": 0,
+        "RMSE": 0,
         "Score": 0,
+        "Score_raw": 0,
     }
