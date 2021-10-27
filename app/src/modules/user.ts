@@ -20,7 +20,8 @@ export type PlayerState = {
 
 export type AssetState = {
   corpId: string;
-  quantity: number;
+  totalQuantity: number;
+  availableQuantity: number;
 };
 
 export type TradeState = {
@@ -32,6 +33,11 @@ export type TradeState = {
   status: "pending" | "disposed" | "cancel";
 };
 
+export type CashState = {
+  totalCash: number;
+  availableCash: number;
+};
+
 export type userState = {
   name: string;
   room: string;
@@ -41,7 +47,7 @@ export type userState = {
   gameId: string;
   messages: MessageState[];
   players: PlayerState[];
-  cash: number;
+  cash: CashState;
   assets: AssetState[];
   trades: TradeState[];
   selectedCorpId: string;
@@ -56,12 +62,12 @@ const initialState: userState = {
   gameId: "",
   messages: [],
   players: [],
-  cash: 100_000,
+  cash: { totalCash: 100_000, availableCash: 100_000 },
   assets: [
-    // { corpId: "gyu", quantity: 0 },
-    // { corpId: "kang", quantity: 0 },
-    // { corpId: "han", quantity: 0 },
-    // { corpId: "lee", quantity: 0 },
+    // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0 },
+    // { corpId: "kang", totalQuantity: 0, availbleQuantity: 0 },
+    // { corpId: "han", totalQuantity: 0, availbleQuantity: 0 },
+    // { corpId: "lee", totalQuantity: 0, availbleQuantity: 0 },
   ],
   trades: [
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
@@ -102,7 +108,7 @@ export const gameSlice = createSlice({
     updateAssets: (state, action: PayloadAction<AssetState[]>) => {
       state.assets = action.payload;
     },
-    updateCash: (state, action: PayloadAction<number>) => {
+    updateCash: (state, action: PayloadAction<CashState>) => {
       state.cash = action.payload;
     },
     updateSelectedCorpId: (state, action: PayloadAction<string>) => {

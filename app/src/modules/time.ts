@@ -9,7 +9,7 @@ export type TimeState = {
 const initialState: TimeState = {
   week: 1,
   day: 0, // 0: weekend, 1~5: Mon~Fri
-  tick: 1, // 1~4
+  tick: 0, // 0: dawn, 1~3: morning~afternoon, 4: evening
 };
 
 export const timeSlice = createSlice({
