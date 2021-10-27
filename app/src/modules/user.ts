@@ -79,6 +79,7 @@ export const gameSlice = createSlice({
   name: "game",
   initialState,
   reducers: {
+    resetUser: () => initialState,
     updateName(state, action: PayloadAction<string>) {
       state.name = action.payload;
     },
@@ -154,6 +155,7 @@ export const {
   updateCash,
   updateSelectedCorpId,
   updateTrades,
+  resetUser
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
