@@ -95,7 +95,9 @@ def get_data_by_datetime_in_one_row(
         )
         company_dataframe["날짜"] = pd.to_datetime(company_dataframe["날짜"])
         company_dataframe = company_dataframe.drop(["Unnamed: 0"], axis=1)
-        company_dataframe = company_dataframe[company_dataframe['날짜'] > target_day][: train_days + init_days]
+        company_dataframe = company_dataframe[company_dataframe["날짜"] > target_day][
+            : train_days + init_days
+        ]
         # 3. 찾았다면, 해당 정보를 numpy 배열에 append
         print(company_dataframe.head(5))
         res.append(company_dataframe.reset_index(drop=True))
@@ -103,15 +105,17 @@ def get_data_by_datetime_in_one_row(
     # 4. KOSPI INDEX 정보 추가 - '종가'를 기준으로 함
     kospi = pd.read_csv(os.path.join(DATA_PATH, "kospi.csv"))
     kospi["날짜"] = pd.to_datetime(kospi["날짜"])
-    kospi = kospi[kospi['날짜'] > target_day][: train_days + init_days]["종가"]
+    kospi = kospi[kospi["날짜"] > target_day][: train_days + init_days]["종가"]
     res.append(kospi.reset_index(drop=True))
 
     # 5. Dollar Exchange Rate 정보 추가
     exchange_rate = pd.read_csv(os.path.join(DATA_PATH, "exchange_rate.csv"))
-    exchange_rate['DateTime'] = pd.to_datetime(exchange_rate['DateTime']).dt.date
+    exchange_rate["DateTime"] = pd.to_datetime(exchange_rate["DateTime"]).dt.date
     exchange_rate = exchange_rate.drop(["Unnamed: 0"], axis=1)
     exchange_rate = exchange_rate[~exchange_rate["Rate"].isna()]
-    exchange_rate = exchange_rate[exchange_rate['DateTime'] > target_day.date()][: train_days + init_days]["Rate"].reset_index(drop=True)
+    exchange_rate = exchange_rate[exchange_rate["DateTime"] > target_day.date()][
+        : train_days + init_days
+    ]["Rate"].reset_index(drop=True)
     print(exchange_rate.head(5))
     res.append(exchange_rate)
 
@@ -129,6 +133,6 @@ def get_data_by_datetime_in_one_row(
         ]
     df_label += ["kospi", "exchange_rate"]
     result.columns = df_label
-    result = result.loc[:,~result.columns.duplicated()]
+    result = result.loc[:, ~result.columns.duplicated()]
     result.set_index("date", inplace=True)
     return result
