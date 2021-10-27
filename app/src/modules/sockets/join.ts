@@ -15,6 +15,7 @@ import {
   JOIN_CANCEL,
   JOIN_CONNECTED,
   JOIN_HOST,
+  JOIN_LEAVE,
   JOIN_PLAY,
   JOIN_PLAYERS,
   JOIN_READY,
@@ -155,5 +156,17 @@ export function* receiveJoinHostSaga(socket: Socket) {
   while (true) {
     const payload: boolean = yield take(channel);
     yield put(updateIsHost(payload));
+  }
+}
+
+export const sendJoinLeave = createAction<null>(JOIN_LEAVE);
+
+export function* sendJoinLeaveSaga(socket: Socket) {
+  while (true) {
+    yield take(JOIN_LEAVE);
+    yield apply(socket, socket.emit, [JOIN_LEAVE]);
+
+    // TO DO
+    // status 내 room, gameId, playerId 초기화하기 위한 reducer 함수 호출
   }
 }

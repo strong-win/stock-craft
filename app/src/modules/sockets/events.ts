@@ -12,6 +12,7 @@ export const JOIN_START = "join/start";
 export const JOIN_CANCEL = "join/cancel";
 export const JOIN_PLAYERS = "join/players";
 export const JOIN_HOST = "join/host";
+export const JOIN_LEAVE = "join/leave";
 
 export const GAME_TIME_REQUEST = "game/time_request";
 export const GAME_TIME_RESPONSE = "game/time_response";
