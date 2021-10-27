@@ -15,7 +15,7 @@ class LSTMGenerator(nn.Module):
     Output: sequence of shape (batch_size, seq_len, out_dim)
     """
 
-    def __init__(self, in_dim, out_dim, n_layers=1, hidden_dim=256, device=None):
+    def __init__(self, in_dim, out_dim, hidden_dim=256, n_layers=1, device=None):
         super().__init__()
         self.device = device
         self.n_layers = n_layers
@@ -64,7 +64,7 @@ class LSTMDiscriminator(nn.Module):
     Output: sequence of shape (batch_size, seq_len, 1)
     """
 
-    def __init__(self, in_dim, n_layers=1, hidden_dim=256, device=None):
+    def __init__(self, in_dim, hidden_dim=256, n_layers=1, device=None):
         super().__init__()
         self.device = device
         self.n_layers = n_layers

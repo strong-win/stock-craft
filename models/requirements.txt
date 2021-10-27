@@ -1,9 +1,15 @@
+cloudpickle==2.0.0
 colorama==0.4.4
 cycler==0.10.0
+dask==2021.10.0
+fsspec==2021.10.1
 kiwisolver==1.3.2
+locket==0.2.1
 matplotlib==3.4.3
 numpy==1.21.2
+packaging==21.0
 pandas==1.3.3
+partd==1.2.0
 Pillow==8.3.2
 pyparsing==2.4.7
 python-dateutil==2.8.2
@@ -11,6 +17,9 @@ pytz==2021.1
 PyYAML==5.4.1
 six==1.16.0
 structlog==21.1.0
+tabulate==0.8.9
+toolz==0.11.1
 torch==1.9.1+cu111
 tqdm==4.62.3
 typing-extensions==3.10.0.2
+wcwidth==0.2.5

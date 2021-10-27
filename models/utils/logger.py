@@ -1,3 +1,4 @@
+import os
 import pytz
 import structlog
 import datetime
@@ -8,20 +9,28 @@ timestamper = structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S", utc=Fals
 pre_chain = [structlog.stdlib.add_log_level, timestamper]
 
 today = datetime.datetime.today()
-logtime = (today).strftime("%Y%m%d")
+
+DETAIL = 0
+NORMAL = 1
+IMPORT = 2
 
 
 class Logger:
-    def __init__(self, file):
-        self.init_config(file)
-        self.logger = logging.getLogger(file)
+    def __init__(self, logpath: str, verbosity: int):
+        # Set log file path
+        self.logpath = logpath
+        self.verbosity = verbosity
 
-    def init_config(self, file):
+        self.init_config()
+        self.logger = logging.getLogger()
 
+    def init_config(self):
+        logtime = (today).strftime("%y%m%d_%H%M")
+        logfile = os.path.join(self.logpath, f"{logtime}.log")
         logging.config.dictConfig(
             {
                 "version": 1,
-                "disable_existing_loggers": False,
+                "disable_existing_loggers": True,
                 "formatters": {
                     "plain": {
                         "()": structlog.stdlib.ProcessorFormatter,
@@ -36,14 +45,14 @@ class Logger:
                 },
                 "handlers": {
                     "default": {
-                        "level": "INFO",
+                        "level": "DEBUG",
                         "class": "logging.StreamHandler",
                         "formatter": "colored",
                     },
                     "file": {
                         "level": "INFO",
                         "class": "logging.handlers.RotatingFileHandler",
-                        "filename": f"logs/{logtime}.log",
+                        "filename": logfile,
                         "formatter": "plain",
                         "backupCount": 20,
                     },
@@ -58,8 +67,14 @@ class Logger:
             }
         )
 
-    def info(self, message):
-        return self.logger.info(message)
+    def debug(self, message: str, level: int = NORMAL):
+        if level >= self.verbosity:
+            return self.logger.debug(message)
 
-    def warn(self, message):
-        return self.logger.warning(message)
+    def info(self, message: str, level: int = NORMAL):
+        if level >= self.verbosity:
+            return self.logger.info(message)
+
+    def warn(self, message: str, level: int = NORMAL):
+        if level >= self.verbosity:
+            return self.logger.warning(message)

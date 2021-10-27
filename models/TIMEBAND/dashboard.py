@@ -17,17 +17,24 @@ class TIMEBANDDashboard:
         # Dataset
         self.time_idx = 0
         self.dataset = dataset
+
+        self.times = dataset.times
         self.observed = dataset.observed
         self.target_cols = dataset.targets
         self.target_dims = len(self.target_cols)
-
-        self.timestamp = dataset.times
 
         self.observed_len = dataset.observed_len
         self.forecast_len = dataset.forecast_len
 
         # Figure and Axis
         self.fig, self.axes = None, None
+        global logger
+        logger = config["logger"]
+
+        logger.info(
+            f"\n  Dashboard: \n" f"  - visualize : {self.vis_opt} \n",
+            level=0,
+        )
 
     def set_config(self, config: dict) -> None:
         """
@@ -39,29 +46,21 @@ class TIMEBANDDashboard:
         """
 
         # Data file configuration
-        self.visual = config["visualize"]
-        self.scope = config["scope"]
-        self.feats_by_rows = config["features_by_rows"]
-        self.xinterval = config["xinterval"]
-
-        self.height = config["height"]
-        self.width = config["width"]
+        self.__dict__ = {**config, **self.__dict__}
 
     def init_figure(self) -> tuple:
-        if self.visual is False:
+        if self.vis_opt is False:
             return
 
         self.time_idx = 0
 
         # Config subplots
-        nrows = 2 + (self.target_dims - 1) // self.feats_by_rows
+        nrows = self.vis_column
         ncols = 1
         size = (self.width, self.height)
 
-        plt.title("주가 데이터 Dashboard")
-        fig, axes = plt.subplots(nrows, ncols, figsize=size, clear=True)
+        fig, axes = plt.subplots(nrows, ncols, figsize=size, clear=True, sharex=True)
         # fig.tight_layout()
-        # axes[0].set_title("TARGET FEATURES")
 
         for i, ax in enumerate(axes):
             idx_s = i * self.feats_by_rows
@@ -69,112 +68,73 @@ class TIMEBANDDashboard:
             subplot_title = f"TIMEBAND-Band Feature {idx_s} to {idx_e}"
             ax.set_title(subplot_title)
 
+        self.reals = self.observed
+        self.preds = self.observed
+        self.lower = self.observed
+        self.upper = self.observed
+        self.output = self.observed
+
         self.fig, self.axes = fig, axes
 
-    def visualize(self, batchs, real_data, pred, pred_data, std):
-        if self.visual is False:
+    def vis(self, batchs, reals, preds, lower, upper, target=None):
+        if self.vis_opt is False:
             return
 
-        pred = pred.detach().numpy()
-        if not hasattr(self, "lower"):
-            zero_forecast = np.zeros(pred_data.shape)
-            empty_forecast = np.empty(pred_data.shape)
+        self.reals = np.concatenate([self.reals[: 1 - self.forecast_len], reals])
+        self.preds = np.concatenate([self.preds[: 1 - self.forecast_len], preds])
+        self.lower = np.concatenate([self.lower[: 1 - self.forecast_len], lower])
+        self.upper = np.concatenate([self.upper[: 1 - self.forecast_len], upper])
+        if target is not None:
+            self.output = np.concatenate([self.output[: 1 - self.forecast_len], target])
 
-            self.std = np.concatenate([np.zeros(self.observed.shape), zero_forecast])
-            self.reals = np.concatenate(
-                [self.observed, real_data[0, :-1], real_data[:, -1]]
-            )
-            self.preds = np.concatenate([self.observed, empty_forecast])
-            self.lower = self.preds.copy()
-            self.upper = self.preds.copy()
-        else:
-            empty_forecast = np.empty((batchs, self.target_dims))
-
-            self.std = np.concatenate([self.std, empty_forecast])
-            self.reals = np.concatenate([self.reals, real_data[:, -1]])
-            self.preds = np.concatenate([self.preds, empty_forecast])
-            self.lower = np.concatenate([self.lower, empty_forecast])
-            self.upper = np.concatenate([self.upper, empty_forecast])
-
-        update_idx = -pred_data.shape[0]
-        self.std[update_idx:] = std
-        self.preds[update_idx:] = pred_data
-        self.lower[update_idx:] = pred_data - self.std[update_idx:]
-        self.upper[update_idx:] = pred_data + self.std[update_idx:]
-
-        reals = reals.detach().numpy()
-        preds = preds.detach().numpy()
-        predictions = predictions.detach().numpy()
-        std = std.detach().numpy()
-
-        if self.pred_data is None:
-            self.pred_data = self.origin_df[self.target_cols][: 2 * self.observed_len]
-            self.lower = self.origin_df[self.target_cols][: 2 * self.observed_len]
-            self.upper = self.origin_df[self.target_cols][: 2 * self.observed_len]
-
-        self.pred_data = np.concatenate(
-            [self.pred_data, np.zeros((batchs, self.target_dims))]
-        )
-        self.lower = np.concatenate([self.lower, np.zeros((batchs, self.target_dims))])
-        self.upper = np.concatenate([self.upper, np.zeros((batchs, self.target_dims))])
-
-        self.pred_data[-batchs - self.forecast_len : -1] = predictions[
-            -batchs - self.forecast_len : -1
-        ]
-        self.upper[-self.forecast_len - batchs :] = (
-            self.pred_data[-self.forecast_len - batchs :]
-            + 2 * std[-self.forecast_len - batchs :]
-        )
-        self.lower[-self.forecast_len - batchs :] = (
-            self.pred_data[-self.forecast_len - batchs :]
-            - 2 * std[-self.forecast_len - batchs :]
-        )
         for batch in range(batchs):
             fig, axes = self.reset_figure()
             # 하단 그래프
-            SCOPE = max(0, self.time_idx - self.scope)
-            PIVOT = SCOPE + self.observed_len + min(self.scope, self.time_idx)
-            OBSRV = PIVOT - self.observed_len
-            FRCST = PIVOT + self.forecast_len
+            START = max(self.time_idx - self.scope, 0)
+            PIVOT = START + min(self.scope, self.time_idx)
+            OBSRV = PIVOT + self.observed_len
+            FRCST = OBSRV + self.forecast_len
 
-            xticks = np.arange(SCOPE, FRCST)
-            true_ticks = np.arange(SCOPE, PIVOT)
-            pred_ticks = np.arange(SCOPE, FRCST)
-            timelabel = [self.timestamp[x] for x in xticks]
-            target_col = 0
+            xticks = np.arange(START, FRCST + 1)
+            true_ticks = np.arange(START, OBSRV)
+            pred_ticks = np.arange(START, FRCST)
+            timelabel = [self.times[x] for x in xticks]
+            col = 0
             for i, ax in enumerate(axes):
                 ax.set_xticks(xticks[:: self.xinterval])
                 ax.set_xticklabels(timelabel[:: self.xinterval], rotation=30)
 
                 idx_s = i * self.feats_by_rows
                 idx_e = idx_s + min(self.target_dims - idx_s, self.feats_by_rows)
-                ax.axvline(SCOPE)
-                ax.axvline(PIVOT - 1)
-                ax.axvline(OBSRV - 1)
-                ax.axvline(FRCST + 1)
 
-                ax.axvspan(OBSRV - 1, PIVOT - 1, alpha=0.1, label="Observed window")
-                ax.axvspan(
-                    PIVOT - 1, FRCST, alpha=0.1, color="r", label="Forecast window"
-                )
+                ax.axvline(START, color="black")
+                ax.axvline(PIVOT, color="blue")
+                ax.axvline(OBSRV - 1, color="red")
+                ax.axvline(FRCST - 1, color="black")
 
-                for target_col in range(idx_s, idx_e):
-                    feature_label = self.target_cols[target_col]
-                    color = COLORS[target_col]
+                ax.axvspan(PIVOT, OBSRV - 1, alpha=0.1, label="Observed")
+                ax.axvspan(OBSRV - 1, FRCST - 1, alpha=0.1, color="r", label="Forecast")
+
+                for col in range(idx_s, idx_e):
+                    feature_label = self.target_cols[col]
+                    color = COLORS[col]
+
                     ax.plot(
                         true_ticks,
-                        self.reals[SCOPE:PIVOT, target_col],
+                        self.output[START:OBSRV, col],
+                        color="black",
+                        linewidth=2,
+                        label=f"Imputed {feature_label}",
+                    )
+                    ax.plot(
+                        true_ticks,
+                        self.reals[START:OBSRV, col],
+                        color=color,
                         label=f"Real {feature_label}",
-                        color=color,
                     )
                     ax.plot(
                         pred_ticks,
-                        self.reals[SCOPE:FRCST, target_col],
-                        color=color,
-                    )
-                    ax.plot(
-                        pred_ticks,
-                        self.preds[SCOPE:FRCST, target_col],
+                        self.preds[START:FRCST, col],
                         alpha=0.2,
                         linewidth=5,
                         color=color,
@@ -182,18 +142,17 @@ class TIMEBANDDashboard:
                     )
                     ax.fill_between(
                         pred_ticks,
-                        self.lower[SCOPE:FRCST, target_col],
-                        self.upper[SCOPE:FRCST, target_col],
-                        label="Normal Band",
-                        color=color,
+                        self.lower[START:FRCST, col],
+                        self.upper[START:FRCST, col],
                         alpha=0.2,
+                        color=color,
+                        label="Normal Band",
                     )
-                    target_col += 1
+                    col += 1
                 ax.legend(loc="lower left")
                 ax.relim()
             self.time_idx += 1
             self.show_figure()
-            self.idx += 1
 
     def reset_figure(self):
         # Clear previous figure
@@ -209,13 +168,12 @@ class TIMEBANDDashboard:
         self.fig.canvas.flush_events()
 
     def clear_figure(self) -> None:
-        if self.visual is False:
+        if self.vis_opt is False:
             return
 
         plt.close("all")
         plt.clf()
 
-        del self.std
         del self.preds
         del self.lower
         del self.upper

@@ -1,7 +1,8 @@
-from utils.logger import Logger
-from utils.device import init_device
+import os
+import torch
 
 from torch.utils.data import DataLoader
+from TIMEBAND.loss import TIMEBANDLoss
 from TIMEBAND.model import TIMEBANDModel
 from TIMEBAND.metric import TIMEBANDMetric
 from TIMEBAND.dataset import TIMEBANDDataset
@@ -9,7 +10,7 @@ from TIMEBAND.trainer import TIMEBANDTrainer
 from TIMEBAND.runner import TIMEBANDRunner
 from TIMEBAND.dashboard import TIMEBANDDashboard
 
-logger = Logger(__file__)
+logger = None
 
 
 class TIMEBANDCore:
@@ -21,102 +22,105 @@ class TIMEBANDCore:
     """
 
     def __init__(self, config: dict) -> None:
-        # Set device
-        self.device = init_device()
 
         # Set Config
         self.set_config(config=config)
 
-        # Dataset option
-        self.dataset = TIMEBANDDataset(self.dataset_cfg, self.device)
+        # Dataset & Model Settings
+        self.dataset = TIMEBANDDataset(self.dataset_cfg)
+        self.models = TIMEBANDModel(self.models_cfg)
 
-        # Model option
-        self.models = TIMEBANDModel(self.models_cfg, self.device)
+        # Losses and Metric Settings
+        self.metric = TIMEBANDMetric(self.metric_cfg)
+        self.losses = TIMEBANDLoss(self.losses_cfg)
 
-        # Metric option
-        self.metric = TIMEBANDMetric(self.metric_cfg, self.device)
-
-        # Visualize option
+        # Visualize Settings
         self.dashboard = TIMEBANDDashboard(self.dashboard_cfg, self.dataset)
-
-    def init_dataset(self):
-        self.dataset = TIMEBANDDataset(self.dataset_cfg, self.device)
 
     def set_config(self, config: dict) -> None:
         """
         Setting configuration
 
-        If config/config.json is not exists,
-        Use default config 'config.yml'
         """
-        logger.info("  Config : config settings")
-
-        core = config["core"]
-
-        # Core configs
-        self.mode = core["mode"]
-
-        self.workers = core["workers"]
-        self.batch_size = core["batch_size"]
-        self.seed = core["seed"]  # UNUSED
+        # Set Logger
+        global logger
+        logger = config["core"]["logger"]
+        config["core"]["targets_dims"] = len(config["dataset"]["targets"])
 
         # Configuration Categories
-        self.dataset_cfg = config["dataset"]
-        self.models_cfg = config["models"]
-        self.metric_cfg = config["metric"]
-        self.trainer_cfg = config["trainer"]
-        self.dashboard_cfg = config["dashboard"]
+        self.__dict__ = {**config["core"], **self.__dict__}
+        self.dataset_cfg = {**config["core"], **config["dataset"]}
+        self.models_cfg = {**config["core"], **config["models"]}
+        self.metric_cfg = {**config["core"], **config["dataset"]}
+        self.losses_cfg = {**config["core"], **config["losses"]}
+        self.trainer_cfg = {**config["core"], **config["trainer"]}
+        self.dashboard_cfg = {**config["core"], **config["dashboard"]}
+        self.runner_cfg = {**config["core"], **config["trainer"]}
+
+        self.output_path = os.path.join(self.outputs, self.data_name, self.TAG)
+
+    def init_device(self):
+        """
+        Setting device CUDNN option
+
+        """
+        # TODO : Using parallel GPUs options
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
+        return torch.device(device)
 
     def train(self) -> None:
-        # Model train
-        self.models.init_models(dims=self.dataset.dims)
+        # Init the models
+        self.models.initiate(dims=self.dataset.dims)
+
         self.trainer = TIMEBANDTrainer(
             self.trainer_cfg,
             self.dataset,
             self.models,
             self.metric,
-            self.dashboard,
-            self.device,
+            self.losses,
         )
 
-        for k in range(self.dataset.window_sliding + 1):
-            logger.info(f"Run ({k + 1}/{self.dataset.window_sliding + 1})")
+        for k in range(self.dataset.sliding_step + 1):
+            logger.info(f"Train ({k + 1}/{self.dataset.sliding_step})")
+
+            if self.pretrain:
+                self.models.load("BEST")
 
             # Dataset
-            trainset, validset = self.dataset.load_dataset(k + 1)
-            trainset = self.loader(trainset)
-            validset = self.loader(validset)
+            trainset, validset = self.dataset.prepare_dataset(k + 1)
+            trainset, validset = self.loader(trainset), self.loader(validset)
 
             # Model
-            netD, netG = self.trainer.train(trainset, validset)
+            self.trainer.train(trainset, validset)
 
-            logger.info(f"Done ({k + 1}/{self.dataset.window_sliding + 1}) ")
+            logger.info(f"Done ({k + 1}/{self.dataset.sliding_step + 1}) ")
 
-        return netD, netG
+    def run(self) -> None:
+        # Init the models
+        self.models.initiate(dims=self.dataset.dims)
 
-    def run(self, netG=None):
         self.runner = TIMEBANDRunner(
-            self.trainer_cfg,
+            self.runner_cfg,
             self.dataset,
             self.models,
+            self.losses,
             self.metric,
             self.dashboard,
-            self.device,
         )
 
-        _, _, predsset = self.dataset.load_dataset(0)
-        predsset = self.loader(predsset)
+        if self.pretrain:
+            self.models.load("BEST")
 
-        output = self.runner.inference(netG, predsset)
-        output.to_csv(f"./outputs/output.csv", index=False)
+        dataset = self.dataset.prepare_testset()
+        dataset = self.loader(dataset)
 
-    def visualize(self):
-        pass
+        target_output = self.runner.run(dataset)
+        target_output.to_csv(os.path.join(self.output_path, "target.csv"))
 
-    def loader(self, dataset: TIMEBANDDataset):
+        data_output = self.dataset.origin
+        data_output[target_output.columns] = target_output
+        data_output.to_csv(os.path.join(self.output_path, f"{self.TAG}.csv"))
+
+    def loader(self, dataset: TIMEBANDDataset) -> DataLoader:
         dataloader = DataLoader(dataset, self.batch_size, num_workers=self.workers)
         return dataloader
-
-    def clear(self):
-        del self.dataset
-        self.dataset = None
