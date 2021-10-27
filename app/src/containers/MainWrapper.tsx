@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
-import { updateIsHost, updateName, resetUser} from "../modules/user";
+import { updateIsHost, updateName } from "../modules/user";
 import Main from "../components/Main";
 import { createName } from "../utils/create";
 
@@ -14,7 +14,6 @@ const MainWrapper = () => {
   const [room, setRoom] = useState<string>("");
 
   useEffect(() => {
-    dispatch(resetUser());
     dispatch(updateName(createName()));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
