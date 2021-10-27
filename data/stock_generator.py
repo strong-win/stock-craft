@@ -71,9 +71,9 @@ def get_data_by_datetime(
 
 def get_data_by_datetime_in_one_row(
     quantity: int = 5, train_days: int = 365, init_days: int = 14
-) -> "numpy.ndarray":
+) -> "pandas.DataFrame":
     """
-    A function that returns ndarray with `quantity` stocks with `train_days` + `init_days` with exchange_rate and kospi_200
+    A function that returns DataFrame with `quantity` stocks with `train_days` + `init_days` with exchange_rate and kospi_index
     """
     # 0. initialize list to store individual df for merge
     res = []
@@ -94,39 +94,41 @@ def get_data_by_datetime_in_one_row(
             os.path.join(DATA_PATH, company_name + ".csv"), index_col=False
         )
         company_dataframe["날짜"] = pd.to_datetime(company_dataframe["날짜"])
-        company_dataframe = company_dataframe.drop(["Unnamed: 0"], axis=1).set_index(
-            "날짜"
-        )
-        company_dataframe = company_dataframe[company_dataframe.index > target_day][
-            : train_days + init_days
-        ]
+        company_dataframe = company_dataframe.drop(["Unnamed: 0"], axis=1)
+        company_dataframe = company_dataframe[company_dataframe['날짜'] > target_day][: train_days + init_days]
         # 3. 찾았다면, 해당 정보를 numpy 배열에 append
-        res.append(company_dataframe)
+        print(company_dataframe.head(5))
+        res.append(company_dataframe.reset_index(drop=True))
 
     # 4. KOSPI INDEX 정보 추가 - '종가'를 기준으로 함
     kospi = pd.read_csv(os.path.join(DATA_PATH, "kospi.csv"))
     kospi["날짜"] = pd.to_datetime(kospi["날짜"])
-    kospi = kospi.set_index("날짜")
-    kospi = kospi[kospi.index > target_day][: train_days + init_days]["종가"]
-    res.append(kospi)
+    kospi = kospi[kospi['날짜'] > target_day][: train_days + init_days]["종가"]
+    res.append(kospi.reset_index(drop=True))
 
     # 5. Dollar Exchange Rate 정보 추가 - '종가'를 기준으로 함
-    # TO-DO
+    exchange_rate = pd.read_csv(os.path.join(DATA_PATH, "exchange_rate.csv"))
+    exchange_rate['DateTime'] = pd.to_datetime(exchange_rate['DateTime']).dt.date
+    exchange_rate = exchange_rate.drop(["Unnamed: 0"], axis=1)
+    exchange_rate = exchange_rate[~exchange_rate["Rate"].isna()]
+    exchange_rate = exchange_rate[exchange_rate['DateTime'] > target_day.date()][: train_days + init_days]["Rate"].reset_index(drop=True)
+    print(exchange_rate.head(5))
+    res.append(exchange_rate)
 
     # 6. Merge Dataframe, reset labelname, and return final DataFrame
     result = pd.concat(res, axis=1)
     df_label = []
     for i in range(1, quantity + 1):
         df_label += [
+            "date",
             "open" + str(i),
             "high" + str(i),
             "low" + str(i),
             "close" + str(i),
             "volume" + str(i),
         ]
-    df_label += ["kospi"]
+    df_label += ["kospi", "exchange_rate"]
     result.columns = df_label
+    result = result.loc[:,~result.columns.duplicated()]
+    result.set_index("date", inplace=True)
     return result
-
-
-print(get_data_by_datetime_in_one_row().head(5))
