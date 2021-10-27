@@ -2,7 +2,10 @@ import { IsNotEmpty } from 'class-validator';
 
 export class TradeRequestDto {
   @IsNotEmpty()
-  room: string;
+  gameId: string;
+
+  @IsNotEmpty()
+  playerId: string;
 
   @IsNotEmpty()
   week: number;

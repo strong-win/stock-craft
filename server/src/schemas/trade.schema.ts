@@ -1,12 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Date } from 'mongoose';
+import { Types, Date } from 'mongoose';
+import { Player } from './player.schema';
 
 export type TradeDocument = Trade & Document;
 
 @Schema()
 export class Trade {
-  @Prop()
-  clientId: string;
+  _id: Types.ObjectId;
 
   @Prop()
   week: number;
@@ -34,6 +34,9 @@ export class Trade {
 
   @Prop()
   status: 'pending' | 'cancel' | 'disposed';
+
+  @Prop({ type: Types.ObjectId, ref: 'Player' })
+  player: Player;
 }
 
-export const TradesSchema = SchemaFactory.createForClass(Trade);
+export const TradeSchema = SchemaFactory.createForClass(Trade);
