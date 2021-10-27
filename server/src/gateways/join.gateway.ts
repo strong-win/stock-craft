@@ -4,6 +4,7 @@ import {
   JOIN_CANCEL,
   JOIN_CONNECTED,
   JOIN_HOST,
+  JOIN_LEAVE,
   JOIN_PLAY,
   JOIN_PLAYERS,
   JOIN_READY,
@@ -198,6 +199,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('connected'),
       });
     }
+  }
+
+  @SubscribeMessage(JOIN_LEAVE)
+  async receiveJoinLeave(client: Socket): Promise<void> {
+    this.handleDisconnect(client);
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
