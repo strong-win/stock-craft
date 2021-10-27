@@ -124,12 +124,6 @@ def launcher():
     except KeyboardInterrupt:
         print("Abort!")
 
-    logger.info("*********************")
-    logger.info("- Data Visualize -")
-    logger.info("*********************")
-
-    model.clear()
-
 
 if __name__ == "__main__":
     launcher()

@@ -97,7 +97,7 @@ class TIMEBANDCore:
 
     def run(self) -> None:
         # Init the models
-        self.models.initiate(dims=self.dataset.dims)
+        self.models.load("BEST")
 
         self.runner = TIMEBANDRunner(
             self.runner_cfg,
@@ -108,8 +108,6 @@ class TIMEBANDCore:
             self.dashboard,
         )
 
-        if self.pretrain:
-            self.models.load("BEST")
 
         dataset = self.dataset.prepare_testset()
         dataset = self.loader(dataset)
