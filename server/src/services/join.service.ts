@@ -5,6 +5,7 @@ import * as mongoose from 'mongoose';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
+  Cash,
   Player,
   PlayerDocument,
   PlayerInfo,
@@ -87,11 +88,15 @@ export class JoinService {
 
   getSampleData() {
     // get sample data from config
-    const cash = 100_000;
+    const cash: Cash = {
+      totalCash: 100_000,
+      availableCash: 100_000,
+    };
     const corps: Corp[] = this.configService.get<Corp[]>('corps');
     const assets: Asset[] = corps.map(({ corpId }) => ({
       corpId,
-      quantity: 0,
+      totalQuantity: 0,
+      availableQuantity: 0,
     }));
 
     return { cash, corps, assets };
