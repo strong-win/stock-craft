@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 
 export type TimeState = {
   week: number;
@@ -10,6 +11,7 @@ export type GameState = {
   gameId: string;
   room: string;
   time: TimeState;
+  date?: Date;
 };
 
 @Injectable()
@@ -20,7 +22,10 @@ export class GameService {
     this.games.push({ gameId, room, time: { week: 1, day: 0, tick: 0 } });
   }
 
-  getTime(gameId: string): TimeState {
+  getTime(gameId: Types.ObjectId | string): TimeState {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
     return this.games.find((game) => game.gameId === gameId).time;
   }
 
@@ -35,16 +40,17 @@ export class GameService {
       if (game.gameId === gameId) {
         // get room, time
         room = game.room;
-        timeChanged = this.nextTime(game.time);
+        timeChanged = this.getNextTime(game.time);
 
         // update time
         game.time = timeChanged;
+        game.date = new Date();
       }
     }
     return { room, timeChanged };
   }
 
-  nextTime({ week, day, tick }: TimeState): TimeState {
+  getNextTime({ week, day, tick }: TimeState): TimeState {
     if (day === 0) {
       return tick < 2
         ? { week: week, day: day, tick: tick + 1 }
@@ -59,5 +65,19 @@ export class GameService {
         ? { week: week, day: day, tick: tick + 1 }
         : { week: week, day: day + 1, tick: 0 };
     }
+  }
+
+  getNextDate(gameId: Types.ObjectId | string): Date {
+    const game: GameState = this.games.find((game) => game.gameId === gameId);
+
+    const { time, date } = game;
+    const timeChanged: TimeState = this.getNextTime(time);
+
+    if (timeChanged.tick === 0) {
+      date.setSeconds(date.getSeconds() + 5);
+    } else {
+      date.setSeconds(date.getSeconds() + 15);
+    }
+    return date;
   }
 }
