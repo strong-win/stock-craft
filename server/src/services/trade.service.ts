@@ -258,24 +258,24 @@ export class TradeService {
   async handleTradeCancel(
     tradeCancelDto: TradeCancelDto,
   ): Promise<TradeResponseDto> {
-    const { playerId, gameId, week, day, tick, corpId, _id } = tradeCancelDto;
+    const { playerId, corpId, _id } = tradeCancelDto;
 
-    const time: TimeState = this.gameService.getTime(gameId);
+    // const time: TimeState = this.gameService.getTime(gameId);
 
-    if (
-      time.week !== week ||
-      time.day !== day ||
-      time.tick !== tick ||
-      time.tick < 1 ||
-      time.tick > 3 ||
-      day < 1
-    ) {
-      const timeError = new Error(
-        '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
-      );
-      timeError.name = 'TimeException';
-      throw timeError;
-    }
+    // if (
+    //   time.week !== week ||
+    //   time.day !== day ||
+    //   time.tick !== tick ||
+    //   time.tick < 1 ||
+    //   time.tick > 3 ||
+    //   day < 1
+    // ) {
+    //   const timeError = new Error(
+    //     '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
+    //   );
+    //   timeError.name = 'TimeException';
+    //   throw timeError;
+    // }
 
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
