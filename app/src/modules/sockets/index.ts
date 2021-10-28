@@ -12,6 +12,7 @@ import {
   receiveJoinPlaySaga,
   sendJoinCancelSaga,
   sendJoinConnectedSaga,
+  sendJoinLeaveSaga,
   sendJoinReadySaga,
   sendJoinStartSaga,
 } from "./join";
@@ -30,6 +31,7 @@ export function* handleIO() {
     sendJoinStartSaga(socket),
     sendJoinCancelSaga(socket),
     receiveJoinHostSaga(socket),
+    sendJoinLeaveSaga(socket),
 
     // chatting
     sendChattingSaga(socket),

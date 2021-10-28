@@ -5,6 +5,7 @@ import { Socket } from "socket.io-client";
 
 import {
   AssetState,
+  CashState,
   TradeState,
   updateAssets,
   updateCash,
@@ -25,13 +26,17 @@ type TradeRequest = {
 };
 
 type TradeCancel = {
+  gameId: string;
   playerId: string;
-  _id: string;
+  week: number;
+  day: number;
+  tick: number;
   corpId: string;
+  _id: string;
 };
 
 type TradeResponse = {
-  cash: number;
+  cash: CashState;
   assets: AssetState[];
   action: "request" | "refresh" | "cancel";
   trades: TradeState[];

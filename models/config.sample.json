@@ -3,44 +3,43 @@
         "mode": "train",
 
         "workers": 2,
-        "batch_size": 28,
+        "batch_size": 64,
         "seed": 42
     },
     "dataset": {
         "directory": "data",
-        "data_name": "sample",
+        "data_name": "stock.sample",
 
-        "index_col": "날짜",
-        "index_format": "%Y-%m-%d",
-
-        "year": "year",
-        "month": "month",
-        "weekday": "weekday",
+        "time_index": "date",
+        "time_format": "%Y-%m-%d",
+        "time_encoding":{
+            "month": true,
+            "weekday": true
+        },
 
         "drops": [],
-        "targets": ["종가"],
+        "targets": ["open", "close"],
 
         "stride": 1,
-        "observed_len": 28,
-        "forecast_len": 28,
+        "observed_len": 14,
+        "forecast_len": 14,
 
         "split_rate": 0.9,
         "window_scale": 2,
-        "window_sliding": 1,
+        "window_sliding": 10,
 
         "scaler": false,
+        "impute": false,
         "cutoff": {
             "min": 0.01,
-            "max": 0
+            "max": 0.01
         }
     },
     "models": {
         "directory": "TIMEBAND/pretrained/",
-        "model_tag": "stock",
+        "model_tag": "sample",
         
         "load": true,
-        "load_interval": 20,
-
         "reload": true,
         "reload_interval": 15,
         
@@ -59,7 +58,7 @@
     "trainer": {
         "epochs": {
             "base": 0,
-            "iter": 10,
+            "iter": 50,
             "critic": 5
         },
         "learning_rate": {
@@ -75,7 +74,7 @@
     },
     "dashboard": {
         "visualize": false,
-        "scope": 36,
+        "scope": 180,
         
         "features_by_rows": 13,
         "xinterval": 60,

@@ -20,6 +20,14 @@ class TIMEBANDMetric:
     def GANloss(self, D, target_is_real):
         return self.criterion_adv(D, target_is_real)
 
+    def RMSE(self, pred, true):
+        pred, true = self._ignore_zero(pred, true)
+        return torch.mean(torch.sqrt(torch.square(true - pred)))
+
+    def NME(self, pred, true):
+        pred, true = self._ignore_zero(pred, true)
+        return torch.mean((true - pred) / (true))
+
     def NMAE(self, pred, true):
         pred, true = self._ignore_zero(pred, true)
         return torch.mean(torch.abs(true - pred) / (true))

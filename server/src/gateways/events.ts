@@ -5,6 +5,7 @@ export const JOIN_PLAY = 'join/play';
 export const JOIN_CANCEL = 'join/cancel';
 export const JOIN_PLAYERS = 'join/players';
 export const JOIN_HOST = 'join/host';
+export const JOIN_LEAVE = 'join/leave';
 
 export const CHATTING_SERVER_MESSAGE = 'chatting/server_message';
 export const CHATTING_CLIENT_MESSAGE = 'chatting/client_message';

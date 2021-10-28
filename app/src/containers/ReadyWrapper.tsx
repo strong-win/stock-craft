@@ -2,7 +2,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { RootState } from "..";
 import ReadyButton from "../components/ReadyButton";
-import {PlayerState} from "../modules/user";
 import {
   sendJoinCancel,
   sendJoinReady,
@@ -25,7 +24,15 @@ const ReadyWrapper = () => {
     dispatch(sendJoinCancel({ playerId, room }));
   };
 
-  return <ReadyButton players={players} isHost={isHost} status={status} onClickReady={onClickReady} onClickCancel={onClickCancel} />;
+  return (
+    <ReadyButton
+      players={players}
+      isHost={isHost}
+      status={status}
+      onClickReady={onClickReady}
+      onClickCancel={onClickCancel}
+    />
+  );
 };
 
 export default ReadyWrapper;

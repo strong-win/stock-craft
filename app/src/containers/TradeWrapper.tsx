@@ -38,11 +38,10 @@ const TradeWrapper = () => {
       (asset) => asset.corpId === selectedCorpId
     );
 
-    const { quantity } = corpAsset;
     const stockBill = {
       // price: corpStock.todayChart[tick * 4 - 1] || 0,
       price: corpStock.todayChart[tick - 1] || 0,
-      quantity,
+      quantity: corpAsset.availableQuantity,
     };
 
     setStockBill(stockBill);
@@ -67,7 +66,7 @@ const TradeWrapper = () => {
   };
 
   const handleCancel = (_id: string, corpId: string) => {
-    dispatch(tradeCancel({ playerId, _id, corpId }));
+    dispatch(tradeCancel({ gameId, playerId, week, day, tick, corpId, _id }));
   };
 
   return (
