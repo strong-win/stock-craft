@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400&display=swap');
+
+.header{
+    max-height: 10%;
+    color: #F0E583;
+    background-color: #615F54;
+    font-size: 5vh;
+    font-weight: 300;
+    font-family: "Chakra Petch";
+    justify-content: center;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+b{
+    font-weight: 700;
+}

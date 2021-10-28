@@ -6,21 +6,15 @@ import { Container, Row, Col } from "reactstrap";
 import { RootState } from "..";
 import ChattingWrapper from "../containers/ChattingWrapper";
 import ClockWrapper from "../containers/ClockWrapper";
-import PlayersWrapper from "../containers/PlayersWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import { updateName, updateRoom, resetUser } from "../modules/user";
 import { createName } from "../utils/create";
-import {
-  sendJoinCancel,
-  sendJoinConnected,
-  sendJoinReady,
-  sendJoinStart,
-  sendJoinLeave
-} from "../modules/sockets/join";
+import WaitingRoom from "./WaitingRoom";
+import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
 
 const Play = ({ location, history }: any) => {
-  const [ isBlocking, setIsBlocking ] = useState<boolean>(false); 
+  const [isBlocking, setIsBlocking] = useState<boolean>(false);
   const { room: initRoom } = queryString.parse(location.search);
 
   const { playerId, name, room, status, isHost } = useSelector(
@@ -30,38 +24,39 @@ const Play = ({ location, history }: any) => {
 
   useEffect(() => {
     history.block((loc, action) => {
-      if(action === 'POP' && isBlocking) {
-        if(window.confirm("정말 나가시겠습니까?")){
+      if (action === "POP" && isBlocking) {
+        if (window.confirm("정말 나가시겠습니까?")) {
           //TODO: host 처리 fe? be?
           dispatch(sendJoinLeave());
           return true;
-        }
-        else return false;
+        } else return false;
       }
       return true;
     });
-  }, [isBlocking])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isBlocking]);
 
   useEffect(() => {
-    const checkLeaveHandler = (e: any) => { 
+    const checkLeaveHandler = (e: any) => {
       e.preventDefault();
       e.returnValue = "";
-    }
+    };
     const leaveHandler = (e: any) => {
       //TODO: event handler
       dispatch(sendJoinLeave());
-    }
+    };
 
-    setIsBlocking(true)
+    setIsBlocking(true);
 
-    window.addEventListener('beforeunload', checkLeaveHandler); 
-    window.addEventListener('unload', leaveHandler); 
-    
+    window.addEventListener("beforeunload", checkLeaveHandler);
+    window.addEventListener("unload", leaveHandler);
+
     return () => {
       window.removeEventListener("beforeunload", checkLeaveHandler);
       window.removeEventListener("unload", leaveHandler);
       dispatch(resetUser());
-    }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -81,23 +76,13 @@ const Play = ({ location, history }: any) => {
     }
 
     return () => {
-      if(playerId === "") {
+      if (playerId === "") {
         history.push("/");
-      } 
+      }
       //TODO: 기능 개선 필요 (playerId update함수 진행 후에 바로 비교연산 수행 필요.)
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
-
-  const onClickReady = (isHost: boolean) => {
-    isHost
-      ? dispatch(sendJoinStart({ playerId, room }))
-      : dispatch(sendJoinReady({ playerId, room }));
-  };
-
-  const onClickCancel = (e: any) => {
-    dispatch(sendJoinCancel({ playerId, room }));
-  };
 
   return status === "play" ? (
     <Container fluid={true}>
@@ -105,16 +90,13 @@ const Play = ({ location, history }: any) => {
         <Col>
           <ClockWrapper />
         </Col>
-        <Col>
-          <PlayersWrapper room={room} />
-        </Col>
       </Row>
       <Row>
         <Col md="8">
           <CorporationsWrapper />
         </Col>
         <Col md="4">
-          <ChattingWrapper name={name} />
+          <ChattingWrapper room={room} name={name} />
         </Col>
       </Row>
       <Row>
@@ -124,15 +106,7 @@ const Play = ({ location, history }: any) => {
       </Row>
     </Container>
   ) : (
-    <>
-      <div>
-        <button onClick={() => onClickReady(isHost)}>
-          {isHost ? "START" : "READY"}
-        </button>
-        <button onClick={onClickCancel}>CANCEL</button>
-      </div>
-      <PlayersWrapper room={room} />
-    </>
+    <WaitingRoom name={name} room={room} />
   );
 };
 

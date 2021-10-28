@@ -10,6 +10,7 @@ import Messages from "./Messages";
 
 type ChattingProps = {
   name: string;
+  room: string;
   message: string;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
@@ -18,6 +19,7 @@ type ChattingProps = {
 
 const Chatting = ({
   name,
+  room,
   message,
   messages,
   setMessage,
@@ -25,8 +27,9 @@ const Chatting = ({
 }: ChattingProps) => {
   return (
     <Card className="chatting">
-      <CardHeader>
-        <FiUser /> {name}
+      <CardHeader className="chattingHeader">
+        <div ><FiUser /> {name} </div>
+        <div >RoomCode: {room}</div>
       </CardHeader>
       <CardBody className="chattingBody">
         <Messages name={name} messages={messages} />

@@ -5,7 +5,7 @@ import { RootState } from "..";
 import Chatting from "../components/Chatting";
 import { sendChatting } from "../modules/sockets/chatting";
 
-const ChattingWrapper = ({ name }: { name: string }) => {
+const ChattingWrapper = ({ name, room }: { name: string, room: string }) => {
   const { playerId, messages } = useSelector(
     (state: RootState) => state.user
   );
@@ -25,6 +25,7 @@ const ChattingWrapper = ({ name }: { name: string }) => {
   return (
     <Chatting
       name={name}
+      room={room}
       message={message}
       setMessage={setMessage}
       sendMessage={sendMessage}

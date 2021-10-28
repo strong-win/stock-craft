@@ -12,7 +12,8 @@ const PlayersWrapper = ({ room }: PlayersWrapperProps) => {
   const players: PlayerState[] = useSelector(
     (state: RootState) => state.user.players
   );
-  return <Players room={room} players={players} />;
+
+  return <Players players={players} />;
 };
 
 export default PlayersWrapper;
