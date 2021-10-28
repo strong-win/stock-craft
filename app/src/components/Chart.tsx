@@ -1,4 +1,4 @@
-import { chartType } from "../modules/stock";
+import { ChartState } from "../modules/stock";
 
 import { Button } from "reactstrap";
 import {
@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 type ChartProps = {
-  corp: chartType;
+  corp: ChartState;
   tick: number;
   onClickBackButton: (id: string) => void;
 };

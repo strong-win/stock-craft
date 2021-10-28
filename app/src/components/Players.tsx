@@ -1,58 +1,34 @@
-import React, { useState } from "react";
+import React from "react";
 import {
-  Dropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
+  Row,
+  Col,
+  Container
 } from "reactstrap";
+import {BsFillCircleFill} from "react-icons/bs";
 
-import { playerType } from "../modules/user";
+import { PlayerState } from "../modules/user";
 import "../styles/Players.css";
 
 type PlayersProps = {
-  room: string;
-  players: playerType[];
+  players: PlayerState[];
 };
 
-const RoomCode = ({ room }) => (
-  <DropdownToggle caret className="RoomCode">
-    <p className="label">room</p>
-    <p className="code">{room}</p>
-  </DropdownToggle>
-);
+const Players = ({ players }: PlayersProps) => {
 
-const Players = ({ room, players }: PlayersProps) => {
-  const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
-
-  const toggle = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
-
-  const onMouseEnter = () => {
-    setDropdownOpen(true);
-  };
-
-  const onMouseLeave = () => {
-    setDropdownOpen(false);
-  };
-
-  const playerComponent = players.map(({ clientId, name }, index) => (
-    <DropdownItem key={index}>
-      {name}({clientId})
-    </DropdownItem>
+  const playerComponent = players.map(({ name, status }, index) => (
+    <Row className="player">
+    <Col className={`readyState ${status==="ready"? "green" : ""}`} md="1"><BsFillCircleFill size="10"/></Col>
+    <Col key={index}>
+      {name}
+    </Col>
+    </Row>
   ));
 
   return (
-    <Dropdown
-      direction="left"
-      onMouseOver={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      isOpen={dropdownOpen}
-      toggle={toggle}
-    >
-      <RoomCode room={room} />
-      <DropdownMenu>{playerComponent}</DropdownMenu>
-    </Dropdown>
+    <Container>
+      <div className="playersCount">현재 방 참여 인원 : <b>{players.length}</b>명</div>
+      {playerComponent}
+    </Container>
   );
 };
 

@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
 import Chart from "../components/Chart";
 import Corporations from "../components/Corporations";
-import { chartType } from "../modules/stock";
+import { ChartState } from "../modules/stock";
 import { updateSelectedCorpId } from "../modules/user";
 
 const CorporationsWrapper = () => {
@@ -20,7 +20,9 @@ const CorporationsWrapper = () => {
 
   const onClickCorpItem = (corpId: string) => {
     setSelectedCorpId(corpId);
-    if (corps.find((corp: chartType) => corp.corpId === corpId) !== undefined) {
+    if (
+      corps.find((corp: ChartState) => corp.corpId === corpId) !== undefined
+    ) {
       setIsChartView(true);
       dispatch(updateSelectedCorpId(corpId));
     } else {
@@ -31,7 +33,7 @@ const CorporationsWrapper = () => {
   return isChartView ? (
     <>
       <Chart
-        corp={corps.find((corp: chartType) => corp.corpId === selectedCorpId)}
+        corp={corps.find((corp: ChartState) => corp.corpId === selectedCorpId)}
         tick={tick}
         onClickBackButton={onClickCorpItem}
       />

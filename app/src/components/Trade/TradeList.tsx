@@ -1,9 +1,9 @@
-import { chartType } from "../../modules/stock";
-import { tradeType } from "../../modules/user";
+import { ChartState } from "../../modules/stock";
+import { TradeState } from "../../modules/user";
 
 type tradeListProps = {
-  trades: tradeType[];
-  corps: chartType[];
+  trades: TradeState[];
+  corps: ChartState[];
   selectedCorpId: string;
   handleCancel: (_id: string, corpId: string) => void;
 };

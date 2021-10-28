@@ -10,6 +10,27 @@
   border: none;
   padding: 0;
 }
+.readyState{
+  line-height: normal;
+  color: #C4C4C4;
+}
+
+.green{
+  color: #8BDC8A;
+}
+
+.player{
+  margin-left: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.playersCount{
+ margin-top: 1.2rem;
+ margin-left: 3.375rem;
+ font-size: 1.5rem;
+ margin-bottom: 1.2rem;
+}
 
 .label {
   font-size: small;
