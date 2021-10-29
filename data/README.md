@@ -32,8 +32,8 @@ get_data_by_datetime_in_one_row(quantity: int = 5, train_days: int = 365, init_d
 	- `train_days` : 학습 시 사용할 주가일만큼의 데이터 일자
 	- `init_days` : 처음 사용자에게 보여줄 라이브 일자
 - returns:
-	- 주식 `quantity`개의 `train_days` + `init_days`일치 분량의 주가데이터 + KOSPI INDEX + USD->KRW Exchange Rate를 반환 (`pandas_DataFrame`)
+	- 종목 `quantity`개의 `train_days` + `init_days`일치 분량의 주가데이터 + KOSPI INDEX + USD->KRW Exchange Rate를 반환 (`pandas.DataFrame`)
 
 
 Created on : 21/09/23  
-Updated on : 21/10/27
+Updated on : 21/10/29
