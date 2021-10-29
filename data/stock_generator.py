@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from random import sample, randint
 from data_constant import KOSPI_200, TICKER_NAME, DATA_PATH, START_DATE, END_DATE
 
+
 def get_random_date(train_days: int, init_days: int) -> "pd.Timestamp":
     """
     return random date between START_DATE and END_DATE
@@ -14,6 +15,7 @@ def get_random_date(train_days: int, init_days: int) -> "pd.Timestamp":
     date_length = (end_date - start_date).days - train_days - init_days
     target = randint(0, date_length)
     return pd.Timestamp(start_date + timedelta(days=target))
+
 
 def get_data_by_datetime_in_one_row(
     quantity: int = 5, train_days: int = 365, init_days: int = 14
@@ -30,9 +32,7 @@ def get_data_by_datetime_in_one_row(
     # 2. import csv and convert into DataFrame, 이에 해당하는 날짜 이전에 상장된 기업 정보를 찾기 (using KOSPI200_info.csv)
     df = pd.read_csv(os.path.join(DATA_PATH, "kospi200_info.csv"), index_col=False)
     df.ListingDate = pd.to_datetime(df.ListingDate)
-    target_companies = df[df["ListingDate"] <= target_day].sample(
-        n=5
-    )
+    target_companies = df[df["ListingDate"] <= target_day].sample(n=5)
 
     for idx, company in target_companies.iterrows():
         company_name = company["Name"]
