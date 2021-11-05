@@ -20,7 +20,7 @@ COLORS = [
     "royalblue",
     "pink",
     "silver",
-    "yello",
+    "yellow",
     "darkseagreen",
     "violet",
     "darkred",

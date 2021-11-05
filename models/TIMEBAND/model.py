@@ -1,10 +1,9 @@
 import os
 import torch
-from utils.logger import Logger
 from .utils.lstm_layer import LSTMGenerator as NetG
 from .utils.lstm_layer import LSTMDiscriminator as NetD
 
-logger = Logger(__file__)
+logger = None
 
 
 class TIMEBANDModel:
@@ -13,7 +12,7 @@ class TIMEBANDModel:
 
     """
 
-    def __init__(self, config: dict, device: torch.device) -> None:
+    def __init__(self, config: dict) -> None:
         """
         TIMEBAND Dataset
 
@@ -21,16 +20,23 @@ class TIMEBANDModel:
             config: Dataset configuration dict
             device: Torch device (cpu / cuda:0)
         """
-        logger.info("  Model: ")
+        global logger
+        logger = config["logger"]
 
         # Set Config
         self.set_config(config)
 
-        # Set device
-        self.device = device
-
         self.netD = None
         self.netG = None
+
+        logger.info(
+            "\n  Model: \n"
+            f"  - File path  : {self.models_path} \n"
+            f"  - Pretrained : {self.pretrain} \n"
+            f"  - Save opts  : {self.save_opt} \n"
+            f"  - Load opts  : {self.load_opt} \n",
+            level=0,
+        )
 
     def set_config(self, config: dict) -> None:
         """
@@ -38,95 +44,54 @@ class TIMEBANDModel:
 
         params:
             config: Dataset configuration dict
-                `config['models']`
+                `config['core'] & config['models']`
         """
-        self.directory = config["directory"]
-        self.model_tag = config["model_tag"]
-        self.model_dir = os.path.join(self.directory, self.model_tag)
-        if not os.path.exists(self.model_dir):
-            os.mkdir(self.model_dir)
+        logger.info("Timeband Model Setting")
+        self.__dict__ = {**config, **self.__dict__}
 
-        self.load_option = config["load"]
-        self.reload_option = config["reload"]
-        self.reload_interval = config["reload_interval"]
-
-        self.save_option = config["save"]
-        self.save_interval = config["save_interval"]
-
-        self.best_score = config["best_score"]
-        self.reload_count = 0
-
-        self.hidden_dim = config["hidden_dim"]
-
-    def init_models(self, dims: dict):
-        if self.load_option:
-            netD_path = self.get_path("netD")
-            netG_path = self.get_path("netG")
-            if os.path.exists(netD_path) and os.path.exists(netG_path):
-                logger.info(f" - Loaded netD : {netD_path}, netG: {netG_path}")
-                self.netD = torch.load(netD_path)
-                self.netG = torch.load(netG_path)
-            else:
-                logger.warn("Pretrained models are not exists !")
-
-        enc_dim = dims["encode"]
-        dec_dim = dims["decode"]
-
-        netD = NetD(dec_dim, hidden_dim=self.hidden_dim, device=self.device)
-        netG = NetG(enc_dim, dec_dim, hidden_dim=self.hidden_dim, device=self.device)
-
-        self.netD = netD.to(self.device)
-        self.netG = netG.to(self.device)
-        logger.info(f" - Initiated netD : {netD_path}, netG: {netG_path}")
-
-    def load(self, postfix: str = "") -> tuple((NetD, NetG)):
-        if self.load_option is False:
-            return None, None
-
-        netD_path = self.get_path("netD", postfix)
-        netG_path = self.get_path("netG", postfix)
-
-        try:
-            netD, netG = torch.load(netD_path), torch.load(netG_path)
-            logger.info(f" - Loaded netD : {netD_path}, netG: {netG_path}")
-        except:
-            netD, netG = self.load()
-
-        return netD, netG
-
-    def save(self, netD: NetD, netG: NetG, postfix: str = "") -> None:
-        if self.save_option is False:
+    def initiate(self, dims: dict) -> None:
+        if self.netD and self.netG:
             return
 
+        enc_dim, dec_dim = dims["encode"], dims["decode"]
+        netD = NetD(dec_dim, self.hidden_dim, self.layers_num, self.device)
+        netG = NetG(enc_dim, dec_dim, self.hidden_dim, self.layers_num, self.device)
+
+        self.netD, self.netG = netD.to(self.device), netG.to(self.device)
+        logger.info(f" - Initiated netD : {self.netD}, netG: {self.netG}", level=0)
+        self.save()
+
+    def load(self, postfix: str = "") -> tuple((NetD, NetG)):
         netD_path = self.get_path("netD", postfix)
         netG_path = self.get_path("netG", postfix)
 
-        torch.save(netD, netD_path)
-        torch.save(netG, netG_path)
+        if self.load_opt:
+            if os.path.exists(netD_path) and os.path.exists(netG_path):
+                logger.info(f" - {postfix} Model Loading : {netD_path}, {netG_path}")
+                self.netD, self.netG = torch.load(netD_path), torch.load(netG_path)
+            else:
+                logger.warn(f" - {postfix} Model Loading Fail")
 
-    def update(self, netD: NetD, netG: NetG, score: float) -> tuple((NetD, NetG)):
+        return self.netD, self.netG
 
-        if score < self.best_score:
-            self.best_score = score
-            score_tag = f"{self.best_score:.4f}"
-            logger.info(f"*** BEST SCORE MODEL ({score_tag}) IS SAVED ***")
+    def save(self, postfix: str = "", best: bool = False) -> None:
+        netD_path = self.get_path("netD", postfix)
+        netG_path = self.get_path("netG", postfix)
 
-            self.save(netD, netG, postfix=score_tag)
-            self.reload_count = 0
-            return netD, netG
+        if self.save_opt:
+            torch.save(self.netD, netD_path)
+            torch.save(self.netG, netG_path)
 
-        if self.reload_option is True:
-            self.reload_count += 1
-            if self.reload_count >= self.reload_interval:
-                score_tag = f"{self.best_score:.4f}"
-                logger.info(f"*** BEST SCORE MODEL ({score_tag}) IS RELOADED ***")
+            if best:
+                best_netD_path = self.get_path("netD", "BEST")
+                best_netG_path = self.get_path("netG", "BEST")
+                torch.save(self.netD, best_netD_path)
+                torch.save(self.netG, best_netG_path)
+                postfix = f"Best({postfix})"
 
-                self.reload_count = 0
-                netD, netG = self.load(postfix=score_tag)
+            logger.info(f"*** {postfix} MODEL IS SAVED ***")
 
-        return netD, netG
-
-    def get_path(self, target: str, postfix: str = ""):
+    def get_path(self, target: str, postfix: str = "") -> os.path:
         filename = target if postfix == "" else f"{target}_{postfix}"
-        filepath = os.path.join(self.model_dir, f"{filename}.pth")
+        filepath = os.path.join(self.models_path, f"{filename}.pth")
         return filepath
