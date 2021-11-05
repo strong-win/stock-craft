@@ -1,6 +1,6 @@
 import { IsNotEmpty } from 'class-validator';
 import { Types } from 'mongoose';
-import { Asset } from '../schemas/player.schema';
+import { Asset, Cash } from '../schemas/player.schema';
 
 type Trade = {
   _id: Types.ObjectId;
@@ -13,7 +13,7 @@ type Trade = {
 
 export class TradeResponseDto {
   @IsNotEmpty()
-  cash: number;
+  cash: Cash;
 
   @IsNotEmpty()
   assets: Asset[];
