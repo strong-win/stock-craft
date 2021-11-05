@@ -14,5 +14,14 @@ export class ItemRequestDto {
   day: number;
 
   @IsNotEmpty()
-  item: string[];
+  moment: 'now' | 'on-infer' | 'after-infer' | 'end';
+
+  @IsNotEmpty()
+  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+
+  @IsNotEmpty()
+  type: string;
+
+  @IsNotEmpty()
+  target: string;
 }

@@ -29,6 +29,13 @@ export class GameService {
     return this.games.find((game) => game.gameId === gameId).time;
   }
 
+  getRoom(gameId: Types.ObjectId | string): string {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+    return this.games.find((game) => game.gameId === gameId).room;
+  }
+
   updateTime(gameId: string): {
     room: string;
     timeChanged: TimeState;

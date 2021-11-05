@@ -113,7 +113,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       _id: playerId,
       name,
       room,
-    } = await this.playerService.create({
+    } = await this.playerService.createDocument({
       ...payload,
       clientId: client.id,
       status: 'connected',

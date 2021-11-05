@@ -14,7 +14,8 @@ export class ItemService {
   ) {}
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
-    const { playerId, gameId, week, day, item } = itemRequestDto;
+    const { playerId, gameId, week, day, moment, category, type, target } =
+      itemRequestDto;
     const time = this.gameService.getTime(gameId);
 
     if (
@@ -35,7 +36,10 @@ export class ItemService {
       game: Types.ObjectId(gameId),
       week,
       day,
-      item,
+      moment,
+      category,
+      type,
+      target,
     });
   }
 

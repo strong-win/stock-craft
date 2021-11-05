@@ -5,13 +5,26 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
+export type PlayerOption = {
+  type: string;
+  duration: number;
+};
+
+export type PlayerState = {
+  playerId: string;
+  option: PlayerOption[];
+};
+
 @Injectable()
 export class PlayerService {
+  // state for handling options
+  private players: PlayerState[] = [];
+
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
   ) {}
 
-  async create(playerCreateDto: PlayerCreateDto): Promise<Player> {
+  async createDocument(playerCreateDto: PlayerCreateDto): Promise<Player> {
     return this.playerModel.create(playerCreateDto);
   }
 
@@ -58,5 +71,41 @@ export class PlayerService {
       { room, status: { $in: statuses } },
       playerUpdateDto,
     );
+  }
+
+  // state
+  createState(playerId: string) {
+    this.players.push({
+      playerId,
+      option: [{ type: 'chat', duration: 0 }],
+    });
+  }
+
+  async updateOptionByPlayerId(
+    target: string,
+    effect: PlayerOption,
+  ): Promise<PlayerOption> {
+    if (target === 'all') {
+      // if target for all
+      this.players.map((player) => ({
+        ...player,
+        option: player.option.map((option) =>
+          effect.type === option.type ? effect : option,
+        ),
+      }));
+    } else {
+      // if target for the player
+      this.players.map((player) =>
+        target === player.playerId
+          ? {
+              ...player,
+              option: player.option.map((option) =>
+                effect.type === option.type ? effect : option,
+              ),
+            }
+          : player,
+      );
+    }
+    return effect;
   }
 }

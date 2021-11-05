@@ -11,6 +11,7 @@ import {
   PlayerInfo,
   PlayerStatus,
 } from 'src/schemas/player.schema';
+import { PlayerService } from './player.service';
 
 @Injectable()
 export class JoinService {
@@ -18,6 +19,7 @@ export class JoinService {
     @InjectModel(Game.name) private gameModel: mongoose.Model<GameDocument>,
     @InjectModel(Player.name)
     private playerModel: mongoose.Model<PlayerDocument>,
+    private playerService: PlayerService,
     private configService: ConfigService,
   ) {}
 
@@ -67,6 +69,11 @@ export class JoinService {
           assets,
         },
       );
+
+      // create players state
+      players.forEach((player) => {
+        this.playerService.createState(player._id.toString());
+      });
 
       const playersInfo: PlayerInfo[] = players.map(({ name }) => ({
         name,

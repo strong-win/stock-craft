@@ -16,7 +16,16 @@ export class Item {
   day: number;
 
   @Prop()
-  item: string[];
+  moment: 'now' | 'on-infer' | 'after-infer' | 'end';
+
+  @Prop()
+  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+
+  @Prop()
+  type: string;
+
+  @Prop()
+  target: string;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;
