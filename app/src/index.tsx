@@ -12,6 +12,8 @@ import Play from "./pages/Play";
 import reportWebVitals from "./reportWebVitals";
 import Main from "./pages/Main";
 
+import "./styles/index.css";
+
 const sagaMiddleware = createSagaMiddleware();
 
 const store = configureStore({

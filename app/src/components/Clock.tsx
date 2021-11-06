@@ -1,5 +1,4 @@
-import React from "react";
-import { Jumbotron } from "reactstrap";
+import { Jumbotron, Col, Row } from "reactstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 import { TimeState } from "../modules/time";
@@ -8,6 +7,29 @@ import "../styles/Clock.css";
 type TimeCardProps = {
   num: number;
   unit: string;
+};
+
+const Tick = {
+  0: {
+    status: "새벽",
+    duration: 15,
+  },
+  1: {
+    status: "아침",
+    duration: 15,
+  },
+  2: {
+    status: "점심",
+    duration: 15,
+  },
+  3: {
+    status: "저녁",
+    duration: 15,
+  },
+  4: {
+    status: "밤",
+    duration: 15,
+  },
 };
 
 const TimeCard = ({ num, unit }: TimeCardProps) => {
@@ -23,14 +45,20 @@ const TimeCard = ({ num, unit }: TimeCardProps) => {
 const Clock = ({ week, day, tick }: TimeState) => {
   return (
     <>
-      <div className="d-flex flex-row">
-        <TimeCard num={week} unit="week" />
-        <TimeCard num={day} unit="day" />
-        <TimeCard num={tick} unit="tick" />
-        <div className="m-3">
+      <Row className="clockWrapper justify-content-end">
+        <Col className="time week">Week {week}</Col>
+        {day > 0 ? (
+          <>
+            <Col className="time day">day {day}</Col>
+            <Col className="time tick">{Tick[tick]?.status}</Col>
+          </>
+        ) : (
+          <Col className="time day">주말</Col>
+        )}
+        <Col>
           <CountdownCircleTimer
             isPlaying
-            duration={15}
+            duration={Tick[tick]?.duration}
             onComplete={() => [true, 0]}
             colors={[
               ["#008000", 0.5],
@@ -41,8 +69,8 @@ const Clock = ({ week, day, tick }: TimeState) => {
           >
             {({ remainingTime }) => remainingTime}
           </CountdownCircleTimer>
-        </div>
-      </div>
+        </Col>
+      </Row>
     </>
   );
 };
