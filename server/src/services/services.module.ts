@@ -15,6 +15,7 @@ import { ItemService } from './item.service';
 import { JoinService } from './join.service';
 import { GameService } from './game.service';
 import { EffectService } from './effect.service';
+import { RepositoriesModule } from 'src/repositories/repositories.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { EffectService } from './effect.service';
     MongooseModule.forFeature([{ name: Trade.name, schema: TradeSchema }]),
     MongooseModule.forFeature([{ name: Game.name, schema: GameSchema }]),
     MongooseModule.forFeature([{ name: Item.name, schema: ItemSchema }]),
+    RepositoriesModule,
     ConfigModule,
   ],
   providers: [

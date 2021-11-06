@@ -1,5 +1,3 @@
-import { tradeRequest } from './../../../app/src/modules/sockets/trade';
-import { EffectService } from 'src/services/effect.service';
 import {
   GAME_TIME_REQUEST,
   GAME_TIME_RESPONSE,
@@ -12,13 +10,16 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { GameService } from 'src/services/game.service';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
-import { PlayerService, PlayerState } from 'src/services/player.service';
 import { TradeService } from 'src/services/trade.service';
 import { DayChart } from 'src/dto/chart-response.dto';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
+import {
+  PlayerRepository,
+  PlayerState,
+} from 'src/repositories/player.repository';
+import { GameRepository } from 'src/repositories/game.repository';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -26,12 +27,11 @@ export class GameGateway {
   private server: Server;
 
   constructor(
-    private gamesService: GameService,
+    private gameRepository: GameRepository,
+    private playerRepository: PlayerRepository,
     private tradeService: TradeService,
     private stockService: StockService,
     private itemService: ItemService,
-    private effectService: EffectService,
-    private playerService: PlayerService,
   ) {}
 
   @SubscribeMessage(GAME_TIME_REQUEST)
@@ -40,32 +40,28 @@ export class GameGateway {
     payload: { gameId: string },
   ): Promise<void> {
     const { gameId } = payload;
-    const { room, prevTime, nextTime } = this.gamesService.updateTime(gameId);
+    const { room, prevTime, nextTime } = this.gameRepository.updateTime(gameId);
 
     if (nextTime.day > 0 && nextTime.tick == 0) {
       // find items with moment on-infer
-      const items = await this.itemService.findByGameIdAndTimeAndMoment(
+      const items = await this.itemService.findItems(
         gameId,
         prevTime.week,
         prevTime.day,
         'on-infer',
       );
       // create stock by requests with items
+      // TODO - sample stock 생성을 ML Server 요청으로 변경
       await this.stockService.createStock(gameId, nextTime.week, nextTime.day);
 
       // find items with moment now
-      await this.effectService.useItems(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-        'now',
-      );
+      await this.itemService.useItems(gameId, prevTime.week, prevTime.day);
 
       // item response
-      const playersState: PlayerState[] =
-        this.playerService.findStateByGameId(gameId);
+      const playerStates: PlayerState[] =
+        this.playerRepository.findByGameId(gameId);
 
-      playersState.forEach((playerState) => {
+      playerStates.forEach((playerState) => {
         const { clientId, option } = playerState;
         this.server.to(clientId).emit(ITEM_RESPONSE, option);
       });
@@ -83,7 +79,7 @@ export class GameGateway {
 
     if (nextTime.day > 0 && nextTime.tick < 4) {
       // refresh trade
-      const tradesResponse: TradeResponseDto[] =
+      const tradesResponseDtos: TradeResponseDto[] =
         await this.tradeService.handleRefresh(
           gameId,
           nextTime.week,
@@ -91,10 +87,10 @@ export class GameGateway {
           nextTime.tick,
         );
 
-      tradesResponse.map((tradeResponse) => {
+      tradesResponseDtos.map((tradeResponseDto) => {
         this.server
-          .to(tradeResponse.clientId)
-          .emit(TRADE_RESPONSE, tradeResponse);
+          .to(tradeResponseDto.clientId)
+          .emit(TRADE_RESPONSE, tradeResponseDto);
       });
     }
 

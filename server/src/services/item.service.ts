@@ -2,21 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ItemRequestDto } from 'src/dto/item-request.dto';
+import { GameRepository } from 'src/repositories/game.repository';
 
 import { Item, ItemDocument } from 'src/schemas/item.schema';
-import { GameService } from './game.service';
+import { Player } from 'src/schemas/player.schema';
+import { EffectService } from './effect.service';
 
 @Injectable()
 export class ItemService {
   constructor(
     @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
-    private gameService: GameService,
+    private gameRepository: GameRepository,
+    private effectService: EffectService,
   ) {}
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
     const { playerId, gameId, week, day, moment, category, type, target } =
       itemRequestDto;
-    const time = this.gameService.getTime(gameId);
+    const time = this.gameRepository.getTime(gameId);
 
     if (
       time.week !== week ||
@@ -43,7 +46,7 @@ export class ItemService {
     });
   }
 
-  findByGameIdAndTimeAndMoment(
+  async findItems(
     gameId: string,
     week: number,
     day: number,
@@ -52,5 +55,34 @@ export class ItemService {
     return this.itemModel
       .find({ game: Types.ObjectId(gameId), week, day, moment })
       .exec();
+  }
+
+  async useItems(gameId: string, week: number, day: number): Promise<void> {
+    const items: Item[] = await this.itemModel
+      .find({
+        game: Types.ObjectId(gameId),
+        week,
+        day,
+        moment: 'now',
+      })
+      .exec();
+
+    items.forEach((item) => {
+      const isPlayer = (player: Types.ObjectId | Player): player is Player => {
+        return (<Player>player)._id !== undefined;
+      };
+
+      if (!isPlayer(item.player)) {
+        const typeGuardError = Error('타입이 일치하지 않습니다.');
+        typeGuardError.name = 'TypeGuardError';
+        throw typeGuardError;
+      }
+
+      this.effectService.handleEffect({
+        playerId: item.player._id,
+        type: item.type,
+        target: item.target,
+      });
+    });
   }
 }
