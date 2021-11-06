@@ -1,3 +1,4 @@
+import { ItemResponse } from "./sockets/items";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type PlayerStatus =
@@ -38,6 +39,10 @@ export type CashState = {
   availableCash: number;
 };
 
+export type OptionState = {
+  chat: boolean;
+};
+
 export type userState = {
   name: string;
   room: string;
@@ -51,6 +56,7 @@ export type userState = {
   assets: AssetState[];
   trades: TradeState[];
   selectedCorpId: string;
+  option: OptionState;
 };
 
 const initialState: userState = {
@@ -73,6 +79,7 @@ const initialState: userState = {
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
   selectedCorpId: "gyu",
+  option: { chat: true },
 };
 
 export const gameSlice = createSlice({
@@ -139,6 +146,10 @@ export const gameSlice = createSlice({
           break;
       }
     },
+    updateUserOption: (state, action: PayloadAction<ItemResponse>) => {
+      const { category, active } = action.payload;
+      state.option[category] = active;
+    },
   },
 });
 
@@ -155,7 +166,8 @@ export const {
   updateCash,
   updateSelectedCorpId,
   updateTrades,
-  resetUser
+  resetUser,
+  updateUserOption,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
