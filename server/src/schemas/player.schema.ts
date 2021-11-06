@@ -7,8 +7,14 @@ export type PlayerDocument = Player & Document;
 
 export type Asset = {
   corpId: string;
-  quantity: number;
+  totalQuantity: number;
+  availableQuantity: number;
 };
+
+export interface Cash {
+  totalCash: number;
+  availableCash: number;
+}
 
 export type PlayerStatus =
   | 'connected'
@@ -47,8 +53,8 @@ export class Player {
   @Prop({ type: Types.ObjectId, ref: 'Game' })
   game: Types.ObjectId | Game;
 
-  @Prop()
-  cash?: number;
+  @Prop({ type: { totalCash: Number, availableCash: Number } })
+  cash?: Cash;
 
   @Prop()
   assets?: Asset[];

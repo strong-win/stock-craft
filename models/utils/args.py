@@ -1,5 +1,3 @@
-# import os
-# import yaml
 import argparse
 from argparse import Namespace
 
@@ -14,13 +12,29 @@ class Parser:
         parser = argparse.ArgumentParser(description="** BandGan CLI **")
         parser.set_defaults(function=None)
 
+        # Launcher
+        parser.add_argument(
+            "-tm",
+            "--train_mode",
+            type=self.str2bool,
+            help="If True, Do the train",
+            default=config["train_mode"],
+        )
+        parser.add_argument(
+            "-rm",
+            "--run_mode",
+            type=self.str2bool,
+            help="If True, Do the run",
+            default=config["run_mode"],
+        )
+
         # DASHBOARD
         parser.add_argument(
             "-v",
-            "--visualize",
+            "--vis_opt",
             type=self.str2bool,
             help="Visualize options",
-            default=config["dashboard"]["visualize"],
+            default=config["dashboard"]["vis_opt"],
         )
         parser.add_argument(
             "-dw",
@@ -40,11 +54,11 @@ class Parser:
 
     def set_config(self, config: dict, parser: Namespace) -> dict:
         # -v, --visual
+        config["run_mode"] = parser.run_mode
+        config["train_mode"] = parser.train_mode
         config["dashboard"]["width"] = parser.dashboard_width
         config["dashboard"]["height"] = parser.dashboard_height
-        config["dashboard"]["visualize"] = parser.visualize
-
-        config["dataset"]["batch_size"] = config["core"]["batch_size"]
+        config["dashboard"]["vis_opt"] = parser.vis_opt
 
         return config
 

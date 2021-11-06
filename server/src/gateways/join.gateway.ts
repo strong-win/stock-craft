@@ -22,6 +22,8 @@ import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
 import { GameService } from 'src/services/game.service';
+import { Game } from 'src/schemas/game.schema';
+import { Types } from 'mongoose';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -44,13 +46,13 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client Disconnected: ${client.id}`);
 
     // find player with clientId only
-    const player = await this.playerService.findByClientIdAndStatuses(
+    const player: Player = await this.playerService.findByClientIdAndStatuses(
       client.id,
       this.getStatuses('all'),
     );
 
     if (player) {
-      const { _id: playerId, name, room, status, isHost } = player;
+      const { _id: playerId, name, room, status, isHost, game } = player;
       await this.playerService.updateByPlayerId(playerId, {
         status: 'disconnected',
       });
@@ -61,7 +63,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses(status),
       });
 
-      const players = await this.playerService.findByRoomAndStatuses(
+      const players: Player[] = await this.playerService.findByRoomAndStatuses(
         room,
         this.getStatuses('all'),
       );
@@ -71,13 +73,31 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }));
 
       if (isHost && players.length) {
-        const newHost = players[0];
-        this.server.to(newHost.clientId).emit(JOIN_HOST, { isHost: true });
+        const newHost: Player = players[0];
+
         this.server.to(newHost.clientId).emit(CHATTING_SERVER_MESSAGE, {
           user: '관리자',
           text: `${newHost.name} 님이 새로운 방장이 되었습니다.`,
           statuses: this.getStatuses(status),
         });
+
+        const isGame = (game: Types.ObjectId | Game): game is Game => {
+          return (<Game>game)._id !== undefined;
+        };
+
+        if (!isGame(game)) {
+          const typeGuardError = Error('타입이 일치하지 않습니다.');
+          typeGuardError.name = 'TypeGuardError';
+          throw typeGuardError;
+        }
+
+        const nowDate: Date = new Date();
+        const nextDate: Date = this.gameService.getNextDate(game._id);
+        const dateDiff: number = nextDate.getTime() - nowDate.getTime();
+
+        this.server
+          .to(newHost.clientId)
+          .emit(JOIN_HOST, { isHost: true, dateDiff });
       }
       // emit playersInfo to wait room
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
@@ -202,7 +222,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage(JOIN_LEAVE)
-  async receiveJoinLeave(client: Socket): Promise<void> {
+  async receiveJoinLeave(
+    client: Socket,
+    payload: { room: string },
+  ): Promise<void> {
+    client.leave(payload.room);
     this.handleDisconnect(client);
   }
 

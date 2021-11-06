@@ -9,7 +9,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { GameService, TimeState } from 'src/services/game.service';
+import { GameService } from 'src/services/game.service';
 import { DayChart } from 'src/dto/chart-response.dto';
 import { TradeService } from 'src/services/trade.service';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
@@ -29,31 +29,31 @@ export class GameGateway {
   ) {}
 
   @SubscribeMessage(GAME_TIME_REQUEST)
-  async handleMessage(client: any, payload: { gameId: string }): Promise<void> {
+  async handleTimeRequest(
+    client: any,
+    payload: { gameId: string },
+  ): Promise<void> {
     const { gameId } = payload;
-    const {
-      room,
-      time,
-      timeChanged,
-    }: { room: string; time: TimeState; timeChanged: TimeState } =
-      this.gamesService.updateTime(gameId);
+    const { room, timeChanged } = this.gamesService.updateTime(gameId);
 
-    let dayChart: DayChart;
-    // TO DO - timeChanged.day > 0 && timeChanged.tick === 5 로 조건 변경 필요
-    if (time.day !== timeChanged.day && timeChanged.day > 0) {
-      // find Items
+    if (timeChanged.day > 0 && timeChanged.tick == 0) {
+      // find items
       const items = await this.itemService.findByGameIdAndTime(
         gameId,
         timeChanged.week,
         timeChanged.day,
       );
-      // Create Stock By request with items
+      // create stock by requests with items
       await this.stockService.createStock(
         gameId,
         timeChanged.week,
         timeChanged.day,
       );
-      // find Day Chart
+    }
+
+    let dayChart: DayChart;
+    if (timeChanged.day > 0 && timeChanged.tick == 1) {
+      // find day chart
       dayChart = await this.stockService.findDayChart(
         gameId,
         timeChanged.week,
@@ -61,11 +61,8 @@ export class GameGateway {
       );
     }
 
-    if (
-      time.tick !== timeChanged.tick &&
-      timeChanged.day > 0 &&
-      timeChanged.tick < 4
-    ) {
+    if (timeChanged.day > 0 && timeChanged.tick < 4) {
+      // refresh trade
       const tradesResponse: TradeResponseDto[] =
         await this.tradeService.handleRefresh(
           gameId,

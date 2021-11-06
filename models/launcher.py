@@ -9,23 +9,6 @@ from utils.args import Parser
 from utils.logger import Logger
 from TIMEBAND.core import TIMEBANDCore
 
-logger = Logger(__file__)
-
-torch.set_printoptions(precision=3, sci_mode=False)
-pd.set_option("mode.chained_assignment", None)
-pd.options.display.float_format = "{:.3f}".format
-np.set_printoptions(linewidth=np.inf, precision=3, suppress=True)
-
-
-def use_default_config(path: os.path = "config.json"):
-    """
-    User Default Configuration settings
-    """
-    with open(path, encoding="utf-8") as f:
-        config = json.load(f)
-
-    return config
-
 
 def seeding(seed=31):
     random.seed(seed)
@@ -34,7 +17,66 @@ def seeding(seed=31):
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
-    logger.info(f"  Seed   : {seed}")
+
+    torch.set_printoptions(precision=3, sci_mode=False)
+    pd.set_option("mode.chained_assignment", None)
+    pd.options.display.float_format = "{:.3f}".format
+    np.set_printoptions(linewidth=np.inf, precision=3, suppress=True)
+
+
+def load_config(config_path: str = "config.json"):
+    with open(config_path, encoding="utf-8") as f:
+        config = json.load(f)
+    config = Parser(config).config
+
+    config = setting_path(config)
+
+    config_path = os.path.join(config["core"]["path"], config_path)
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False)
+
+    return config
+
+
+def setting_path(config: dict) -> dict:
+    """
+    { OUTPUT_ROOT } / { DATA NAME } / { TAG }
+        - models : trained model path
+        - labels : missing / anomaly label path
+        - data   : processed data path
+        - logs   : log files path
+    """
+
+    OUTPUT_ROOT = config["core"]["outputs"]
+    DATA_NAME = config["core"]["data_name"]
+    MODEL_TAG = config["core"]["TAG"]
+
+    output_path = os.path.join(OUTPUT_ROOT, DATA_NAME)
+    models_path = os.path.join(output_path, MODEL_TAG)
+    os.mkdir(OUTPUT_ROOT) if not os.path.exists(OUTPUT_ROOT) else None
+    os.mkdir(output_path) if not os.path.exists(output_path) else None
+
+    config["core"]["path"] = models_path
+    config["core"]["models_path"] = os.path.join(models_path, "models")
+    config["core"]["logs_path"] = os.path.join(models_path, "logs")
+
+    if not os.path.exists(models_path):
+        os.mkdir(models_path)
+        os.mkdir(config["core"]["models_path"])
+        os.mkdir(config["core"]["logs_path"])
+
+    return config
+
+
+def init_device():
+    """
+    Setting device CUDNN option
+
+    """
+    # TODO : Using parallel GPUs options
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
+    return torch.device(device)
 
 
 def launcher():
@@ -45,52 +87,42 @@ def launcher():
 
     """
 
-    logger.info("*********************")
-    logger.info("***** TIME BAND *****")
-    logger.info("*********************\n\n")
+    config = load_config()
+    SEED = config.get("seed", 31)
+    TAG = config["core"]["TAG"]
 
-    logger.info("*********************")
-    logger.info("- System  Setting -")
-    logger.info("*********************")
+    logger = Logger(config["core"]["logs_path"], config["core"]["verbosity"])
+    config["core"]["logger"] = logger
+    config["core"]["device"] = init_device()
 
-    seeding(31)
-    with open("config.json", encoding="utf-8") as f:
-        config = json.load(f)
-    config = Parser(config).config
+    logger.info("**********************")
+    logger.info("***** TIME  BAND *****")
+    logger.info("**********************")
+    logger.info("** System   Setting **")
+    logger.info(f"  Random Seed : {SEED}")
+    logger.info(f"  MODELS TAG  : {TAG} ")
+    logger.info(f"  OUTPUT DIR  : {config['core']['path']} ")
+    logger.info(f"  VERBOSITY   : {config['core']['verbosity']} ")
 
-    logger.info("*********************")
-    logger.info("- Model Setting -")
-    logger.info("*********************")
-    # Model setting
-    # - Timeband Dataset
-    # - Timeband Metric
-    # - Timeband Model
+    logger.info("** TIMEBAND Setting **")
     model = TIMEBANDCore(config=config)
 
-    logger.info("*********************")
-    logger.info("- Model Training -")
-    logger.info("*********************")
-
-    netG = None
+    # Run Model Trainning
+    logger.info("** Model   Training **")
     try:
-        # Run Model Trainning
-        netD, netG = model.train()
-    except (KeyboardInterrupt, SyntaxError):
-        bestD, bestG = model.models.load(postfix=f"{model.models.best_score:.4f}")
-        model.models.save(bestD, bestG)
-        logger.warn("Abort!")
+        if config["train_mode"]:
+            model.train()
+    except KeyboardInterrupt:
+        print("Abort!")
 
     logger.info("*********************")
     logger.info("- Model Output -")
     logger.info("*********************")
-    model.run(netG)
-
-    logger.info("*********************")
-    logger.info("- Data Visualize -")
-    logger.info("*********************")
-    model.visualize()
-
-    model.clear()
+    try:
+        if config["run_mode"]:
+            model.run()
+    except KeyboardInterrupt:
+        print("Abort!")
 
 
 if __name__ == "__main__":

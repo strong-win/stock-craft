@@ -8,6 +8,8 @@ export type Corp = { corpId: string; corpName: string };
 
 @Schema()
 export class Game {
+  _id: Types.ObjectId;
+
   @Prop()
   room: string;
 

@@ -30,6 +30,7 @@ export class TradeService {
       time.week !== week ||
       time.day !== day ||
       time.tick !== tick ||
+      time.tick < 1 ||
       time.tick > 3 ||
       day < 1
     ) {
@@ -57,8 +58,8 @@ export class TradeService {
     let isDirect: boolean;
     if (deal === 'buy') {
       // check if player can trade
-      if (player.cash < price * quantity) {
-        const tradeError = new Error('유저 계좌 잔액이 부족합니다');
+      if (player.cash.availableCash < price * quantity) {
+        const tradeError = new Error('거래 가능 잔액이 부족합니다');
         tradeError.name = 'TradeException';
         throw tradeError;
       }
@@ -68,31 +69,41 @@ export class TradeService {
 
       for (const asset of player.assets) {
         if (asset.corpId === corpId) {
-          asset.quantity = isDirect
-            ? asset.quantity + quantity
-            : asset.quantity;
+          if (isDirect) {
+            asset.availableQuantity += quantity;
+            asset.totalQuantity += quantity;
+          }
         }
       }
       // caclulate cash and asset with deal
-      player.cash -= price * quantity;
+      player.cash.availableCash -= price * quantity;
+      if (isDirect) {
+        player.cash.totalCash -= price * quantity;
+      }
     }
-    if (deal == 'sell') {
+    if (deal === 'sell') {
       // check if player can directly trade
       isDirect = stock.price >= price ? true : false;
 
       for (const asset of player.assets) {
         if (asset.corpId === corpId) {
           // check if player can trade
-          if (asset.quantity < quantity) {
-            const tradeError = new Error('유저 계좌 잔액이 부족합니다');
+          if (asset.availableQuantity < quantity) {
+            const tradeError = new Error('거래 가능 수량이 부족합니다');
             tradeError.name = 'TradeException';
             throw tradeError;
           }
-          asset.quantity = asset.quantity - quantity;
+          asset.availableQuantity -= quantity;
+          if (isDirect) {
+            asset.totalQuantity -= quantity;
+          }
         }
       }
       // if corp is included in assets
-      isDirect ? (player.cash += price * quantity) : null;
+      if (isDirect) {
+        player.cash.totalCash += price * quantity;
+        player.cash.availableCash += price * quantity;
+      }
     }
 
     // add to trade collection if player cannot directly trade
@@ -174,9 +185,14 @@ export class TradeService {
 
         if (trade.deal === 'buy') {
           if (trade.price >= stock.price) {
+            // update player cash
+            player.cash.totalCash -= trade.price * trade.quantity;
+
+            // update player assets
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
-                asset.quantity += trade.quantity;
+                asset.totalQuantity += trade.quantity;
+                asset.availableQuantity += trade.quantity;
               }
             }
             await this.tradeModel.updateOne(
@@ -190,7 +206,16 @@ export class TradeService {
 
         if (trade.deal === 'sell') {
           if (trade.price <= stock.price) {
-            player.cash += trade.price * trade.quantity;
+            // update player cash
+            player.cash.totalCash += trade.price * trade.quantity;
+            player.cash.availableCash += trade.price * trade.quantity;
+
+            // update player assets
+            for (const asset of player.assets) {
+              if (asset.corpId === trade.corpId) {
+                asset.totalQuantity -= trade.quantity;
+              }
+            }
 
             await this.tradeModel.updateOne(
               { _id: trade._id },
@@ -204,7 +229,10 @@ export class TradeService {
 
       await this.playerModel.updateOne(
         { _id: player._id },
-        { cash: player.cash, assets: player.assets },
+        {
+          cash: player.cash,
+          assets: player.assets,
+        },
       );
 
       playersResponse.push({
@@ -230,24 +258,42 @@ export class TradeService {
   async handleTradeCancel(
     tradeCancelDto: TradeCancelDto,
   ): Promise<TradeResponseDto> {
-    const { playerId, _id, corpId } = tradeCancelDto;
+    const { playerId, corpId, _id } = tradeCancelDto;
+
+    // const time: TimeState = this.gameService.getTime(gameId);
+
+    // if (
+    //   time.week !== week ||
+    //   time.day !== day ||
+    //   time.tick !== tick ||
+    //   time.tick < 1 ||
+    //   time.tick > 3 ||
+    //   day < 1
+    // ) {
+    //   const timeError = new Error(
+    //     '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
+    //   );
+    //   timeError.name = 'TimeException';
+    //   throw timeError;
+    // }
+
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
     const trade = await this.tradeModel.findOne({ _id: Types.ObjectId(_id) });
 
     if (trade.deal === 'buy') {
-      player.cash += trade.price * trade.quantity;
+      player.cash.availableCash += trade.price * trade.quantity;
     }
     if (trade.deal === 'sell') {
       for (const asset of player.assets) {
         if (asset.corpId == corpId) {
-          asset.quantity = asset.quantity + trade.quantity;
+          asset.availableQuantity += trade.quantity;
         }
       }
     }
     trade.status = 'cancel';
-    trade.save();
+    await trade.save();
 
     await this.playerModel.updateOne(
       { _id: Types.ObjectId(playerId) },
