@@ -38,23 +38,26 @@ export class GameService {
 
   updateTime(gameId: string): {
     room: string;
-    timeChanged: TimeState;
+    prevTime: TimeState;
+    nextTime: TimeState;
   } {
     let room: string;
-    let timeChanged: TimeState;
+    let prevTime: TimeState;
+    let nextTime: TimeState;
 
     for (const game of this.games) {
       if (game.gameId === gameId) {
         // get room, time
         room = game.room;
-        timeChanged = this.getNextTime(game.time);
+        prevTime = game.time;
+        nextTime = this.getNextTime(game.time);
 
         // update time
-        game.time = timeChanged;
+        game.time = nextTime;
         game.date = new Date();
       }
     }
-    return { room, timeChanged };
+    return { room, prevTime, nextTime };
   }
 
   getNextTime({ week, day, tick }: TimeState): TimeState {
@@ -78,9 +81,9 @@ export class GameService {
     const game: GameState = this.games.find((game) => game.gameId === gameId);
 
     const { time, date } = game;
-    const timeChanged: TimeState = this.getNextTime(time);
+    const nextTime: TimeState = this.getNextTime(time);
 
-    if (timeChanged.tick === 0) {
+    if (nextTime.tick === 0) {
       date.setSeconds(date.getSeconds() + 5);
     } else {
       date.setSeconds(date.getSeconds() + 15);

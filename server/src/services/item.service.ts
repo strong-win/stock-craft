@@ -43,13 +43,14 @@ export class ItemService {
     });
   }
 
-  findByGameIdAndTime(
+  findByGameIdAndTimeAndMoment(
     gameId: string,
     week: number,
     day: number,
+    moment: 'now' | 'on-infer' | 'after-infer' | 'end',
   ): Promise<Item[]> {
     return this.itemModel
-      .find({ game: Types.ObjectId(gameId), week, day })
+      .find({ game: Types.ObjectId(gameId), week, day, moment })
       .exec();
   }
 }

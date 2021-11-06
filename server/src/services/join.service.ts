@@ -72,7 +72,11 @@ export class JoinService {
 
       // create players state
       players.forEach((player) => {
-        this.playerService.createState(player._id.toString());
+        this.playerService.createState(
+          gameId.toString(),
+          player._id.toString(),
+          player.clientId,
+        );
       });
 
       const playersInfo: PlayerInfo[] = players.map(({ name }) => ({

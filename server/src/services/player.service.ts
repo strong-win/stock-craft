@@ -6,12 +6,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 export type PlayerOption = {
-  type: string;
-  duration: number;
+  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+  active: boolean;
 };
 
 export type PlayerState = {
   playerId: string;
+  clientId: string;
+  gameId: string;
   option: PlayerOption[];
 };
 
@@ -74,38 +76,52 @@ export class PlayerService {
   }
 
   // state
-  createState(playerId: string) {
+  // TODO - state 를 repository 로 별도로 분리
+  createState(gameId: string, playerId: string, clientId: string): void {
     this.players.push({
+      gameId,
       playerId,
-      option: [{ type: 'chat', duration: 0 }],
+      clientId,
+      option: [{ category: 'chat', active: true }],
     });
   }
 
-  async updateOptionByPlayerId(
+  findStateByGameId(gameId: string): PlayerState[] {
+    return this.players.filter((player) => gameId === player.gameId);
+  }
+
+  async updateStateByPlayerId(
+    playerId: string,
     target: string,
     effect: PlayerOption,
-  ): Promise<PlayerOption> {
+  ): Promise<void> {
     if (target === 'all') {
       // if target for all
-      this.players.map((player) => ({
-        ...player,
-        option: player.option.map((option) =>
-          effect.type === option.type ? effect : option,
-        ),
-      }));
-    } else {
-      // if target for the player
+      const gameId: string = this.players.find(
+        (player) => playerId === player.playerId,
+      ).gameId;
+
       this.players.map((player) =>
-        target === player.playerId
+        gameId === player.gameId
           ? {
               ...player,
               option: player.option.map((option) =>
-                effect.type === option.type ? effect : option,
+                effect.category === option.category ? effect : option,
+              ),
+            }
+          : player,
+      );
+    } else {
+      this.players.map((player) =>
+        target === player.gameId
+          ? {
+              ...player,
+              option: player.option.map((option) =>
+                effect.category === option.category ? effect : option,
               ),
             }
           : player,
       );
     }
-    return effect;
   }
 }

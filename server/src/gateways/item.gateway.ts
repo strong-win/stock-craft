@@ -25,24 +25,5 @@ export class GameGateway {
   @SubscribeMessage(ITEM_REQUEST)
   async receiveItemRequest(client: any, payload: ItemRequestDto) {
     await this.itemService.create(payload);
-
-    const { gameId, moment, category, type, target } = payload;
-    const { state }: EffectResponse = await this.effectService.handleEffect({
-      type,
-      target,
-    });
-
-    if (moment === 'now') {
-      if (category === 'stock') {
-        // apply effect to stock
-      } else {
-        if (target === 'all') {
-          const room = this.gameService.getRoom(gameId);
-          this.server.to(room).emit(ITEM_RESPONSE, { category, state });
-        } else {
-          this.server.to(target).emit(ITEM_RESPONSE, { category, state });
-        }
-      }
-    }
   }
 }
