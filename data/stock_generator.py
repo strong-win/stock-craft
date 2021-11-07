@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from random import sample, randint
 from data_constant import KOSPI_200, TICKER_NAME, DATA_PATH, START_DATE, END_DATE
 
+
 def get_random_date(train_days: int, init_days: int) -> "pd.Timestamp":
     """
     return random date between START_DATE and END_DATE
@@ -45,7 +46,7 @@ def get_data_by_datetime_in_one_row(
             : train_days + init_days
         ]
         # 3. 찾았다면, 해당 정보를 배열에 append
-        ticker_list.append(company['Symbol'])
+        ticker_list.append(company["Symbol"])
         res.append(company_dataframe.reset_index(drop=True))
 
     # 4. KOSPI INDEX 정보 추가 - '종가'를 기준으로 함
@@ -74,7 +75,7 @@ def get_data_by_datetime_in_one_row(
             str(ticker_list[i]) + "_high",
             str(ticker_list[i]) + "_low",
             str(ticker_list[i]) + "_close",
-            str(ticker_list[i]) + "_volume"
+            str(ticker_list[i]) + "_volume",
         ]
     df_label += ["kospi", "exchange_rate"]
     result.columns = df_label
