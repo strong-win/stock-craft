@@ -6,6 +6,7 @@ import { GatewaysModule } from './gateways/gateways.module';
 import SampleConfig from './configs/sample.config';
 import { StatesModule } from './states/states.modules';
 import { ProvidersModule } from './providers/providers.module';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ProvidersModule } from './providers/providers.module';
     GatewaysModule,
     StatesModule,
     ProvidersModule,
+    ApiModule,
   ],
 })
 export class AppModule {}

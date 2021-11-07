@@ -16,6 +16,7 @@ import { ItemService } from './item.service';
 import { JoinService } from './join.service';
 import { GameService } from './game.service';
 import { ProvidersModule } from 'src/providers/providers.module';
+import { ApiModule } from 'src/api/api.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProvidersModule } from 'src/providers/providers.module';
     StatesModule,
     ConfigModule,
     ProvidersModule,
+    ApiModule,
   ],
   providers: [
     PlayerService,

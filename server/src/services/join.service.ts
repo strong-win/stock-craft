@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { MarketApi } from 'src/api/market.api';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
@@ -21,6 +22,7 @@ export class JoinService {
     private playerModel: mongoose.Model<PlayerDocument>,
     private playerState: PlayerStateProvider,
     private configService: ConfigService,
+    private marketApi: MarketApi,
   ) {}
 
   async startGame(
@@ -50,16 +52,19 @@ export class JoinService {
     ).length;
 
     if (numHost + numGuest === players.length) {
-      const { cash, corps, assets } = this.getSampleData();
-
       // create game
       const { _id: gameId } = await this.gameModel.create({
         room,
-        corps,
         players,
       });
 
-      // update player
+      // get start response from Market Server
+      const corps = await this.marketApi.requestStart(gameId);
+
+      // get player acccounts with corportions
+      const { cash, assets } = this.getPlayerAccount(corps);
+
+      // update player with accounts
       await this.playerModel.updateMany(
         { room, status: { $in: ['connected', 'ready'] } },
         {
@@ -72,17 +77,14 @@ export class JoinService {
 
       // create players state
       players.forEach((player) => {
-        this.playerState.create(
-          gameId.toString(),
-          player._id.toString(),
-          player.clientId,
-        );
+        this.playerState.create(gameId, player._id, player.clientId);
       });
 
       const playersInfo: PlayerInfo[] = players.map(({ name }) => ({
         name,
         status: 'play',
       }));
+
       return {
         playersInfo,
         gameInfo: { gameId: gameId.toString(), corps, assets },
@@ -97,20 +99,18 @@ export class JoinService {
     }
   }
 
-  getSampleData() {
-    // get sample data from config
+  getPlayerAccount(corps: Corp[]): { cash: Cash; assets: Asset[] } {
     const cash: Cash = {
-      totalCash: 100_000,
-      availableCash: 100_000,
+      totalCash: 10_000_000,
+      availableCash: 10_000_000,
     };
-    const corps: Corp[] = this.configService.get<Corp[]>('corps');
     const assets: Asset[] = corps.map(({ corpId }) => ({
       corpId,
       totalQuantity: 0,
       availableQuantity: 0,
     }));
 
-    return { cash, corps, assets };
+    return { cash, assets };
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
