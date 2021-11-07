@@ -16,6 +16,7 @@ type TradeProps = {
   selectedCorpId: string;
   stockBill: billType;
   tradeBill: billType;
+  isChartView: boolean;
   setTradeBill: React.Dispatch<React.SetStateAction<billType>>;
   handleDeal: React.MouseEventHandler<HTMLButtonElement>;
   handleCancel: (_id: string, corpId: string) => void;
@@ -27,32 +28,32 @@ const Trade = ({
   selectedCorpId,
   stockBill,
   tradeBill,
+  isChartView,
   setTradeBill,
   handleDeal,
   handleCancel,
 }: TradeProps) => {
-  return (
-    <>
-      <Card className="tradeCard">
-        <Row className="trade">
-          <TradeBoard
-            stockBill={stockBill}
-            tradeBill={tradeBill}
-            setTradeBill={setTradeBill}
-          />
-          <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
-          <TradeButton handleDeal={handleDeal} />
-        </Row>
-      </Card>
-      <Row>
-        <TradeList
-          trades={trades}
-          corps={corps}
-          selectedCorpId={selectedCorpId}
-          handleCancel={handleCancel}
+  return isChartView ? (
+    <Card className="tradeCard">
+      <Row className="trade">
+        <TradeBoard
+          stockBill={stockBill}
+          tradeBill={tradeBill}
+          setTradeBill={setTradeBill}
         />
+        <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
+        <TradeButton handleDeal={handleDeal} />
       </Row>
-    </>
+    </Card>
+  ) : (
+    <Row>
+      <TradeList
+        trades={trades}
+        corps={corps}
+        selectedCorpId={selectedCorpId}
+        handleCancel={handleCancel}
+      />
+    </Row>
   );
 };
 

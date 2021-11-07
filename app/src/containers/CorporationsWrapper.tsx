@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "..";
 import ChartTab from "../components/Corporations";
 import { ChartState } from "../modules/stock";
-import { updateSelectedCorpId } from "../modules/user";
+import { updateSelectedCorpId, updateIsChartView } from "../modules/user";
 
 const CorporationsWrapper = () => {
   // redux state
@@ -15,7 +15,6 @@ const CorporationsWrapper = () => {
   const dispatch = useDispatch();
 
   // container state
-  const [isChartView, setIsChartView] = useState<boolean>(false);
   const [selectedCorpId, setSelectedCorpId] = useState<string>("");
 
   const onClickCorpItem = (corpId: string) => {
@@ -23,10 +22,10 @@ const CorporationsWrapper = () => {
     if (
       corps.find((corp: ChartState) => corp.corpId === corpId) !== undefined
     ) {
-      setIsChartView(true);
+      dispatch(updateIsChartView(true));
       dispatch(updateSelectedCorpId(corpId));
     } else {
-      setIsChartView(false);
+      dispatch(updateIsChartView(false));
     }
   };
 

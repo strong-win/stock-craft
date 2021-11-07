@@ -19,6 +19,7 @@ const TradeWrapper = () => {
   );
   const { corps } = useSelector((state: RootState) => state.stock);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
+  const { isChartView } = useSelector((state: RootState) => state.user);
 
   // container state
   const [stockBill, setStockBill] = useState<billType>({
@@ -76,6 +77,7 @@ const TradeWrapper = () => {
       selectedCorpId={selectedCorpId}
       stockBill={stockBill}
       tradeBill={tradeBill}
+      isChartView={isChartView}
       setTradeBill={setTradeBill}
       handleDeal={handleDeal}
       handleCancel={handleCancel}

@@ -52,6 +52,7 @@ export type userState = {
   assets: AssetState[];
   trades: TradeState[];
   selectedCorpId: string;
+  isChartView: boolean;
 };
 
 const initialState: userState = {
@@ -74,6 +75,7 @@ const initialState: userState = {
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
   selectedCorpId: "gyu",
+  isChartView: false,
 };
 
 export const gameSlice = createSlice({
@@ -116,6 +118,9 @@ export const gameSlice = createSlice({
     updateSelectedCorpId: (state, action: PayloadAction<string>) => {
       state.selectedCorpId = action.payload;
     },
+    updateIsChartView: (state, action: PayloadAction<boolean>) => {
+      state.isChartView = action.payload;
+    },
     updateTrades: (
       state,
       action: PayloadAction<{
@@ -157,6 +162,7 @@ export const {
   updateSelectedCorpId,
   updateTrades,
   resetUser,
+  updateIsChartView,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

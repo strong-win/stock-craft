@@ -34,3 +34,44 @@
   justify-content: space-around;
   line-height: normal;
 }
+
+.tradeTable {
+  text-align: center;
+  font-family: "IBM Plex Sans KR";
+  vertical-align: middle;
+  overflow-y: auto;
+}
+
+.tableTitle {
+  font-family: "IBM Plex Sans KR";
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.tradeTable td {
+  font-weight: bold;
+}
+
+.tradeTable .pending {
+  background-color: rgba(0, 67, 147, 0.1);
+}
+
+.tradeTable .pendingText {
+  color: rgb(0, 67, 147);
+}
+.tradeTable .disposed {
+  background-color: rgba(21, 147, 0, 0.1);
+}
+
+.tradeTable .disposedText {
+  color: rgb(21, 147, 0);
+}
+
+.tradeTable .buy {
+  color: red;
+}
+.tradeTable .sell {
+  color: blue;
+}
