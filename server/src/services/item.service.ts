@@ -1,25 +1,25 @@
+import { EffectProvider } from './../providers/effect.provider';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ItemRequestDto } from 'src/dto/item-request.dto';
-import { GameRepository } from 'src/repositories/game.repository';
 
 import { Item, ItemDocument } from 'src/schemas/item.schema';
 import { Player } from 'src/schemas/player.schema';
-import { EffectService } from './effect.service';
+import { GameStateProvider } from 'src/states/game.state.';
 
 @Injectable()
 export class ItemService {
   constructor(
     @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
-    private gameRepository: GameRepository,
-    private effectService: EffectService,
+    private gameState: GameStateProvider,
+    private effectProvider: EffectProvider,
   ) {}
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
     const { playerId, gameId, week, day, moment, category, type, target } =
       itemRequestDto;
-    const time = this.gameRepository.getTime(gameId);
+    const time = this.gameState.getTime(gameId);
 
     if (
       time.week !== week ||
@@ -78,7 +78,7 @@ export class ItemService {
         throw typeGuardError;
       }
 
-      this.effectService.handleEffect({
+      this.effectProvider.handleEffect({
         playerId: item.player._id,
         type: item.type,
         target: item.target,

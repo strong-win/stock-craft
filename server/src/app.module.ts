@@ -3,8 +3,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ServicesModule } from './services/services.module';
 import { GatewaysModule } from './gateways/gateways.module';
-import { RepositoriesModule } from './repositories/repositories.module';
 import SampleConfig from './configs/sample.config';
+import { StatesModule } from './states/states.modules';
+import { ProvidersModule } from './providers/providers.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import SampleConfig from './configs/sample.config';
     mongooseConfig,
     ServicesModule,
     GatewaysModule,
-    RepositoriesModule,
+    StatesModule,
+    ProvidersModule,
   ],
 })
 export class AppModule {}

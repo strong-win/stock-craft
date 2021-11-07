@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import {
-  PlayerOption,
-  PlayerRepository,
-} from 'src/repositories/player.repository';
+import { PlayerStateProvider } from 'src/states/player.state';
 
 export type EffectRequest = {
   playerId: Types.ObjectId | string;
@@ -14,21 +11,31 @@ export type EffectRequest = {
 type EffectHandler = (playerId: string, target: string) => Promise<void>;
 
 @Injectable()
-export class EffectService {
-  constructor(private playerRepository: PlayerRepository) {}
+export class EffectProvider {
+  constructor(private playerState: PlayerStateProvider) {}
 
-  // example effectHandler (chat ban)
+  // example effectHandler (chatting ban)
   private effectHandler_0001: EffectHandler = async (playerId, target) => {
-    const effect: PlayerOption = { category: 'chat', active: false };
-    await this.playerRepository.updateWithEffect(playerId, target, effect);
+    await this.playerState.updateWithEffect(playerId, target, {
+      category: 'chatting',
+      active: false,
+    });
   };
 
+  // example effectHandler (trade ban)
   private effectHandler_0002: EffectHandler = async (playerId, target) => {
-    return null;
+    await this.playerState.updateWithEffect(playerId, target, {
+      category: 'trade',
+      active: false,
+    });
   };
 
+  // example effectHandler (chart ban)
   private effectHandler_0003: EffectHandler = async (playerId, target) => {
-    return null;
+    await this.playerState.updateWithEffect(playerId, target, {
+      category: 'chart',
+      active: false,
+    });
   };
 
   private effectHandler: { [key: string]: EffectHandler } = {

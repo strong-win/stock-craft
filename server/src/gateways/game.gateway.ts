@@ -13,13 +13,9 @@ import { Server } from 'socket.io';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
 import { TradeService } from 'src/services/trade.service';
-import { DayChart } from 'src/dto/chart-response.dto';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
-import {
-  PlayerRepository,
-  PlayerState,
-} from 'src/repositories/player.repository';
-import { GameRepository } from 'src/repositories/game.repository';
+import { GameStateProvider } from 'src/states/game.state.';
+import { PlayerState, PlayerStateProvider } from 'src/states/player.state';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -27,8 +23,8 @@ export class GameGateway {
   private server: Server;
 
   constructor(
-    private gameRepository: GameRepository,
-    private playerRepository: PlayerRepository,
+    private gameState: GameStateProvider,
+    private playerState: PlayerStateProvider,
     private tradeService: TradeService,
     private stockService: StockService,
     private itemService: ItemService,
@@ -40,7 +36,7 @@ export class GameGateway {
     payload: { gameId: string },
   ): Promise<void> {
     const { gameId } = payload;
-    const { room, prevTime, nextTime } = this.gameRepository.updateTime(gameId);
+    const { room, prevTime, nextTime } = this.gameState.updateTime(gameId);
 
     if (nextTime.day > 0 && nextTime.tick == 0) {
       // find items with moment on-infer
@@ -58,23 +54,28 @@ export class GameGateway {
       await this.itemService.useItems(gameId, prevTime.week, prevTime.day);
 
       // item response
-      const playerStates: PlayerState[] =
-        this.playerRepository.findByGameId(gameId);
+      const playerStates: PlayerState[] = this.playerState.findByGameId(gameId);
 
       playerStates.forEach((playerState) => {
-        const { clientId, option } = playerState;
-        this.server.to(clientId).emit(ITEM_RESPONSE, option);
+        this.server
+          .to(playerState.clientId)
+          .emit(ITEM_RESPONSE, { option: playerState.option });
       });
+
+      this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime });
     }
 
-    let dayChart: DayChart;
     if (nextTime.day > 0 && nextTime.tick == 1) {
       // find day chart
-      dayChart = await this.stockService.findDayChart(
+      const dayChart = await this.stockService.findDayChart(
         gameId,
         nextTime.week,
         nextTime.day,
       );
+
+      this.server
+        .to(room)
+        .emit(GAME_TIME_RESPONSE, { time: nextTime, dayChart });
     }
 
     if (nextTime.day > 0 && nextTime.tick < 4) {
@@ -87,13 +88,13 @@ export class GameGateway {
           nextTime.tick,
         );
 
-      tradesResponseDtos.map((tradeResponseDto) => {
+      tradesResponseDtos.forEach((tradeResponseDto) => {
         this.server
           .to(tradeResponseDto.clientId)
           .emit(TRADE_RESPONSE, tradeResponseDto);
       });
-    }
 
-    this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime, dayChart });
+      this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime });
+    }
   }
 }

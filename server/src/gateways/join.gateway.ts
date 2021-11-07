@@ -23,7 +23,7 @@ import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
 import { Game } from 'src/schemas/game.schema';
 import { Types } from 'mongoose';
-import { GameRepository } from 'src/repositories/game.repository';
+import { GameStateProvider } from 'src/states/game.state.';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -33,7 +33,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('AppGateway');
 
   constructor(
-    private gameRepository: GameRepository,
+    private gameState: GameStateProvider,
     private playerService: PlayerService,
     private joinService: JoinService,
   ) {}
@@ -92,7 +92,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         const nowDate: Date = new Date();
-        const nextDate: Date = this.gameRepository.getNextDate(game._id);
+        const nextDate: Date = this.gameState.getNextDate(game._id);
         const dateDiff: number = nextDate.getTime() - nowDate.getTime();
 
         this.server
@@ -211,7 +211,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('play'),
       });
 
-      this.gameRepository.createGameState(gameInfo.gameId, room);
+      this.gameState.createGameState(gameInfo.gameId, room);
     } else {
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',

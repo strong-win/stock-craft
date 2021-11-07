@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { PlayerRepository } from 'src/repositories/player.repository';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
@@ -12,6 +11,7 @@ import {
   PlayerInfo,
   PlayerStatus,
 } from 'src/schemas/player.schema';
+import { PlayerStateProvider } from 'src/states/player.state';
 
 @Injectable()
 export class JoinService {
@@ -19,8 +19,8 @@ export class JoinService {
     @InjectModel(Game.name) private gameModel: mongoose.Model<GameDocument>,
     @InjectModel(Player.name)
     private playerModel: mongoose.Model<PlayerDocument>,
+    private playerState: PlayerStateProvider,
     private configService: ConfigService,
-    private playerRepository: PlayerRepository,
   ) {}
 
   async startGame(
@@ -72,7 +72,7 @@ export class JoinService {
 
       // create players state
       players.forEach((player) => {
-        this.playerRepository.createPlayerState(
+        this.playerState.create(
           gameId.toString(),
           player._id.toString(),
           player.clientId,

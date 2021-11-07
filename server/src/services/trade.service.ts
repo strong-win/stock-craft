@@ -4,10 +4,10 @@ import { Model, Types } from 'mongoose';
 import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
-import { GameRepository, TimeState } from 'src/repositories/game.repository';
 import { Player, PlayerDocument } from 'src/schemas/player.schema';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
+import { GameStateProvider, TimeState } from 'src/states/game.state.';
 
 @Injectable()
 export class TradeService {
@@ -15,7 +15,7 @@ export class TradeService {
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
-    private gameRepository: GameRepository,
+    private gameState: GameStateProvider,
   ) {}
 
   async handleTrade(
@@ -24,7 +24,7 @@ export class TradeService {
     const { playerId, gameId, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
 
-    const time: TimeState = this.gameRepository.getTime(gameId);
+    const time: TimeState = this.gameState.getTime(gameId);
 
     if (
       time.week !== week ||

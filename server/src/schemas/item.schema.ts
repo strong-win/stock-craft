@@ -19,7 +19,7 @@ export class Item {
   moment: 'now' | 'on-infer' | 'after-infer' | 'end';
 
   @Prop()
-  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+  category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
 
   @Prop()
   type: string;

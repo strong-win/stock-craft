@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule } from '@nestjs/config';
 
-import { Stock, StockSchema } from '../schemas/stock.schema';
-import { Player, PlayerSchema } from '../schemas/player.schema';
-import { Trade, TradeSchema } from '../schemas/trade.schema';
+import { Stock, StockSchema } from 'src/schemas/stock.schema';
+import { Player, PlayerSchema } from 'src/schemas/player.schema';
+import { Trade, TradeSchema } from 'src/schemas/trade.schema';
 import { Game, GameSchema } from 'src/schemas/game.schema';
 import { Item, ItemSchema } from 'src/schemas/item.schema';
-import { ConfigModule } from '@nestjs/config';
+import { StatesModule } from 'src/states/states.modules';
 
 import { PlayerService } from './player.service';
 import { StockService } from './stock.service';
@@ -14,8 +15,7 @@ import { TradeService } from './trade.service';
 import { ItemService } from './item.service';
 import { JoinService } from './join.service';
 import { GameService } from './game.service';
-import { EffectService } from './effect.service';
-import { RepositoriesModule } from 'src/repositories/repositories.module';
+import { ProvidersModule } from 'src/providers/providers.module';
 
 @Module({
   imports: [
@@ -24,8 +24,9 @@ import { RepositoriesModule } from 'src/repositories/repositories.module';
     MongooseModule.forFeature([{ name: Trade.name, schema: TradeSchema }]),
     MongooseModule.forFeature([{ name: Game.name, schema: GameSchema }]),
     MongooseModule.forFeature([{ name: Item.name, schema: ItemSchema }]),
-    RepositoriesModule,
+    StatesModule,
     ConfigModule,
+    ProvidersModule,
   ],
   providers: [
     PlayerService,
@@ -34,7 +35,6 @@ import { RepositoriesModule } from 'src/repositories/repositories.module';
     ItemService,
     JoinService,
     GameService,
-    EffectService,
   ],
   exports: [
     PlayerService,
@@ -43,7 +43,6 @@ import { RepositoriesModule } from 'src/repositories/repositories.module';
     ItemService,
     JoinService,
     GameService,
-    EffectService,
   ],
 })
 export class ServicesModule {}

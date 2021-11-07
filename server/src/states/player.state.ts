@@ -1,5 +1,5 @@
 export type PlayerOption = {
-  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+  category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
   active: boolean;
 };
 
@@ -10,15 +10,15 @@ export type PlayerState = {
   option: PlayerOption[];
 };
 
-export class PlayerRepository {
+export class PlayerStateProvider {
   private players: PlayerState[] = [];
 
-  createPlayerState(gameId: string, playerId: string, clientId: string): void {
+  create(gameId: string, playerId: string, clientId: string): void {
     this.players.push({
       gameId,
       playerId,
       clientId,
-      option: [{ category: 'chat', active: true }],
+      option: [{ category: 'chatting', active: true }],
     });
   }
 
