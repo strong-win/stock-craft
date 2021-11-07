@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DayChart } from 'src/dto/chart-response.dto';
+import { DayChart } from 'src/dto/day-start-response.dto';
 
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 
@@ -65,17 +65,5 @@ export class StockService {
       corpId,
     });
     return stock.price;
-  }
-
-  // method to add sample stock
-  async createStock(gameId: string, week: number, day: number) {
-    const sampleCharts: SampleStock[] =
-      this.configService.get<SampleStock[]>('stocks');
-
-    const dayCharts: Stock[] = sampleCharts
-      .filter((stock) => stock.week === week && stock.day === day)
-      .map((stock) => ({ ...stock, game: Types.ObjectId(gameId) }));
-
-    await this.stockModel.insertMany(dayCharts);
   }
 }

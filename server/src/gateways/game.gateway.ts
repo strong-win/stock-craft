@@ -16,6 +16,8 @@ import { TradeService } from 'src/services/trade.service';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { GameStateProvider } from 'src/states/game.state.';
 import { PlayerState, PlayerStateProvider } from 'src/states/player.state';
+import { DayChart } from 'src/dto/day-start-response.dto';
+import { MarketApi } from 'src/api/market.api';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -28,6 +30,7 @@ export class GameGateway {
     private tradeService: TradeService,
     private stockService: StockService,
     private itemService: ItemService,
+    private marketApi: MarketApi,
   ) {}
 
   @SubscribeMessage(GAME_TIME_REQUEST)
@@ -46,9 +49,19 @@ export class GameGateway {
         prevTime.day,
         'on-infer',
       );
+
+      const trades = await this.tradeService.findTrades(
+        gameId,
+        prevTime.week,
+        prevTime.day,
+      );
+
       // create stock by requests with items
-      // TODO - sample stock 생성을 ML Server 요청으로 변경
-      await this.stockService.createStock(gameId, nextTime.week, nextTime.day);
+      this.marketApi
+        .requestChart(gameId, prevTime, nextTime, items, trades)
+        .then((chartResponseDto) => {
+          console.log('CHART GENERATE RESPONSE');
+        });
 
       // find items with moment now
       await this.itemService.useItems(gameId, prevTime.week, prevTime.day);
@@ -61,24 +74,19 @@ export class GameGateway {
           .to(playerState.clientId)
           .emit(ITEM_RESPONSE, { option: playerState.option });
       });
-
-      this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime });
     }
 
+    let dayChart: DayChart;
     if (nextTime.day > 0 && nextTime.tick == 1) {
       // find day chart
-      const dayChart = await this.stockService.findDayChart(
+      dayChart = await this.stockService.findDayChart(
         gameId,
         nextTime.week,
         nextTime.day,
       );
-
-      this.server
-        .to(room)
-        .emit(GAME_TIME_RESPONSE, { time: nextTime, dayChart });
     }
 
-    if (nextTime.day > 0 && nextTime.tick < 4) {
+    if (nextTime.day > 0 && nextTime.tick > 0 && nextTime.tick < 4) {
       // refresh trade
       const tradesResponseDtos: TradeResponseDto[] =
         await this.tradeService.handleRefresh(
@@ -93,8 +101,8 @@ export class GameGateway {
           .to(tradeResponseDto.clientId)
           .emit(TRADE_RESPONSE, tradeResponseDto);
       });
-
-      this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime });
     }
+
+    this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime, dayChart });
   }
 }

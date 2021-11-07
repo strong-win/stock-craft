@@ -299,4 +299,12 @@ export class TradeService {
       ],
     };
   }
+
+  async findTrades(
+    gameId: string,
+    week: number,
+    day: number,
+  ): Promise<Trade[]> {
+    return this.tradeModel.find({ gameId, week, day, staus: 'pending' }).exec();
+  }
 }
