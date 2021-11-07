@@ -40,7 +40,7 @@ const createItemResponseChannel = (socket: Socket) => {
   });
 };
 
-export function* itemResponseSaga(socket: Socket) {
+export function* receiveItemResponseSaga(socket: Socket) {
   const channel: ReturnType<typeof createItemResponseChannel> = yield call(
     createItemResponseChannel,
     socket

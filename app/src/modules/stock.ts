@@ -3,10 +3,10 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export type CorpState = {
   corpId: string;
   corpName: string;
+  totalChart: number[];
 };
 
 export type ChartState = CorpState & {
-  totalChart: number[];
   todayChart: number[];
 };
 
@@ -45,7 +45,6 @@ export const stockSlice = createSlice({
     initializeCharts(state, action: PayloadAction<CorpState[]>) {
       state.corps = action.payload.map((corp) => ({
         ...corp,
-        totalChart: [],
         todayChart: [],
       }));
     },
