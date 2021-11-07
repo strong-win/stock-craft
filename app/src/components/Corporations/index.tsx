@@ -101,7 +101,7 @@ const MyStockMarket = ({
       <Chart
         corp={corps.find((corp: ChartState) => corp.corpId === selectedCorpId)}
         tick={tick}
-        averagePrice={assets.averagePrice}
+        asset={assets.find((asset) => asset.corpId === selectedCorpId)}
         onClickBackButton={onClickCorpItem}
       />
     </>

@@ -22,6 +22,7 @@ export type AssetState = {
   corpId: string;
   totalQuantity: number;
   availableQuantity: number;
+  purchaseAmount: number;
 };
 
 export type TradeState = {
@@ -64,10 +65,10 @@ const initialState: userState = {
   players: [],
   cash: { totalCash: 100_000, availableCash: 100_000 },
   assets: [
-    // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "kang", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "han", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "lee", totalQuantity: 0, availbleQuantity: 0 },
+    // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "kang", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "han", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "lee", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
   ],
   trades: [
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
@@ -155,7 +156,7 @@ export const {
   updateCash,
   updateSelectedCorpId,
   updateTrades,
-  resetUser
+  resetUser,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

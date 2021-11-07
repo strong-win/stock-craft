@@ -1,4 +1,5 @@
 import { ChartState } from "../../modules/stock";
+import { AssetState } from "../../modules/user";
 
 import { Button, Col, Row } from "reactstrap";
 import {
@@ -15,18 +16,20 @@ import "../../styles/Chart.css";
 type ChartProps = {
   corp: ChartState;
   tick: number;
-  averagePrice?: number;
+  asset?: AssetState;
   onClickBackButton: (id: string) => void;
 };
 
-const Chart = ({ corp, tick, onClickBackButton, averagePrice }: ChartProps) => {
+const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
   tick = tick % 4 === 0 ? 3 : tick;
-  const ChartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
-  const prevPrice = corp.totalChart.at(-1);
-  const nowPrice = corp.todayChart[tick - 1];
+  const chartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
+  const prevPrice = chartData.at(-2);
+  const nowPrice = chartData.at(-1);
   const rate = ((nowPrice - prevPrice) / prevPrice) * 100;
   const gap = nowPrice - prevPrice;
-  let color = "";
+  const averagePrice =
+    (asset && asset.purchaseAmount / asset.totalQuantity) || 0;
+  let color = "black";
   if (rate > 0) color = "red";
   else if (rate < 0) color = "blue";
   return (
@@ -42,14 +45,31 @@ const Chart = ({ corp, tick, onClickBackButton, averagePrice }: ChartProps) => {
           </Button>
         </Col>
         <Col>{corp.corpName}</Col>
-        <Col>{nowPrice ? nowPrice : "-"}</Col>
-        <Col className={color}>{gap ? gap : "-"}</Col>
-        <Col className={color}>{rate ? rate.toFixed(2) : "-"}%</Col>
+        {asset ? (
+          <>
+            <Col>{asset.totalQuantity}</Col>
+            <Col>{averagePrice.toFixed(2)}</Col>
+            <Col>{nowPrice ? nowPrice : "-"}</Col>
+            <Col className={color}>{nowPrice - averagePrice}</Col>
+            <Col className={color}>
+              {asset.totalQuantity
+                ? (((nowPrice - averagePrice) / averagePrice) * 100).toFixed(2)
+                : 0}
+              %
+            </Col>
+          </>
+        ) : (
+          <>
+            <Col>{nowPrice ? nowPrice : "-"}</Col>
+            <Col className={color}>{gap ? gap : "-"}</Col>
+            <Col className={color}>{rate ? rate.toFixed(2) : "-"}%</Col>
+          </>
+        )}
       </Row>
       <LineChart
         width={800}
         height={400}
-        data={ChartData.map((value, index) => ({ time: index, value }))}
+        data={chartData.map((value, index) => ({ time: index, value }))}
         margin={{
           top: 5,
           right: 30,
@@ -61,9 +81,9 @@ const Chart = ({ corp, tick, onClickBackButton, averagePrice }: ChartProps) => {
         <YAxis hide={true} />
         <Tooltip />
         <Line type="linear" dataKey="value" strokeWidth={3} stroke={color} />
-        {averagePrice && (
+        {asset && (
           <ReferenceLine
-            y={averagePrice}
+            y={asset.purchaseAmount / asset.totalQuantity || null}
             strokeWidth={3}
             strokeDasharray="5 5"
             stroke="purple"

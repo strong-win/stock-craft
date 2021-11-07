@@ -14,11 +14,13 @@ type MyStockProps = {
 const MyStock = ({ tick, corps, assets, onClickCorpItem }: MyStockProps) => {
   const CorpItem = ({ corp }) => {
     const asset = assets.find((asset) => asset.corpId === corp.corpId);
-    const averagePrice = 3000; //asset.평단가
-
+    const averagePrice: number =
+      asset.purchaseAmount / asset.totalQuantity || 0;
     const nowPrice = corp.todayChart[tick - 1];
-    const rate = ((nowPrice - averagePrice) / averagePrice) * 100;
-    const gap = nowPrice - averagePrice;
+    const rate = asset.totalQuantity
+      ? ((nowPrice - averagePrice) / averagePrice) * 100
+      : 0;
+    const gap = asset.totalQuantity ? nowPrice - averagePrice : 0;
     let color = "";
     if (rate > 0) color = "red";
     else if (rate < 0) color = "blue";
@@ -27,9 +29,9 @@ const MyStock = ({ tick, corps, assets, onClickCorpItem }: MyStockProps) => {
       <tr className="corpItem" onClick={() => onClickCorpItem(corp.corpId)}>
         <th scope="row">{corp.corpName}</th>
         <td>{asset.totalQuantity}</td>
-        <td>{averagePrice}</td>
+        <td>{averagePrice ? averagePrice.toFixed(2) : "-"}</td>
         <td>{nowPrice}</td>
-        <td className={color}>{gap ? gap : "-"}</td>
+        <td className={color}>{gap ? gap.toFixed(2) : "-"}</td>
         <td className={color}>{rate ? rate.toFixed(2) : "-"}%</td>
       </tr>
     );

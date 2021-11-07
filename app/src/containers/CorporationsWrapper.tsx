@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
-import Chart from "../components/Corporations/Chart";
 import ChartTab from "../components/Corporations";
 import { ChartState } from "../modules/stock";
 import { updateSelectedCorpId } from "../modules/user";
@@ -31,8 +30,6 @@ const CorporationsWrapper = () => {
     }
   };
 
-  //최상단은 tab으로 분기하고
-  //chart view/corporation view 분기는 Corporation에서 하기 (chart 경로 옮기기)
   return (
     <ChartTab
       tick={tick}
