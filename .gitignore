@@ -32,3 +32,6 @@ yarn-error.log*
 # Data
 
 # Models
+__pycache__/*
+*.csv
+!*.sample.csv

@@ -53,7 +53,6 @@ class Parser:
         return parser.parse_args()
 
     def set_config(self, config: dict, parser: Namespace) -> dict:
-        # -v, --visual
         config["run_mode"] = parser.run_mode
         config["train_mode"] = parser.train_mode
         config["dashboard"]["width"] = parser.dashboard_width
