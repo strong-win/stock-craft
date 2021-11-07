@@ -60,7 +60,7 @@ export class GameGateway {
       this.marketApi
         .requestChart(gameId, prevTime, nextTime, items, trades)
         .then((chartResponseDto) => {
-          console.log('CHART GENERATE RESPONSE');
+          console.log('\nCHART GENERATE RESPONSE');
         });
 
       // find items with moment now
