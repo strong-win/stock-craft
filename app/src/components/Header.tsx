@@ -1,4 +1,4 @@
-import { Row, Col } from "reactstrap";
+import { Row } from "reactstrap";
 
 import ClockWrapper from "../containers/ClockWrapper";
 import "../styles/Header.css";

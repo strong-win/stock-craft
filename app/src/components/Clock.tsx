@@ -1,13 +1,8 @@
-import { Jumbotron, Col, Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 import { TimeState } from "../modules/time";
 import "../styles/Clock.css";
-
-type TimeCardProps = {
-  num: number;
-  unit: string;
-};
 
 const Tick = {
   0: {
@@ -30,16 +25,6 @@ const Tick = {
     status: "밤",
     duration: 15,
   },
-};
-
-const TimeCard = ({ num, unit }: TimeCardProps) => {
-  return (
-    <Jumbotron className="TimeCard">
-      <h5>{num}</h5>
-      <hr className="my-2" />
-      <p>{unit}</p>
-    </Jumbotron>
-  );
 };
 
 const Clock = ({ week, day, tick }: TimeState) => {

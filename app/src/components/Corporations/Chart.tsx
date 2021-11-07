@@ -1,4 +1,4 @@
-import { ChartState } from "../modules/stock";
+import { ChartState } from "../../modules/stock";
 
 import { Button, Col, Row } from "reactstrap";
 import {
@@ -6,19 +6,20 @@ import {
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
+  ReferenceLine,
 } from "recharts";
 
-import "../styles/Chart.css";
+import "../../styles/Chart.css";
 
 type ChartProps = {
   corp: ChartState;
   tick: number;
+  averagePrice?: number;
   onClickBackButton: (id: string) => void;
 };
 
-const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
+const Chart = ({ corp, tick, onClickBackButton, averagePrice }: ChartProps) => {
   tick = tick % 4 === 0 ? 3 : tick;
   const ChartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
   const prevPrice = corp.totalChart.at(-1);
@@ -28,7 +29,6 @@ const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
   let color = "";
   if (rate > 0) color = "red";
   else if (rate < 0) color = "blue";
-
   return (
     <>
       <Row className="chartHeader">
@@ -61,6 +61,14 @@ const Chart = ({ corp, tick, onClickBackButton }: ChartProps) => {
         <YAxis hide={true} />
         <Tooltip />
         <Line type="linear" dataKey="value" strokeWidth={3} stroke={color} />
+        {averagePrice && (
+          <ReferenceLine
+            y={averagePrice}
+            strokeWidth={3}
+            strokeDasharray="5 5"
+            stroke="purple"
+          />
+        )}
       </LineChart>
     </>
   );

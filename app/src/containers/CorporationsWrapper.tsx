@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
-import Chart from "../components/Chart";
-import Corporations from "../components/Corporations";
+import Chart from "../components/Corporations/Chart";
+import ChartTab from "../components/Corporations";
 import { ChartState } from "../modules/stock";
 import { updateSelectedCorpId } from "../modules/user";
 
@@ -11,6 +11,7 @@ const CorporationsWrapper = () => {
   // redux state
   const { corps } = useSelector((state: RootState) => state.stock);
   const { tick } = useSelector((state: RootState) => state.time);
+  const { assets } = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
 
@@ -30,22 +31,16 @@ const CorporationsWrapper = () => {
     }
   };
 
-  return isChartView ? (
-    <>
-      <Chart
-        corp={corps.find((corp: ChartState) => corp.corpId === selectedCorpId)}
-        tick={tick}
-        onClickBackButton={onClickCorpItem}
-      />
-    </>
-  ) : (
-    <>
-      <Corporations
-        tick={tick}
-        corps={corps}
-        onClickCorpItem={onClickCorpItem}
-      />
-    </>
+  //최상단은 tab으로 분기하고
+  //chart view/corporation view 분기는 Corporation에서 하기 (chart 경로 옮기기)
+  return (
+    <ChartTab
+      tick={tick}
+      assets={assets}
+      corps={corps}
+      onClickCorpItem={onClickCorpItem}
+      selectedCorpId={selectedCorpId}
+    />
   );
 };
 

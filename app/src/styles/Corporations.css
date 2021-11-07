@@ -27,3 +27,28 @@
   font-size: 1.5rem;
   text-align: center;
 }
+.chartTabWrapper {
+  position: absolute;
+  overflow-y: -1;
+}
+.chartTab {
+  border-radius: 4px 4px 0 0;
+  background-color: #c4c4c4;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  color: black;
+  transform: perspective(0.5em) rotateX(5deg);
+  transform-origin: bottom;
+  font-size: 1rem;
+  position: relative;
+  top: -1.8rem;
+}
+
+.chartTab:hover {
+  background-color: #dbdbdb;
+  color: black;
+}
+
+.active {
+  background-color: white;
+}
