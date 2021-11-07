@@ -7,7 +7,7 @@ import pandas as pd # DataFrame 관리
 from dummy import dummy_df
 from pprint import pprint
 
-MODEL_PATH = "..." # Model `.pt` 파일이 있는 경로
+MODEL_PATH = "..."  # Model `.pt` 파일이 있는 경로
 
 app = FastAPI()
 
@@ -64,10 +64,11 @@ def get_current_price(result_df: 'pd.DataFrame', target_stocks: int = 5, target_
 
 @app.get("/model/init")
 def init_model():
-	"""
-	모델을 새로 생성한 후, 초기 데이터를 반환하는 API
-	"""
-	pass
+    """
+    모델을 새로 생성한 후, 초기 데이터를 반환하는 API
+    """
+    pass
+
 
 @app.put("/model/update")
 def update_model():
