@@ -21,9 +21,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
-import { Game } from 'src/schemas/game.schema';
-import { Types } from 'mongoose';
 import { GameStateProvider } from 'src/states/game.state.';
+import { isGame } from 'src/utis/typeGuard';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -81,15 +80,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
           statuses: this.getStatuses(status),
         });
 
-        const isGame = (game: Types.ObjectId | Game): game is Game => {
-          return (<Game>game)._id !== undefined;
-        };
-
-        if (!isGame(game)) {
-          const typeGuardError = Error('타입이 일치하지 않습니다.');
-          typeGuardError.name = 'TypeGuardError';
-          throw typeGuardError;
-        }
+        if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
 
         const nowDate: Date = new Date();
         const nextDate: Date = this.gameState.getNextDate(game._id);

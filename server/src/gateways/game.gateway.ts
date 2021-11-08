@@ -10,14 +10,17 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { GameService } from 'src/services/game.service';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
 import { TradeService } from 'src/services/trade.service';
-import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { GameStateProvider } from 'src/states/game.state.';
 import { PlayerState, PlayerStateProvider } from 'src/states/player.state';
+import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { DayChart } from 'src/dto/day-start-response.dto';
 import { MarketApi } from 'src/api/market.api';
+import { ChartRequestDto } from 'src/dto/chart-request.dto';
+import { ChartResponseDto } from 'src/dto/chart-response.dto';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -27,6 +30,7 @@ export class GameGateway {
   constructor(
     private gameState: GameStateProvider,
     private playerState: PlayerStateProvider,
+    private gameService: GameService,
     private tradeService: TradeService,
     private stockService: StockService,
     private itemService: ItemService,
@@ -42,25 +46,15 @@ export class GameGateway {
     const { room, prevTime, nextTime } = this.gameState.updateTime(gameId);
 
     if (nextTime.day > 0 && nextTime.tick == 0) {
-      // find items with moment on-infer
-      const items = await this.itemService.findItems(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-        'on-infer',
-      );
+      const chartRequestDto: ChartRequestDto =
+        await this.gameService.composeChartRequest(gameId, prevTime, nextTime);
 
-      const trades = await this.tradeService.findTrades(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-      );
-
-      // create stock by requests with items
       this.marketApi
-        .requestChart(gameId, prevTime, nextTime, items, trades)
-        .then((chartResponseDto) => {
-          console.log('\nCHART GENERATE RESPONSE');
+        .requestChart(chartRequestDto)
+        .then((chartResponseDto: ChartResponseDto) => {
+          console.log(
+            `[CHART GENERATE RESPONSE] week : ${chartResponseDto.nextTime.week} day : ${chartResponseDto.nextTime.day}`,
+          );
         });
 
       // find items with moment now

@@ -5,8 +5,8 @@ import { Model, Types } from 'mongoose';
 import { ItemRequestDto } from 'src/dto/item-request.dto';
 
 import { Item, ItemDocument } from 'src/schemas/item.schema';
-import { Player } from 'src/schemas/player.schema';
 import { GameStateProvider } from 'src/states/game.state.';
+import { isPlayer } from 'src/utis/typeGuard';
 
 @Injectable()
 export class ItemService {
@@ -46,17 +46,6 @@ export class ItemService {
     });
   }
 
-  async findItems(
-    gameId: string,
-    week: number,
-    day: number,
-    moment: 'now' | 'on-infer' | 'after-infer' | 'end',
-  ): Promise<Item[]> {
-    return this.itemModel
-      .find({ game: Types.ObjectId(gameId), week, day, moment })
-      .exec();
-  }
-
   async useItems(gameId: string, week: number, day: number): Promise<void> {
     const items: Item[] = await this.itemModel
       .find({
@@ -68,15 +57,7 @@ export class ItemService {
       .exec();
 
     items.forEach((item) => {
-      const isPlayer = (player: Types.ObjectId | Player): player is Player => {
-        return (<Player>player)._id !== undefined;
-      };
-
-      if (!isPlayer(item.player)) {
-        const typeGuardError = Error('타입이 일치하지 않습니다.');
-        typeGuardError.name = 'TypeGuardError';
-        throw typeGuardError;
-      }
+      if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
 
       this.effectProvider.handleEffect({
         playerId: item.player._id,

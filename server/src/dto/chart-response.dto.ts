@@ -6,5 +6,5 @@ export class ChartResponseDto {
   gameId: string;
 
   @IsNotEmpty()
-  nextTIme: TimeState;
+  nextTime: TimeState;
 }

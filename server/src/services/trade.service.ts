@@ -8,6 +8,7 @@ import { Player, PlayerDocument } from 'src/schemas/player.schema';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
 import { GameStateProvider, TimeState } from 'src/states/game.state.';
+import { isTrade } from 'src/utis/typeGuard';
 
 @Injectable()
 export class TradeService {
@@ -174,15 +175,7 @@ export class TradeService {
 
     for (const player of players) {
       for (const trade of player.trades) {
-        const isTrade = (trade: Types.ObjectId | Trade): trade is Trade => {
-          return (<Trade>trade)._id !== undefined;
-        };
-
-        if (!isTrade(trade)) {
-          const typeGuardError = Error('타입이 일치하지 않습니다.');
-          typeGuardError.name = 'TypeGuardError';
-          throw typeGuardError;
-        }
+        if (!isTrade(trade)) throw TypeError('타입이 일치하지 않습니다.');
 
         const stock = stocks.find((stock) => stock.corpId === trade.corpId);
 
@@ -304,13 +297,5 @@ export class TradeService {
         },
       ],
     };
-  }
-
-  async findTrades(
-    gameId: string,
-    week: number,
-    day: number,
-  ): Promise<Trade[]> {
-    return this.tradeModel.find({ gameId, week, day, staus: 'pending' }).exec();
   }
 }
