@@ -108,6 +108,7 @@ export class JoinService {
       corpId,
       totalQuantity: 0,
       availableQuantity: 0,
+      purchaseAmount: 0,
     }));
 
     return { cash, assets };

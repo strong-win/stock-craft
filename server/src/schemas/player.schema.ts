@@ -9,6 +9,7 @@ export type Asset = {
   corpId: string;
   totalQuantity: number;
   availableQuantity: number;
+  purchaseAmount: number;
 };
 
 export interface Cash {

@@ -72,6 +72,7 @@ export class TradeService {
           if (isDirect) {
             asset.availableQuantity += quantity;
             asset.totalQuantity += quantity;
+            asset.purchaseAmount += price * quantity;
           }
         }
       }
@@ -96,6 +97,8 @@ export class TradeService {
           asset.availableQuantity -= quantity;
           if (isDirect) {
             asset.totalQuantity -= quantity;
+            asset.purchaseAmount -=
+              (asset.purchaseAmount / asset.totalQuantity) * quantity;
           }
         }
       }
@@ -193,6 +196,7 @@ export class TradeService {
               if (asset.corpId === trade.corpId) {
                 asset.totalQuantity += trade.quantity;
                 asset.availableQuantity += trade.quantity;
+                asset.purchaseAmount += trade.price * trade.quantity;
               }
             }
             await this.tradeModel.updateOne(
@@ -214,6 +218,8 @@ export class TradeService {
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
                 asset.totalQuantity -= trade.quantity;
+                asset.purchaseAmount -=
+                  (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
               }
             }
 

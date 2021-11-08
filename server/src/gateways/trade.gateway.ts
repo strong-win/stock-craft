@@ -23,8 +23,8 @@ export class TradeGateway {
     payload: TradeRequestDto,
   ): Promise<void> {
     try {
-      const player = await this.tradeService.handleTrade(payload);
-      this.server.to(client.id).emit(TRADE_RESPONSE, player);
+      const tradeResponseDto = await this.tradeService.handleTrade(payload);
+      this.server.to(client.id).emit(TRADE_RESPONSE, tradeResponseDto);
     } catch (e) {
       console.error(e);
 
@@ -40,7 +40,7 @@ export class TradeGateway {
     client: Socket,
     payload: TradeCancelDto,
   ): Promise<void> {
-    const player = await this.tradeService.handleTradeCancel(payload);
-    this.server.to(client.id).emit(TRADE_RESPONSE, player);
+    const tradeResponseDto = await this.tradeService.handleTradeCancel(payload);
+    this.server.to(client.id).emit(TRADE_RESPONSE, tradeResponseDto);
   }
 }
