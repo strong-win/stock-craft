@@ -1,4 +1,4 @@
-import { Table } from "reactstrap";
+import { Table, Button } from "reactstrap";
 
 import { ChartState } from "../../modules/stock";
 import { TradeState } from "../../modules/user";
@@ -57,18 +57,18 @@ const TradeList = ({
                 <td>{trade.quantity}</td>
                 <td>{trade.price}</td>
                 <td>{trade.quantity * trade.price}</td>
-                <td className={`${trade.status}Text`}>
+                <td className={`${trade.status}Text status`}>
                   {tradeStatusToText[trade.status] || trade.status}
-                </td>
-                {trade.status === "pending" ? (
-                  <td>
-                    <button
+                  {trade.status === "pending" ? (
+                    <Button
+                      className="cancelButton"
+                      color="link"
                       onClick={() => handleCancel(trade._id, trade.corpId)}
                     >
-                      x
-                    </button>
-                  </td>
-                ) : null}
+                      &times;
+                    </Button>
+                  ) : null}
+                </td>
               </tr>
             ))}
         </tbody>

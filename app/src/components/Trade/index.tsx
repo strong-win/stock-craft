@@ -46,7 +46,7 @@ const Trade = ({
       </Row>
     </Card>
   ) : (
-    <Row>
+    <Row className="h-100">
       <TradeList
         trades={trades}
         corps={corps}

@@ -99,7 +99,7 @@ const Play = ({ location, history }: any) => {
         </Col>
       </Row>
       <Row className="playRow2">
-        <Col md="8">
+        <Col md="8" className="h-100">
           <TradeWrapper />
         </Col>
       </Row>
