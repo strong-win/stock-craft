@@ -1,17 +1,12 @@
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { DayChart } from 'src/dto/day-start-response.dto';
-
+import { DayChart } from 'src/dto/stock-response.dto';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 
-type SampleStock = {
-  week: number;
-  day: number;
+type tickStock = {
   tick: number;
   corpId: string;
-  corpName: string;
   price: number;
 };
 
@@ -19,7 +14,6 @@ type SampleStock = {
 export class StockService {
   constructor(
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
-    private configService: ConfigService,
   ) {}
 
   async findDayChart(
@@ -44,8 +38,8 @@ export class StockService {
 
     for (const corpId in dayChart) {
       dayChart[corpId] = dayChart[corpId]
-        .sort((a, b) => a.tick - b.tick)
-        .map((tickChart) => tickChart.price);
+        .sort((a: tickStock, b: tickStock) => a.tick - b.tick)
+        .map((tickChart: tickStock) => tickChart.price);
     }
     return dayChart;
   }

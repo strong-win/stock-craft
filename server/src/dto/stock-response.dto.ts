@@ -2,6 +2,6 @@ export type DayChart = {
   [key: string]: number[];
 };
 
-export class DayStartResponseDto {
+export class StockResponseDto {
   dayChart: DayChart;
 }
