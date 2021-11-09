@@ -24,6 +24,7 @@ def get_data_by_datetime_in_one_row(
     A function that returns DataFrame with `quantity` stocks with `train_days` + `init_days` with exchange_rate and kospi_index
     """
     # 0. initialize list to store individual df for merge
+    ticker_list = []
     res = []
 
     # 1. 날짜 랜덤 추출 (train_duration, init_duration 반영)
@@ -45,6 +46,7 @@ def get_data_by_datetime_in_one_row(
             : train_days + init_days
         ]
         # 3. 찾았다면, 해당 정보를 배열에 append
+        ticker_list.append(company["Symbol"])
         res.append(company_dataframe.reset_index(drop=True))
 
     # 4. KOSPI INDEX 정보 추가 - '종가'를 기준으로 함
@@ -66,14 +68,14 @@ def get_data_by_datetime_in_one_row(
     # 6. Merge Dataframe, reset labelname, and return final DataFrame
     result = pd.concat(res, axis=1)
     df_label = []
-    for i in range(1, quantity + 1):
+    for i in range(0, quantity):
         df_label += [
             "date",
-            "open" + str(i),
-            "high" + str(i),
-            "low" + str(i),
-            "close" + str(i),
-            "volume" + str(i),
+            str(ticker_list[i]) + "_open",
+            str(ticker_list[i]) + "_high",
+            str(ticker_list[i]) + "_low",
+            str(ticker_list[i]) + "_close",
+            str(ticker_list[i]) + "_volume",
         ]
     df_label += ["kospi", "exchange_rate"]
     result.columns = df_label
