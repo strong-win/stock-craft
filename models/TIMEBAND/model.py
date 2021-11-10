@@ -79,15 +79,15 @@ class TIMEBANDModel:
         netG_path = self.get_path("netG", postfix)
 
         if self.save_opt:
-            torch.save(self.netD, netD_path)
-            torch.save(self.netG, netG_path)
-
             if best:
                 best_netD_path = self.get_path("netD", "BEST")
                 best_netG_path = self.get_path("netG", "BEST")
                 torch.save(self.netD, best_netD_path)
                 torch.save(self.netG, best_netG_path)
                 postfix = f"Best({postfix})"
+            else:
+                torch.save(self.netD, netD_path)
+                torch.save(self.netG, netG_path)
 
             logger.info(f"*** {postfix} MODEL IS SAVED ***")
 

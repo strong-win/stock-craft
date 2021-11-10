@@ -10,12 +10,13 @@ pre_chain = [structlog.stdlib.add_log_level, timestamper]
 
 today = datetime.datetime.today()
 
-DETAIL = 0
-NORMAL = 1
-IMPORT = 2
-
 
 class Logger:
+    # Logger verbosity level
+    DETAIL = 0
+    NORMAL = 1
+    IMPORT = 2
+
     def __init__(self, logpath: str, verbosity: int):
         # Set log file path
         self.logpath = logpath

@@ -62,6 +62,7 @@ class TIMEBANDRunner:
 
         # Prediction
         self.idx = 0
+        # self.data_labeling()
         self.pred_initate()
 
         # Dashboard
@@ -78,7 +79,14 @@ class TIMEBANDRunner:
             true_y = data["decoded"].to(self.device)
             (batchs, forecast_len, target_dims) = true_y.shape
 
+            # #######################
+            # Generate
+            # #######################
             fake_y = generate(true_x)
+
+            # #######################
+            # Process
+            # #######################
             pred_y = self.dataset.denormalize(fake_y.cpu())
             preds, lower, upper = self.predicts(pred_y)
 
@@ -86,42 +94,42 @@ class TIMEBANDRunner:
             reals = self.dataset.forecast[self.idx : self.idx + pred_len].numpy()
             masks = self.dataset.missing[self.idx : self.idx + pred_len]
 
-            outputs = np.concatenate([outputs[: 1 - forecast_len], reals])
-            target = self.adjust(outputs, preds, masks, lower, upper)
-            outputs[-pred_len:] = target
+            output = np.concatenate([outputs[-1:], reals])
+            target = self.adjust(output, preds, masks, lower, upper)
+            outputs = np.concatenate([outputs[: 1 - forecast_len], target])
 
+            # #######################
+            # Visualize
+            # #######################
             self.dashboard.vis(batchs, reals, preds, lower, upper, target)
             self.idx += batchs
 
         # Dashboard
         self.dashboard.clear_figure()
-
         outputs = pd.DataFrame(
-            outputs, columns=self.dataset.targets, index=self.dataset.data.index
+            outputs, columns=self.dataset.targets, index=self.dataset.times
         )
         return outputs
 
-    def adjust(self, outputs, preds, masks, lower, upper):
+    def adjust(self, output, preds, masks, lower, upper):
         len = preds.shape[0]
         a = self.missing_gamma
         b = self.anomaly_gamma
 
         for p in range(len):
-            value = outputs[p - len]
+            value = output[p + 1]
 
-            lmask = outputs[p - len] < lower[p]
-            umask = outputs[p - len] > upper[p]
-            mmask = masks[p] * (lmask + umask)
+            lmask = value < lower[p]
+            umask = value > upper[p]
+            mmask = masks[p]
 
-            value = (1 - mmask) * value + mmask * (
-                a * preds[p] + (1 - a) * outputs[p - len - 1]
-            )
-            value = (1 - lmask) * value + lmask * (b * lower[p] + (1 - b) * value)
-            value = (1 - umask) * value + umask * (b * upper[p] + (1 - b) * value)
+            value = (1 - lmask) * value + lmask * (b * preds[p] + (1 - b) * value)
+            value = (1 - umask) * value + umask * (b * preds[p] + (1 - b) * value)
+            value = (1 - mmask) * value + mmask * (a * preds[p] + (1 - a) * output[p])
 
-            outputs[p - len] = value
+            output[p + 1] = value
 
-        target = outputs[-len:]
+        target = output[1:]
         return target
 
     def pred_initate(self):
@@ -164,7 +172,7 @@ class TIMEBANDRunner:
         self.labels = pd.DataFrame(
             self.label_data,
             columns=self.target_col,
-            index=self.dataset.data.index,
+            index=self.dataset.times,
         )
 
         if self.zero_is_missing:

@@ -10,6 +10,7 @@ from TIMEBAND.loss import TIMEBANDLoss
 from TIMEBAND.model import TIMEBANDModel
 from TIMEBAND.metric import TIMEBANDMetric
 from TIMEBAND.dataset import TIMEBANDDataset
+from TIMEBAND.dashboard import TIMEBANDDashboard
 
 logger = None
 
@@ -22,6 +23,7 @@ class TIMEBANDTrainer:
         models: TIMEBANDModel,
         metric: TIMEBANDMetric,
         losses: TIMEBANDLoss,
+        dashboard: TIMEBANDDashboard,
     ) -> None:
         global logger
         logger = config["logger"]
@@ -30,6 +32,7 @@ class TIMEBANDTrainer:
         self.models = models
         self.metric = metric
         self.losses = losses
+        self.dashboard = dashboard
 
         # Set Config
         config = self.set_config(config=config)
@@ -106,6 +109,7 @@ class TIMEBANDTrainer:
             # Prediction
             self.idx = 0
             self.pred_initate()
+            self.dashboard.init_figure()
 
             # Train Step
             train_score = self.train_step(epoch, trainset, training=True)
@@ -116,6 +120,7 @@ class TIMEBANDTrainer:
             valid_score_plot.append(valid_score)
 
             self.model_update(epoch, valid_score)
+            self.dashboard.clear_figure()
 
         self.models.load("BEST")
         self.models.save(best=True)
@@ -196,51 +201,62 @@ class TIMEBANDTrainer:
                     self.losses.gen_loss(true_y, fake_y, DGx)
 
             # #######################
-            # Scoring
+            # Process
             # #######################
             pred_y = self.dataset.denormalize(fake_y.cpu())
-            preds, _, _ = self.predicts(pred_y)
-            preds = torch.tensor(preds)
+            preds, lower, upper = self.predicts(pred_y)
 
             pred_len = preds.shape[0]
             reals = self.dataset.forecast[self.idx : self.idx + pred_len]
             masks = self.dataset.missing[self.idx : self.idx + pred_len]
-            masks = torch.tensor(masks)
+            self.idx += batchs
 
+            output = np.concatenate([outputs[-1:], reals])
+            target = self.adjust(output, preds, masks, lower, upper)
+            outputs = np.concatenate([outputs[: 1 - forecast_len], target])
+
+            # #######################
+            # Visualize
+            # #######################
+            self.dashboard.vis(batchs, reals, preds, lower, upper, target)
+
+            # #######################
+            # Scoring
+            # #######################
+            preds = torch.tensor(preds)
+            masks = torch.tensor(masks)
             self.metric.NMAE(reals, preds, masks)
             self.metric.RMSE(reals, preds, masks)
             self.metric.NME(reals, preds, masks)
 
+            # #######################
+            # Losses Log
+            # #######################
             losses = self.losses.loss(i)
             score = self.metric.score(i)
-
-            # Losses Log
-            self.idx += batchs
             tqdm_.set_description(desc(training, epoch, score, losses))
 
         return self.metric.nmae / (i + 1)
 
-    def adjust(self, outputs, preds, masks, lower, upper):
+    def adjust(self, output, preds, masks, lower, upper):
         len = preds.shape[0]
         a = self.missing_gamma
         b = self.anomaly_gamma
 
         for p in range(len):
-            value = outputs[p - len]
+            value = output[p + 1]
 
-            lmask = outputs[p - len] < lower[p]
-            umask = outputs[p - len] > upper[p]
+            lmask = value < lower[p]
+            umask = value > upper[p]
             mmask = masks[p] * (lmask + umask)
 
-            value = (1 - mmask) * value + mmask * (
-                a * preds[p] + (1 - a) * outputs[p - len - 1]
-            )
-            value = (1 - lmask) * value + lmask * (b * lower[p] + (1 - b) * value)
-            value = (1 - umask) * value + umask * (b * upper[p] + (1 - b) * value)
+            value = (1 - lmask) * value + lmask * (b * preds[p] + (1 - b) * value)
+            value = (1 - umask) * value + umask * (b * preds[p] + (1 - b) * value)
+            value = (1 - mmask) * value + mmask * (a * preds[p] + (1 - a) * output[p])
 
-            outputs[p - len] = value
+            output[p + 1] = value
 
-        target = outputs[-len:]
+        target = output[1:]
         return target
 
     def pred_initate(self):
@@ -268,11 +284,9 @@ class TIMEBANDTrainer:
             gamma = (forecast_len - f) / (forecast_len - 1)
             std[-f] += std[-f - 1] * gamma
 
-        for f in range(1, std.shape[0]):
-            std[f] += std[f - 1] * 0.2
-
         lower = preds - self.band_width * std
         upper = preds + self.band_width * std
+
         return preds, lower, upper
 
 

@@ -59,15 +59,6 @@ class TIMEBANDCore:
 
         self.output_path = os.path.join(self.outputs, self.data_name, self.TAG)
 
-    def init_device(self):
-        """
-        Setting device CUDNN option
-
-        """
-        # TODO : Using parallel GPUs options
-        device = "cuda:0" if torch.cuda.is_available() else "cpu"
-        return torch.device(device)
-
     def train(self) -> None:
         # Init the models
         self.models.initiate(dims=self.dataset.dims)
@@ -78,10 +69,11 @@ class TIMEBANDCore:
             self.models,
             self.metric,
             self.losses,
+            self.dashboard,
         )
 
         for k in range(self.dataset.sliding_step + 1):
-            logger.info(f"Train ({k + 1}/{self.dataset.sliding_step})")
+            logger.info(f"Train ({k + 1}/{self.dataset.sliding_step + 1})")
 
             if self.pretrain:
                 self.models.load("BEST")
@@ -97,7 +89,7 @@ class TIMEBANDCore:
 
     def run(self) -> None:
         # Init the models
-        self.models.load("BEST")
+        self.models.initiate(dims=self.dataset.dims)
 
         self.runner = TIMEBANDRunner(
             self.runner_cfg,
@@ -108,15 +100,17 @@ class TIMEBANDCore:
             self.dashboard,
         )
 
+        if self.pretrain:
+            self.models.load("BEST")
+
         dataset = self.dataset.prepare_testset()
         dataset = self.loader(dataset)
 
+        target_path = os.path.join(self.output_path, "target.csv")
         target_output = self.runner.run(dataset)
-        target_output.to_csv(os.path.join(self.output_path, "target.csv"))
+        target_output.to_csv(target_path)
 
-        data_output = self.dataset.origin
-        data_output[target_output.columns] = target_output
-        data_output.to_csv(os.path.join(self.output_path, f"{self.TAG}.csv"))
+        logger.info(f"{target_path} is saved")
 
     def loader(self, dataset: TIMEBANDDataset) -> DataLoader:
         dataloader = DataLoader(dataset, self.batch_size, num_workers=self.workers)
