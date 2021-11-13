@@ -21,7 +21,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
-import { GameStateProvider } from 'src/states/game.state.';
+import { GameStateProvider } from 'src/states/game.state';
 import { isGame } from 'src/utis/typeGuard';
 
 @WebSocketGateway()

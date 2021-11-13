@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { GameStateProvider } from './game.state.';
+import { GameStateProvider } from './game.state';
 import { PlayerStateProvider } from './player.state';
 
 @Module({

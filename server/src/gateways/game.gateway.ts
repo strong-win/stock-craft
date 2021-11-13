@@ -14,7 +14,7 @@ import { GameService } from 'src/services/game.service';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
 import { TradeService } from 'src/services/trade.service';
-import { GameStateProvider } from 'src/states/game.state.';
+import { GameStateProvider } from 'src/states/game.state';
 import { PlayerState, PlayerStateProvider } from 'src/states/player.state';
 import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { DayChart } from 'src/dto/stock-response.dto';

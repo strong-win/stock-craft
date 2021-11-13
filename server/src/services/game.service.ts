@@ -4,7 +4,7 @@ import { Model, Types } from 'mongoose';
 import { ChartRequestDto, TradeVolume } from 'src/dto/chart-request.dto';
 import { Item, ItemDocument } from 'src/schemas/item.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
-import { GameStateProvider, TimeState } from 'src/states/game.state.';
+import { GameStateProvider, TimeState } from 'src/states/game.state';
 
 @Injectable()
 export class GameService {

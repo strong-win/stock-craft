@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { TimeState } from 'src/states/game.state.';
+import { TimeState } from 'src/states/game.state';
 
 export class ChartResponseDto {
   @IsNotEmpty()
