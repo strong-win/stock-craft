@@ -8,6 +8,7 @@ import ChattingWrapper from "../containers/ChattingWrapper";
 import ClockWrapper from "../containers/ClockWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
+import AssetWrapper from "../containers/AssetWrapper";
 import { updateName, updateRoom, resetUser } from "../modules/user";
 import { createName } from "../utils/create";
 import WaitingRoom from "./WaitingRoom";
@@ -101,6 +102,9 @@ const Play = ({ location, history }: any) => {
       <Row className="playRow2">
         <Col md="8" className="h-100">
           <TradeWrapper />
+        </Col>
+        <Col md="4">
+          <AssetWrapper />
         </Col>
       </Row>
     </Container>

@@ -1,5 +1,7 @@
 @font-face {
   font-family: "IBM Plex Sans KR";
-  font-weight: 50;
-  src: url("https://fonts.googleapis.com/css2?f&family=IBM+Plex+Sans+KR:wght@300&display=swap");
+  font-style: normal;
+  font-weight: 100;
+  src: url("https://fonts.googleapis.com/css2?f&family=IBM+Plex+Sans+KR:wght@300&display=swap")
+    format("woff2");
 }
