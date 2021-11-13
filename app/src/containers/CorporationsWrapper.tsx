@@ -1,21 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { RootState } from "..";
-import Chart from "../components/Chart";
-import Corporations from "../components/Corporations";
+import ChartTab from "../components/Corporations";
 import { ChartState } from "../modules/stock";
-import { updateSelectedCorpId } from "../modules/user";
+import { updateSelectedCorpId, updateIsChartView } from "../modules/user";
 
 const CorporationsWrapper = () => {
   // redux state
   const { corps } = useSelector((state: RootState) => state.stock);
   const { tick } = useSelector((state: RootState) => state.time);
+  const { assets } = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
 
   // container state
-  const [isChartView, setIsChartView] = useState<boolean>(false);
   const [selectedCorpId, setSelectedCorpId] = useState<string>("");
 
   const onClickCorpItem = (corpId: string) => {
@@ -23,29 +22,21 @@ const CorporationsWrapper = () => {
     if (
       corps.find((corp: ChartState) => corp.corpId === corpId) !== undefined
     ) {
-      setIsChartView(true);
+      dispatch(updateIsChartView(true));
       dispatch(updateSelectedCorpId(corpId));
     } else {
-      setIsChartView(false);
+      dispatch(updateIsChartView(false));
     }
   };
 
-  return isChartView ? (
-    <>
-      <Chart
-        corp={corps.find((corp: ChartState) => corp.corpId === selectedCorpId)}
-        tick={tick}
-        onClickBackButton={onClickCorpItem}
-      />
-    </>
-  ) : (
-    <>
-      <Corporations
-        tick={tick}
-        corps={corps}
-        onClickCorpItem={onClickCorpItem}
-      />
-    </>
+  return (
+    <ChartTab
+      tick={tick}
+      assets={assets}
+      corps={corps}
+      onClickCorpItem={onClickCorpItem}
+      selectedCorpId={selectedCorpId}
+    />
   );
 };
 

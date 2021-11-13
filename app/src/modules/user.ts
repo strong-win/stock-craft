@@ -22,6 +22,7 @@ export type AssetState = {
   corpId: string;
   totalQuantity: number;
   availableQuantity: number;
+  purchaseAmount: number;
 };
 
 export type TradeState = {
@@ -51,6 +52,7 @@ export type userState = {
   assets: AssetState[];
   trades: TradeState[];
   selectedCorpId: string;
+  isChartView: boolean;
 };
 
 const initialState: userState = {
@@ -64,15 +66,16 @@ const initialState: userState = {
   players: [],
   cash: { totalCash: 100_000, availableCash: 100_000 },
   assets: [
-    // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "kang", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "han", totalQuantity: 0, availbleQuantity: 0 },
-    // { corpId: "lee", totalQuantity: 0, availbleQuantity: 0 },
+    // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "kang", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "han", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
+    // { corpId: "lee", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
   ],
   trades: [
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
   selectedCorpId: "gyu",
+  isChartView: false,
 };
 
 export const gameSlice = createSlice({
@@ -115,6 +118,9 @@ export const gameSlice = createSlice({
     updateSelectedCorpId: (state, action: PayloadAction<string>) => {
       state.selectedCorpId = action.payload;
     },
+    updateIsChartView: (state, action: PayloadAction<boolean>) => {
+      state.isChartView = action.payload;
+    },
     updateTrades: (
       state,
       action: PayloadAction<{
@@ -155,7 +161,8 @@ export const {
   updateCash,
   updateSelectedCorpId,
   updateTrades,
-  resetUser
+  resetUser,
+  updateIsChartView,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

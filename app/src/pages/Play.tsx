@@ -8,10 +8,14 @@ import ChattingWrapper from "../containers/ChattingWrapper";
 import ClockWrapper from "../containers/ClockWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
+import AssetWrapper from "../containers/AssetWrapper";
 import { updateName, updateRoom, resetUser } from "../modules/user";
 import { createName } from "../utils/create";
 import WaitingRoom from "./WaitingRoom";
+import Header from "../components/Header";
 import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
+
+import "../styles/Play.css";
 
 const Play = ({ location, history }: any) => {
   const [isBlocking, setIsBlocking] = useState<boolean>(false);
@@ -85,13 +89,9 @@ const Play = ({ location, history }: any) => {
   }, [dispatch, history, initRoom]);
 
   return status === "play" ? (
-    <Container fluid={true}>
-      <Row>
-        <Col>
-          <ClockWrapper />
-        </Col>
-      </Row>
-      <Row>
+    <Container className="playContainer" fluid={true}>
+      <Header isGameStart />
+      <Row className="playRow1">
         <Col md="8">
           <CorporationsWrapper />
         </Col>
@@ -99,9 +99,12 @@ const Play = ({ location, history }: any) => {
           <ChattingWrapper room={room} name={name} />
         </Col>
       </Row>
-      <Row>
-        <Col md="8">
+      <Row className="playRow2">
+        <Col md="8" className="h-100">
           <TradeWrapper />
+        </Col>
+        <Col md="4">
+          <AssetWrapper />
         </Col>
       </Row>
     </Container>

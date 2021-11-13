@@ -42,7 +42,7 @@ const TradeInput = ({ tradeBill, setTradeBill }: InputProps) => {
           placeholder="거래수량"
           value={quantity}
           onChange={onQuantityChange}
-          min={0}
+          min={1}
           type="number"
           step="1"
         />
