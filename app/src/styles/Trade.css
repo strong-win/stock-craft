@@ -34,3 +34,86 @@
   justify-content: space-around;
   line-height: normal;
 }
+
+.tradeTable {
+  text-align: center;
+  font-family: "IBM Plex Sans KR";
+  height: 80%;
+}
+
+.tableTitle {
+  font-family: "IBM Plex Sans KR";
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.5rem;
+  height: 20%;
+}
+
+.tradeTable tbody {
+  height: 80%;
+  overflow: auto;
+  display: block;
+  width: 100%;
+}
+
+.tradeTable thead {
+  height: 19%;
+  display: block;
+  padding-right: 1rem;
+}
+
+.tradeTable tr {
+  display: flex;
+  width: 100%;
+}
+
+.tradeTable th,
+td {
+  width: 17%;
+}
+
+.tradeTable td {
+  font-weight: bold;
+}
+
+.tradeTable .buy {
+  color: red;
+}
+
+.tradeTable .sell {
+  color: blue;
+}
+
+.tradeTable .pending {
+  background-color: rgba(0, 67, 147, 0.1);
+}
+
+.tradeTable .pendingText {
+  color: rgb(0, 67, 147);
+}
+
+.tradeTable .disposed {
+  background-color: rgba(21, 147, 0, 0.1);
+}
+
+.tradeTable .disposedText {
+  color: rgb(21, 147, 0);
+}
+
+.tradeTable .cancel {
+  background-color: rgba(196, 196, 196, 0.4);
+  color: #9f9f9f;
+}
+
+.tradeTable .cancelButton {
+  text-decoration: none;
+  color: rgb(131, 131, 131);
+  padding: 0;
+  position: relative;
+  left: 1rem;
+}
+.tradeTable .status {
+  padding-left: 3vw;
+  text-align: left;
+}

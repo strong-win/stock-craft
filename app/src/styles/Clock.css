@@ -6,3 +6,17 @@
   width: 4.375rem;
   height: 4.375rem;
 }
+
+.clockWrapper {
+  font-family: "IBM Plex Sans KR";
+  height: 100%;
+  font-size: 1.5rem;
+  vertical-align: middle;
+}
+
+.time {
+  color: white;
+  vertical-align: middle;
+  line-height: 4rem;
+  width: 2rem;
+}
