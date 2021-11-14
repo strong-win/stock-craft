@@ -1,4 +1,5 @@
 import {
+  GAME_SCORE,
   GAME_TIME_REQUEST,
   GAME_TIME_RESPONSE,
   ITEM_RESPONSE,
@@ -10,7 +11,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { GameService } from 'src/services/game.service';
+import { GameService, PlayerScore } from 'src/services/game.service';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
 import { TradeService } from 'src/services/trade.service';
@@ -104,6 +105,17 @@ export class GameGateway {
         this.server
           .to(tradeResponseDto.clientId)
           .emit(TRADE_RESPONSE, tradeResponseDto);
+      });
+    }
+
+    if (nextTime.week > 0 && nextTime.day === 0 && nextTime.tick == 0) {
+      // calculate score
+      const playerScores: PlayerScore[] = await this.gameService.calculateScore(
+        gameId,
+      );
+
+      playerScores.forEach((playerScore) => {
+        this.server.to(playerScore.clientId).emit(GAME_SCORE, playerScore);
       });
     }
 

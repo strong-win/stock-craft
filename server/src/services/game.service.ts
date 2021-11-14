@@ -7,12 +7,19 @@ import { Game, GameDocument } from 'src/schemas/game.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
 import { TimeState } from 'src/states/game.state';
 import { CorpStateProvider, CorpState } from 'src/states/corp.state';
+import { Player, PlayerDocument } from 'src/schemas/player.schema';
+
+export type PlayerScore = {
+  clientId: string;
+  score: number;
+};
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectModel(Game.name) private gameModel: Model<GameDocument>,
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
+    @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
 
     private corpState: CorpStateProvider,
   ) {}
@@ -67,5 +74,20 @@ export class GameService {
       corps,
     };
     return chartRequestDto;
+  }
+
+  async calculateScore(gameId: string): Promise<PlayerScore[]> {
+    const initialCash = 10_000_000;
+
+    const players: Player[] = await this.playerModel
+      .find({ game: Types.ObjectId(gameId) })
+      .exec();
+
+    const playerScores: PlayerScore[] = players.map((player) => ({
+      clientId: player.clientId,
+      score: player.cash.totalCash - initialCash,
+    }));
+
+    return playerScores;
   }
 }
