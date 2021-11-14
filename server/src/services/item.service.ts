@@ -7,6 +7,7 @@ import { ItemRequestDto } from 'src/dto/item-request.dto';
 import { Item, ItemDocument } from 'src/schemas/item.schema';
 import { GameStateProvider } from 'src/states/game.state';
 import { isPlayer } from 'src/utis/typeGuard';
+import { CorpEvents } from 'src/dto/chart-request.dto';
 
 @Injectable()
 export class ItemService {
@@ -46,12 +47,16 @@ export class ItemService {
     });
   }
 
-  async useItems(gameId: string, week: number, day: number): Promise<void> {
+  // chatting/trade/chart/cash/asset
+  async useItemsNow(gameId: string, week: number, day: number): Promise<void> {
     const items: Item[] = await this.itemModel
       .find({
         game: Types.ObjectId(gameId),
         week,
         day,
+        category: {
+          $in: ['chatting', 'trade', 'chart', 'cash', 'asset'],
+        },
         moment: 'now',
       })
       .exec();
@@ -60,9 +65,36 @@ export class ItemService {
       if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
 
       this.effectProvider.handleEffect({
+        gameId,
         playerId: item.player._id,
         type: item.type,
         target: item.target,
+      });
+    });
+  }
+
+  // stocks
+  async useItemsBeforeInfer(gameId: string, week: number, day: number) {
+    const items: Item[] = await this.itemModel
+      .find({
+        game: Types.ObjectId(gameId),
+        week,
+        day,
+        category: 'stock',
+        moment: 'before-infer',
+      })
+      .exec();
+
+    items.forEach((item) => {
+      if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
+
+      this.effectProvider.handleEffect({
+        gameId,
+        playerId: item.player._id,
+        type: item.type,
+        target: item.target,
+        week,
+        day,
       });
     });
   }

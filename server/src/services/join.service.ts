@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { MarketApi } from 'src/api/market.api';
@@ -14,6 +13,10 @@ import {
 } from 'src/schemas/player.schema';
 import { PlayerStateProvider } from 'src/states/player.state';
 
+export type CorpChart = Corp & {
+  totalChart: [];
+};
+
 @Injectable()
 export class JoinService {
   constructor(
@@ -21,7 +24,6 @@ export class JoinService {
     @InjectModel(Player.name)
     private playerModel: mongoose.Model<PlayerDocument>,
     private playerState: PlayerStateProvider,
-    private configService: ConfigService,
     private marketApi: MarketApi,
   ) {}
 
@@ -59,7 +61,14 @@ export class JoinService {
       });
 
       // get start response from Market Server
-      const corps = await this.marketApi.requestStart(gameId);
+      const corpCharts: CorpChart[] = await this.marketApi.requestStart(gameId);
+      const corps: Corp[] = corpCharts.map(({ corpId, corpName }) => ({
+        corpId,
+        corpName,
+      }));
+
+      // update game with corps
+      await this.gameModel.updateOne({ _id: gameId }, { corps: corps });
 
       // get player acccounts with corportions
       const { cash, assets } = this.getPlayerAccount(corps);

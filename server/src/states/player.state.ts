@@ -9,7 +9,7 @@ export type PlayerState = {
   gameId: Types.ObjectId | string;
   playerId: Types.ObjectId | string;
   clientId: string;
-  option: PlayerOption[];
+  options: PlayerOption[];
 };
 
 export class PlayerStateProvider {
@@ -31,7 +31,7 @@ export class PlayerStateProvider {
       gameId,
       playerId,
       clientId,
-      option: [{ category: 'chatting', active: true }],
+      options: [{ category: 'chatting', active: true }],
     });
   }
 
@@ -58,27 +58,21 @@ export class PlayerStateProvider {
         this.players.find((player) => playerId === player.playerId).gameId
       );
 
-      this.players.map((player) =>
-        gameId === player.gameId && playerId !== player.playerId
-          ? {
-              ...player,
-              option: player.option.map((option) =>
-                effect.category === option.category ? effect : option,
-              ),
-            }
-          : player,
-      );
+      this.players.forEach((player) => {
+        if (gameId === player.gameId && playerId !== player.playerId) {
+          player.options = player.options.map((option) =>
+            effect.category === option.category ? effect : option,
+          );
+        }
+      });
     } else {
-      this.players.map((player) =>
-        target === player.gameId
-          ? {
-              ...player,
-              option: player.option.map((option) =>
-                effect.category === option.category ? effect : option,
-              ),
-            }
-          : player,
-      );
+      this.players.forEach((player) => {
+        if (target === player.playerId) {
+          player.options = player.options.map((option) =>
+            effect.category === option.category ? effect : option,
+          );
+        }
+      });
     }
   }
 }

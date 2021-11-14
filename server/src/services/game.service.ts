@@ -1,54 +1,70 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { ChartRequestDto, TradeVolume } from 'src/dto/chart-request.dto';
-import { Item, ItemDocument } from 'src/schemas/item.schema';
+
+import { ChartRequestDto, CorpEvents } from 'src/dto/chart-request.dto';
+import { Game, GameDocument } from 'src/schemas/game.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
-import { GameStateProvider, TimeState } from 'src/states/game.state';
+import { TimeState } from 'src/states/game.state';
+import { CorpStateProvider, CorpState } from 'src/states/corp.state';
 
 @Injectable()
 export class GameService {
   constructor(
-    @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
+    @InjectModel(Game.name) private gameModel: Model<GameDocument>,
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
 
-    private gameState: GameStateProvider,
+    private corpState: CorpStateProvider,
   ) {}
   async composeChartRequest(
     gameId: string,
     prevTime: TimeState,
     nextTime: TimeState,
   ): Promise<ChartRequestDto> {
-    const items: Item[] = await this.itemModel
+    const game: Game = await this.gameModel.findOne({
+      _id: Types.ObjectId(gameId),
+    });
+
+    const corpStates: CorpState[] = this.corpState.findByGameId(
+      gameId,
+      prevTime.week,
+      prevTime.day,
+    );
+
+    const trades: Trade[] = await this.tradeModel
       .find({
         game: Types.ObjectId(gameId),
         week: prevTime.week,
         day: prevTime.day,
-        moment: 'on-infer',
+        status: { $in: ['pending', 'disposed'] },
       })
       .exec();
 
-    const trades: Trade[] = await this.tradeModel
-      .find({ week: prevTime.week, day: prevTime.day, staus: 'pending' })
-      .exec();
+    const corps: CorpEvents = {};
 
-    const tradeVolume: TradeVolume = {
-      buyQuantity: trades
-        .filter((trade) => trade.deal === 'buy' && trade.status == 'disposed')
-        .map((trade) => trade.quantity)
-        .reduce((acc, cur) => acc + cur, 0),
-      sellQuantity: trades
-        .filter((trade) => trade.deal === 'sell' && trade.status == 'disposed')
-        .map((trade) => trade.quantity)
-        .reduce((acc, cur) => acc + cur, 0),
-    };
+    game.corps.forEach(({ corpId }) => {
+      corps[corpId] = {
+        increment:
+          corpStates.find((corpState) => corpId == corpState.corpId)
+            ?.increment || 0,
+        buyQuantity:
+          trades
+            .filter((trade) => corpId === trade.corpId && trade.deal === 'buy')
+            .map((trade) => trade.quantity)
+            .reduce((acc, cur) => acc + cur, 0) || 0,
+        sellQuantity:
+          trades
+            .filter((trade) => corpId === trade.corpId && trade.deal === 'sell')
+            .map((trade) => trade.quantity)
+            .reduce((acc, cur) => acc + cur, 0) || 0,
+      };
+    });
 
     const chartRequestDto: ChartRequestDto = {
       gameId,
       prevTime,
       nextTime,
-      itemTypes: items.map((item) => item.type),
-      tradeVolume: tradeVolume,
+      corps,
     };
     return chartRequestDto;
   }

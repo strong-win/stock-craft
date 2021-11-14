@@ -16,7 +16,7 @@ export class Item {
   day: number;
 
   @Prop()
-  moment: 'now' | 'on-infer' | 'after-infer' | 'end';
+  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
 
   @Prop()
   category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';

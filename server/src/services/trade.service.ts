@@ -112,6 +112,7 @@ export class TradeService {
 
     // add to trade collection if player cannot directly trade
     const trade = await this.tradeModel.create({
+      game: Types.ObjectId(gameId),
       player,
       week,
       day,

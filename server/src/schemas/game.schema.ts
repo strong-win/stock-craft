@@ -4,7 +4,10 @@ import { Player } from './player.schema';
 
 export type GameDocument = Game & Document;
 
-export type Corp = { corpId: string; corpName: string; totalChart: [] };
+export type Corp = {
+  corpId: string;
+  corpName: string;
+};
 
 @Schema()
 export class Game {
@@ -12,6 +15,9 @@ export class Game {
 
   @Prop()
   room: string;
+
+  @Prop()
+  corps: Corp[];
 
   @Prop({ type: [Types.ObjectId], ref: 'Player' })
   players: Player[];

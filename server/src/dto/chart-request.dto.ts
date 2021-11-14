@@ -1,9 +1,14 @@
 import { IsNotEmpty } from 'class-validator';
 import { TimeState } from 'src/states/game.state';
 
-export type TradeVolume = {
+export type CorpEvent = {
+  increment: number;
   buyQuantity: number;
   sellQuantity: number;
+};
+
+export type CorpEvents = {
+  [key: string]: CorpEvent;
 };
 
 export class ChartRequestDto {
@@ -17,8 +22,5 @@ export class ChartRequestDto {
   nextTime: TimeState;
 
   @IsNotEmpty()
-  itemTypes: string[];
-
-  @IsNotEmpty()
-  tradeVolume: TradeVolume;
+  corps: CorpEvents;
 }

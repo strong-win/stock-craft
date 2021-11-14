@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types, Date } from 'mongoose';
+import { Game } from './game.schema';
 import { Player } from './player.schema';
 
 export type TradeDocument = Trade & Document;
@@ -37,6 +38,9 @@ export class Trade {
 
   @Prop({ type: Types.ObjectId, ref: 'Player' })
   player: Player;
+
+  @Prop({ type: Types.ObjectId, ref: 'Game' })
+  game: Types.ObjectId | Game;
 }
 
 export const TradeSchema = SchemaFactory.createForClass(Trade);

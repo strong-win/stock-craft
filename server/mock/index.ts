@@ -1,28 +1,33 @@
 import * as express from 'express';
 import { MongoClient } from 'mongodb';
 import { Types } from 'mongoose';
+import logger from 'morgan';
 import sample from './sample';
 
-export type TimeState = {
+type TimeState = {
   week: number;
   day: number;
   tick: number;
 };
 
-export type TradeVolume = {
+export type CorpEvent = {
+  increment: number;
   buyQuantity: number;
   sellQuantity: number;
 };
 
-export type ChartRequestDto = {
+export type CorpEvents = {
+  [key: string]: CorpEvent;
+};
+
+type ChartRequestDto = {
   gameId: string;
   prevTime: TimeState;
   nextTime: TimeState;
-  itemTypes: string[];
-  tradeVolume: TradeVolume;
+  corps: CorpEvents;
 };
 
-export type ChartResponseDto = {
+type ChartResponseDto = {
   gameId: string;
   nextTime: TimeState;
 };
@@ -32,19 +37,14 @@ const PORT = process.env.PORT || 8081;
 const app: express.Application = express();
 
 app.use(express.json());
+app.use(logger('dev'));
 
-app.post('/start', (req: express.Request, res: express.Response) => {
+app.post('/model', (req: express.Request, res: express.Response) => {
   res.json(sample.corps);
 });
 
-app.post('/chart', (req: express.Request, res: express.Response) => {
-  const {
-    gameId,
-    prevTime,
-    nextTime,
-    itemTypes,
-    tradeVolume,
-  }: ChartRequestDto = req.body;
+app.put('/model', (req: express.Request, res: express.Response) => {
+  const { gameId, prevTime, nextTime, corps }: ChartRequestDto = req.body;
 
   MongoClient.connect(
     'mongodb://mongodb:27017/stockcraft',

@@ -46,6 +46,13 @@ export class GameGateway {
     const { room, prevTime, nextTime } = this.gameState.updateTime(gameId);
 
     if (nextTime.day > 0 && nextTime.tick == 0) {
+      // find items with moment before-infer
+      await this.itemService.useItemsBeforeInfer(
+        gameId,
+        prevTime.week,
+        prevTime.day,
+      );
+
       const chartRequestDto: ChartRequestDto =
         await this.gameService.composeChartRequest(gameId, prevTime, nextTime);
 
@@ -55,10 +62,13 @@ export class GameGateway {
           console.log(
             `[CHART GENERATE RESPONSE] week : ${chartResponseDto.nextTime.week} day : ${chartResponseDto.nextTime.day}`,
           );
+
+          // TO DO
+          // - find items with moment after-infer
         });
 
       // find items with moment now
-      await this.itemService.useItems(gameId, prevTime.week, prevTime.day);
+      await this.itemService.useItemsNow(gameId, prevTime.week, prevTime.day);
 
       // item response
       const playerStates: PlayerState[] = this.playerState.findByGameId(gameId);
@@ -66,7 +76,7 @@ export class GameGateway {
       playerStates.forEach((playerState) => {
         this.server
           .to(playerState.clientId)
-          .emit(ITEM_RESPONSE, { option: playerState.option });
+          .emit(ITEM_RESPONSE, { options: playerState.options });
       });
     }
 
