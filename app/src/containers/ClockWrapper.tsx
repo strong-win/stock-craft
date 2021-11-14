@@ -10,18 +10,18 @@ const ClockWrapper = () => {
   const { week, day, tick } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    setTimeout(() => {
-      if (isHost) dispatch(sendGameTimeRequest({ gameId }));
-    }, 15000);
+  const handleTimeOut = () => {
+    if (isHost) dispatch(sendGameTimeRequest({ gameId }));
+  };
 
-    /**
-     * TO DO - host 가 퇴장하고 다른 guest 가 host 가 되었을 때, 연속적인 time request 필요
-     */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tick]);
+  /**
+   * TO DO - host 가 퇴장하고 다른 guest 가 host 가 되었을 때, 연속적인 time request 필요
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
 
-  return <Clock week={week} day={day} tick={tick} />;
+  return (
+    <Clock week={week} day={day} tick={tick} handleTimeOut={handleTimeOut} />
+  );
 };
 
 export default ClockWrapper;
