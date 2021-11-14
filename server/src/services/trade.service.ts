@@ -8,7 +8,7 @@ import { Player, PlayerDocument } from 'src/schemas/player.schema';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
 import { GameStateProvider, TimeState } from 'src/states/game.state';
-import { isTrade } from 'src/utis/typeGuard';
+import { isTrade } from 'src/utils/typeGuard';
 
 @Injectable()
 export class TradeService {

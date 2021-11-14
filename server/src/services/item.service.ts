@@ -6,7 +6,7 @@ import { ItemRequestDto } from 'src/dto/item-request.dto';
 
 import { Item, ItemDocument } from 'src/schemas/item.schema';
 import { GameStateProvider } from 'src/states/game.state';
-import { isPlayer } from 'src/utis/typeGuard';
+import { isPlayer } from 'src/utils/typeGuard';
 
 @Injectable()
 export class ItemService {

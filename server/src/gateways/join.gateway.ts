@@ -22,7 +22,7 @@ import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
 import { GameStateProvider } from 'src/states/game.state';
-import { isGame } from 'src/utis/typeGuard';
+import { isGame } from 'src/utils/typeGuard';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
