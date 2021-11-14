@@ -17,7 +17,6 @@ const ClockWrapper = () => {
   /**
    * TO DO - host 가 퇴장하고 다른 guest 가 host 가 되었을 때, 연속적인 time request 필요
    */
-  // eslint-disable-next-line react-hooks/exhaustive-deps
 
   return (
     <Clock week={week} day={day} tick={tick} handleTimeOut={handleTimeOut} />
