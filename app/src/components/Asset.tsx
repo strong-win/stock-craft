@@ -1,8 +1,24 @@
 import { Row, Col } from "reactstrap";
 
+import { CashState, AssetState } from "../modules/user";
+import { ChartState } from "../modules/stock";
 import "../styles/Asset.css";
 
-const AssetItem = ({ name, value, unit, color = false }) => {
+type AssetItemType = {
+  name: string;
+  value: number;
+  unit: string;
+  color?: boolean;
+};
+
+// type AssetPropsType = {
+//   cash: CashState;
+//   assets: AssetState[];
+//   corps: ChartState[];
+//   tick: number;
+// };
+
+const AssetItem = ({ name, value, unit, color = false }: AssetItemType) => {
   return (
     <Row className="assetItemRow">
       <Col md="3" className="assetKey">
@@ -26,7 +42,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     const nowPrice = corp.todayChart[tick - 1] || corp.totalChart.at(-1) || 0;
     return (
       nowPrice *
-      assets.find((asset) => asset.corpId == corp.corpId)?.totalQuantity
+      assets.find((asset) => asset.corpId === corp.corpId)?.totalQuantity
     );
   });
 
