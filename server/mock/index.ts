@@ -1,7 +1,6 @@
 import * as express from 'express';
 import { MongoClient } from 'mongodb';
 import { Types } from 'mongoose';
-import logger from 'morgan';
 import sample from './sample';
 
 type TimeState = {
@@ -37,7 +36,6 @@ const PORT = process.env.PORT || 8081;
 const app: express.Application = express();
 
 app.use(express.json());
-app.use(logger('dev'));
 
 app.post('/model', (req: express.Request, res: express.Response) => {
   res.json(sample.corps);
