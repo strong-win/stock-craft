@@ -114,9 +114,7 @@ export class GameGateway {
         gameId,
       );
 
-      playerScores.forEach((playerScore) => {
-        this.server.to(playerScore.clientId).emit(GAME_SCORE, playerScore);
-      });
+      this.server.to(room).emit(GAME_SCORE, playerScores);
     }
 
     this.server.to(room).emit(GAME_TIME_RESPONSE, { time: nextTime, dayChart });

@@ -10,7 +10,8 @@ import { CorpStateProvider, CorpState } from 'src/states/corp.state';
 import { Player, PlayerDocument } from 'src/schemas/player.schema';
 
 export type PlayerScore = {
-  clientId: string;
+  playerId: Types.ObjectId;
+  name: string;
   score: number;
 };
 
@@ -43,7 +44,7 @@ export class GameService {
         game: Types.ObjectId(gameId),
         week: prevTime.week,
         day: prevTime.day,
-        status: { $in: ['pending', 'disposed'] },
+        status: 'disposed',
       })
       .exec();
 
@@ -84,7 +85,8 @@ export class GameService {
       .exec();
 
     const playerScores: PlayerScore[] = players.map((player) => ({
-      clientId: player.clientId,
+      playerId: player._id,
+      name: player.name,
       score: player.cash.totalCash - initialCash,
     }));
 
