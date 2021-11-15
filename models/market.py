@@ -1,7 +1,7 @@
 from fastapi import FastAPI # Serving
 from fastapi.responses import JSONResponse
 from conn import client, db, col
-from schema import GameInfo, CorpInfo, CorpResInfo
+from schema import GameInfo, CorpInfo, CorpResInfo, CorpEventInfo
 from math import log2
 # from TIMEBAND.core import TIMEBANDCore # ML과 통신
 import pymongo  # NoSQL 연동
@@ -84,11 +84,11 @@ def init_model(game_info: GameInfo):
 		
 		# 2. ML Model의 정보를 바탕으로 새로운 document 생성, DB collection에 추가
 		# TODO: change mock data into real data base on ML model
-		company_info = []
-		company_list = ['000010', '000020', '000030', '000040', '000050']
-		for company in company_list:
-			company_info.append({
-				"corpId": company,
+		corp_info = []
+		corp_list = ['000010', '000020', '000030', '000040', '000050']
+		for corp in corp_list:
+			corp_info.append({
+				"corpId": corp,
 				"totalChart": ['10000', '10500', '10000', '10500', '11000', '11500', '12000', '12500', '12000', '11500']
 			})	
 
@@ -97,14 +97,14 @@ def init_model(game_info: GameInfo):
 			"gameId": gameInfo.gameId,
 			"modelInfo": target_model,
 			"modelConfig": config,
-			"companies": company_info
+			"companies": corp_info
 		}
 		col.insert_one(new_game)
 
 		# 4. 반환을 위한 dict res 생성, `gameId`와 `data` attribute 추가 후 반환
 		res = {}
 		res['gameId'] = new_game.gameId
-		res['data'] = company_info
+		res['data'] = corp_info
 		return JSONResponse(res) # list of dictionary
 	except Exception as e:
 		return JSONResponse({'gameId': game_info.gameId, "data": "Error : {}".format(e)})
@@ -115,9 +115,11 @@ def update_model(game_info_with_event: CorpEventInfo):
 	game_id가 주어졌을 때, 해당 id를 바탕으로 새로운 데이터를 주는 API
 	"""
 	try:
-		# 1. gameId에 해당하는 모델을 찾고, 이를 CONFIG_PATH로 지정
+		# 1. DB에서 해당하는 게임 정보를 가지고 온다
+		game = list(col.find({"gameId": game_info_with_event.gameId}))[0]
 
 		# 2. TIMEBANDCore를 선언하고, torch.load를 한 후, Core.predict를 진행
+		# TODO: 아래 pseudo ML online batch가 완료되면 연동
 		"""
 		이전 회의에서 나왔던 Protocol psuedo-code:
 		MODEL_PATH = mongoDB.find(gameId)
@@ -126,6 +128,9 @@ def update_model(game_info_with_event: CorpEventInfo):
 		model = torch.load(MODEL_PATH)
 		predict_data, predict_band = Core.predicts(data, model)
 		"""
+
+		res = {}
+
 		# 3. 찾은 predict_data를 기반으로 get_current_price 진행(예측)
 		
 		# 4. 예측된 결과를 반환
@@ -139,11 +144,10 @@ def delete_model(game_info: GameInfo):
 	게임이 끝나고 model과의 관계를 삭제하는 API
 	"""
 	try:
-		# 1. gameId에 해당하는 모델을 찾기		
+		# 1. gameId에 해당하는 정보 제거
+		col.delete_one({"gameId": game_info.gameId})
 
-		# 2. MongoDB에서 해당하는 value에 해당하는 document 제거
-
-		# 3. 성공 시그널: {gameId: str, status: 'OK'} 을 return
+		# 2. 성공 시그널: {gameId: str, status: 'OK'} 을 return
 		return JSONResponse({'gameId':game_info.gameId, 'status': "OK"})
 	except Exception as e:
 		return JSONResponse({'gameId':game_info.gameId, "status": "Error : {}".format(e)})
