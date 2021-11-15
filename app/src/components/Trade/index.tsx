@@ -1,4 +1,5 @@
-import { Row, Card } from "reactstrap";
+import { useState } from "react";
+import { Row, Card, Col } from "reactstrap";
 
 import "../../styles/Trade.css";
 import { billType } from "../../containers/TradeWrapper";
@@ -8,6 +9,7 @@ import { TradeState } from "../../modules/user";
 import TradeBoard from "./TradeBoard";
 import TradeButton from "./TradeButton";
 import TradeInput from "./TradeInput";
+import TradeTab from "./TradeTab";
 import TradeList from "./TradeList";
 
 type TradeProps = {
@@ -33,18 +35,29 @@ const Trade = ({
   handleDeal,
   handleCancel,
 }: TradeProps) => {
+  const [tradeType, setTradeType] = useState<"sell" | "buy">("buy");
+
+  const handleChangeType = (e) => {
+    setTradeType(e.target.id);
+  };
+
   return isChartView ? (
-    <Card className="tradeCard">
-      <Row className="trade">
-        <TradeBoard
-          stockBill={stockBill}
-          tradeBill={tradeBill}
-          setTradeBill={setTradeBill}
+    <Row className="h-100">
+      <Col>
+        <TradeList
+          trades={trades}
+          corps={corps}
+          selectedCorpId={selectedCorpId}
+          handleCancel={handleCancel}
+          isChartView={true}
         />
+      </Col>
+      <Col className="tradeCard">
+        <TradeTab tradeType={tradeType} handleChangeType={handleChangeType} />
         <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
-        <TradeButton handleDeal={handleDeal} />
-      </Row>
-    </Card>
+        <TradeButton tradeType={tradeType} handleDeal={handleDeal} />
+      </Col>
+    </Row>
   ) : (
     <Row className="h-100">
       <TradeList

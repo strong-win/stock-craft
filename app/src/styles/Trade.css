@@ -3,10 +3,6 @@
   justify-content: space-between;
 }
 
-.tradeCard {
-  background-color: rgb(211, 211, 211);
-}
-
 .input {
   display: flex;
   flex-direction: column;
@@ -113,7 +109,53 @@ td {
   position: relative;
   left: 1rem;
 }
+
 .tradeTable .status {
   padding-left: 3vw;
   text-align: left;
+}
+
+.tradeTab {
+  font-family: "IBM Plex Sans KR";
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.tradeTab .tabButton {
+  padding: 0.5rem;
+  border-bottom: 1px solid #c4c4c4;
+  color: #c4c4c4;
+}
+
+.tradeTab .selectedBuyTab {
+  border-bottom: 1px solid red;
+  color: red;
+}
+
+.tradeTab .selectedSellTab {
+  border-bottom: 1px solid blue;
+  color: blue;
+}
+
+.tradeButton {
+  font-family: "IBM Plex Sans KR";
+  background-color: red;
+  border: none;
+  width: 100%;
+}
+
+.sellButton {
+  background-color: blue;
+}
+
+.tradeInputWrapper {
+  padding: 2rem;
+}
+
+.tradeInputGroup {
+  display: flex;
+  margin-top: 0.5rem;
+  font-family: "IBM Plex Sans KR";
+  flex-direction: row;
 }
