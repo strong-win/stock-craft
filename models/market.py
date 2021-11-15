@@ -1,6 +1,6 @@
 from fastapi import FastAPI # Serving
 from fastapi.responses import JSONResponse
-from conn import client
+from conn import client, db, col
 from schema import GameInfo, CorpInfo, CorpResInfo
 from math import log2
 # from TIMEBAND.core import TIMEBANDCore # ML과 통신
@@ -8,12 +8,14 @@ import pymongo  # NoSQL 연동
 import json
 import numpy as np  # 정규분포 이용
 import pandas as pd  # DataFrame 관리
+from random import sample
+import glob
 
 ## TO-BE Delete
 from dummy import dummy_df
 from pprint import pprint
 
-MODEL_PATH = "..."  # Model `.pt` 파일이 있는 경로
+MODEL_PATH = "./pretrained_models"  # Model `.pt` 파일이 있는 경로
 
 app = FastAPI()
 
@@ -74,18 +76,38 @@ def init_model(game_info: GameInfo):
 	이미 학습된 모델을 1:1 매칭한 후, 초기 데이터를 반환하는 API (constructor)
 	"""
 	try:
-	# 1. 이미 있는 모델과 gameId를 매칭
+		# 1. 이미 있는 모델과 gameId를 매칭
+		# TODO: change config if some entity needs to be modified.
+		target_model = random.sample(glob.glob(MODEL_PATH+'/*.pt'), 1)[0] # 모델 이름을 임의로 추출
+		with open('./config.sample.json') as json_file:
+			config = json.load(json_file)
+		
+		# 2. ML Model의 정보를 바탕으로 새로운 document 생성, DB collection에 추가
+		# TODO: change mock data into real data base on ML model
+		company_info = []
+		company_list = ['000010', '000020', '000030', '000040', '000050']
+		for company in company_list:
+			company_info.append({
+				"corpId": company,
+				"totalChart": ['10000', '10500', '10000', '10500', '11000', '11500', '12000', '12500', '12000', '11500']
+			})	
 
-	# 2. 매칭된 정보를 dict타입으로 요약
+		# 3. 새로운 document 생성, DB collection에 추가
+		new_game = {
+			"gameId": gameInfo.gameId,
+			"modelInfo": target_model,
+			"modelConfig": config
+			"companies": company_info
+		}
+		col.insert_one(new_game)
 
-	# 3. 생성된 정보를 MongoDB에 document로 생성
-
-	# 4 .처음 생성된 주가를 가져와서 `totalChart`에 넣은 후 최종 데이터를 반환
-
-		return JSONResponse({"status": "OK"})
+		# 4. 반환을 위한 dict res 생성, `gameId`와 `data` attribute 추가 후 반환
+		res = {}
+		res['gameId'] = new_game.gameId
+		res['data'] = company_info
+		return JSONResponse(res) # list of dictionary
 	except Exception as e:
-		return JSONResponse({'gameId': game_info_with_event.gameId, "status": "Error : {}".format(e)})
-
+		return JSONResponse({'gameId': game_info.gameId, "data": "Error : {}".format(e)})
 
 @app.put("/model")
 def update_model(game_info_with_event: CorpEventInfo):
@@ -93,21 +115,20 @@ def update_model(game_info_with_event: CorpEventInfo):
 	game_id가 주어졌을 때, 해당 id를 바탕으로 새로운 데이터를 주는 API
 	"""
 	try:
-	# 1. gameId에 해당하는 모델을 찾고, 이를 CONFIG_PATH로 지정
+		# 1. gameId에 해당하는 모델을 찾고, 이를 CONFIG_PATH로 지정
 
-	# 2. TIMEBANDCore를 선언하고, torch.load를 한 후, Core.predict를 진행
-	"""
-	이전 회의에서 나왔던 Protocol psuedo-code:
-	MODEL_PATH = mongoDB.find(gameId)
-	config = local.find(gameId)
-	Core = TIMEBANDCore(config)
-	model = torch.load(MODEL_PATH)
-	predict_data, predict_band = Core.predicts(data, model)
-	"""
-	# 3. 찾은 predict_data를 기반으로 get_current_price 진행(예측)
-
-	# 4. 예측된 결과를 반환
-
+		# 2. TIMEBANDCore를 선언하고, torch.load를 한 후, Core.predict를 진행
+		"""
+		이전 회의에서 나왔던 Protocol psuedo-code:
+		MODEL_PATH = mongoDB.find(gameId)
+		config = local.find(gameId)
+		Core = TIMEBANDCore(config)
+		model = torch.load(MODEL_PATH)
+		predict_data, predict_band = Core.predicts(data, model)
+		"""
+		# 3. 찾은 predict_data를 기반으로 get_current_price 진행(예측)
+		
+		# 4. 예측된 결과를 반환
 		return JSONResponse({"status": "OK"})
 	except Exception as e:
 		return JSONResponse({'gameId': game_info_with_event.gameId, "status": "Error : {}".format(e)})
@@ -118,14 +139,11 @@ def delete_model(game_info: GameInfo):
 	게임이 끝나고 model과의 관계를 삭제하는 API
 	"""
 	try:
-	# 1. gameId에 해당하는 모델을 찾기
+		# 1. gameId에 해당하는 모델을 찾기		
 
-	# 2. MongoDB에서 해당하는 value에 해당하는 document 제거
+		# 2. MongoDB에서 해당하는 value에 해당하는 document 제거
 
-	# 3. 추가적으로 이번 게임에서 활용된 경로, config 등의 의존성 제거
-
-	# 4. 성공 시그널: {gameId: str, status: 'OK'} 을 return
-
+		# 3. 성공 시그널: {gameId: str, status: 'OK'} 을 return
 		return JSONResponse({'gameId':game_info.gameId, 'status': "OK"})
 	except Exception as e:
 		return JSONResponse({'gameId':game_info.gameId, "status": "Error : {}".format(e)})
