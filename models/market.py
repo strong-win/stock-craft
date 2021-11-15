@@ -96,7 +96,7 @@ def init_model(game_info: GameInfo):
 		new_game = {
 			"gameId": gameInfo.gameId,
 			"modelInfo": target_model,
-			"modelConfig": config
+			"modelConfig": config,
 			"companies": company_info
 		}
 		col.insert_one(new_game)
