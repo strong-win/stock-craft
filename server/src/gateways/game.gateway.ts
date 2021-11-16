@@ -21,10 +21,8 @@ import { DayChart } from 'src/dto/stock-response.dto';
 import { MarketApi } from 'src/api/market.api';
 import { ChartRequestDto } from 'src/dto/chart-request.dto';
 import { ChartResponseDto } from 'src/dto/chart-response.dto';
-import {
-  PlayerEffectState,
-  PlayerEffectStateProvider,
-} from 'src/states/player.effect.state';
+import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
+import { ItemResponseDto } from 'src/dto/item-response.dto';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -78,7 +76,7 @@ export class GameGateway {
       });
     }
 
-    // generate chart
+    // use item and generate chart
     if (nextTime.day > 0 && nextTime.tick == 0) {
       await this.itemService.useItems(
         gameId,
@@ -88,7 +86,7 @@ export class GameGateway {
       );
 
       // response effect to player
-      const playerEffects: PlayerEffectState[] =
+      const itemResponseDtos: ItemResponseDto[] =
         this.playerEffectState.findPlayerEffects(
           gameId,
           prevTime.week,
@@ -96,8 +94,10 @@ export class GameGateway {
           'now',
         );
 
-      playerEffects.forEach((playerEffect: PlayerEffectState) => {
-        this.server.to(playerEffect.clientId).emit(ITEM_RESPONSE, playerEffect);
+      itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
+        this.server
+          .to(itemResponseDto.clientId)
+          .emit(ITEM_RESPONSE, itemResponseDto);
       });
 
       // use item with moment before-infer
@@ -128,7 +128,7 @@ export class GameGateway {
           );
 
           // response effect to player
-          const playerEffects: PlayerEffectState[] =
+          const itemResponseDtos: ItemResponseDto[] =
             this.playerEffectState.findPlayerEffects(
               gameId,
               prevTime.week,
@@ -136,10 +136,10 @@ export class GameGateway {
               'after-infer',
             );
 
-          playerEffects.forEach((playerEffect: PlayerEffectState) => {
+          itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
             this.server
-              .to(playerEffect.clientId)
-              .emit(ITEM_RESPONSE, playerEffect);
+              .to(itemResponseDto.clientId)
+              .emit(ITEM_RESPONSE, itemResponseDto);
           });
         });
     }

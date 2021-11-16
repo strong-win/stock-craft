@@ -1,14 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { PlayerOption } from 'src/dto/item-response.dto';
 import { PlayerEffectStateProvider } from './player.effect.state';
-
-export type PlayerOption = {
-  chatting?: boolean;
-  trade?: boolean;
-  chart?: boolean;
-  cash?: boolean;
-  asset?: boolean;
-};
 
 export type PlayerState = {
   gameId: Types.ObjectId | string;
@@ -62,7 +55,7 @@ export class PlayerStateProvider {
     target: string,
     week: number,
     day: number,
-    option: PlayerOption,
+    options: PlayerOption,
   ): Promise<void> {
     if (typeof playerId !== 'string') {
       playerId = playerId.toString();
@@ -76,7 +69,7 @@ export class PlayerStateProvider {
 
       this.players.forEach((player) => {
         if (gameId === player.gameId && playerId !== player.playerId) {
-          for (const key of Object.keys(option)) {
+          for (const key of Object.keys(options)) {
             player.options[key] = false;
           }
 
@@ -86,7 +79,7 @@ export class PlayerStateProvider {
             clientId: player.clientId,
             week,
             day,
-            option,
+            options,
             moment: 'now',
           });
         }
@@ -94,7 +87,7 @@ export class PlayerStateProvider {
     } else {
       this.players.forEach((player) => {
         if (target === player.playerId) {
-          for (const key of Object.keys(option)) {
+          for (const key of Object.keys(options)) {
             player.options[key] = false;
           }
 
@@ -104,7 +97,7 @@ export class PlayerStateProvider {
             clientId: player.clientId,
             week,
             day,
-            option,
+            options,
             moment: 'now',
           });
         }

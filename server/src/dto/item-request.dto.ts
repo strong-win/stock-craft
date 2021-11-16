@@ -14,12 +14,6 @@ export class ItemRequestDto {
   day: number;
 
   @IsNotEmpty()
-  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
-
-  @IsNotEmpty()
-  category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset';
-
-  @IsNotEmpty()
   type: string;
 
   @IsNotEmpty()

@@ -1,13 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
+import {
+  ItemResponseDto,
+  Message,
+  PlayerOption,
+} from 'src/dto/item-response.dto';
 import { Asset, Cash } from 'src/schemas/player.schema';
-import { PlayerOption } from './player.state';
-
-export type Chatting = {
-  user: string;
-  text: string;
-  statuses: string[];
-};
 
 export type PlayerEffectState = {
   gameId: Types.ObjectId | string;
@@ -15,10 +13,10 @@ export type PlayerEffectState = {
   clientId: string;
   week: number;
   day: number;
-  option?: PlayerOption;
+  options?: PlayerOption;
   cash?: Cash;
-  asset?: Asset;
-  chattings?: Chatting[];
+  assets?: Asset[];
+  messages?: Message[];
   moment: 'now' | 'before-infer' | 'after-infer' | 'end';
 };
 
@@ -32,10 +30,10 @@ export class PlayerEffectStateProvider {
     clientId,
     week,
     day,
-    option,
+    options,
     cash,
-    asset,
-    chattings,
+    assets,
+    messages,
     moment,
   }: PlayerEffectState) {
     if (typeof gameId !== 'string') {
@@ -55,11 +53,11 @@ export class PlayerEffectStateProvider {
       ) {
         flag = true;
 
-        if (option) playerEffect.option = option;
+        if (options) playerEffect.options = options;
         if (cash) playerEffect.cash = cash;
-        if (asset) playerEffect.asset = asset;
-        if (chattings)
-          playerEffect.chattings = [...playerEffect.chattings, ...chattings];
+        if (assets) playerEffect.assets = assets;
+        if (messages)
+          playerEffect.messages = [...playerEffect.messages, ...messages];
       }
     });
 
@@ -70,10 +68,10 @@ export class PlayerEffectStateProvider {
         clientId,
         week,
         day,
-        option,
+        options,
         cash,
-        asset,
-        chattings,
+        assets,
+        messages,
         moment,
       });
     }
@@ -84,17 +82,29 @@ export class PlayerEffectStateProvider {
     week: number,
     day: number,
     moment: 'now' | 'before-infer' | 'after-infer' | 'end',
-  ) {
+  ): ItemResponseDto[] {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }
 
-    return this.playerEffects.filter(
-      (player: PlayerEffectState) =>
-        gameId === player.gameId &&
-        week === player.week &&
-        day === player.day &&
-        moment === player.moment,
-    );
+    const itemResponseDtos: ItemResponseDto[] = this.playerEffects
+      .filter(
+        (player: PlayerEffectState) =>
+          gameId === player.gameId &&
+          week === player.week &&
+          day === player.day &&
+          moment === player.moment,
+      )
+      .map(
+        ({ clientId, options, cash, assets, messages }: PlayerEffectState) => ({
+          clientId,
+          options,
+          cash,
+          assets,
+          messages,
+        }),
+      );
+
+    return itemResponseDtos;
   }
 }
