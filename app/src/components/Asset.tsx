@@ -69,7 +69,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     },
     {
       name: "매입금액",
-      value: Number(totalPurchaseAmount).toFixed(2) || 0,
+      value: totalPurchaseAmount || 0,
       unit: "원",
     },
     {
@@ -79,7 +79,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     },
     {
       name: "평가손익",
-      value: Number(totalDiff).toFixed(2) || 0,
+      value: totalDiff || 0,
       unit: "원",
     },
     {
