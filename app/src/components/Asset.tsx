@@ -68,7 +68,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
       unit: "원",
     },
     {
-      name: "평균단가",
+      name: "매입금액",
       value: Number(totalPurchaseAmount).toFixed(2) || 0,
       unit: "원",
     },
