@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
+import { StockEffectStateProvider } from 'src/states/stock.effect.state';
 import { PlayerStateProvider } from 'src/states/player.state';
-import { CorpStateProvider } from 'src/states/corp.state';
 
 export type EffectRequest = {
   type: string;
@@ -35,33 +35,44 @@ export class EffectProvider {
   constructor(
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     private playerState: PlayerStateProvider,
-    private corpState: CorpStateProvider,
+    private stockEffectState: StockEffectStateProvider,
   ) {}
 
   // example effectHandler (chatting ban)
-  private effectHandler_0001: EffectHandler = async ({ playerId, target }) => {
-    await this.playerState.updateWithEffect(playerId, target, {
-      category: 'chatting',
-      active: false,
+  private effectHandler_0001: EffectHandler = async ({
+    playerId,
+    target,
+    week,
+    day,
+  }) => {
+    await this.playerState.updateWithEffect(playerId, target, week, day, {
+      chatting: false,
     });
   };
 
   // example effectHandler (trade ban)
-  private effectHandler_0002: EffectHandler = async ({ playerId, target }) => {
-    await this.playerState.updateWithEffect(playerId, target, {
-      category: 'trade',
-      active: false,
+  private effectHandler_0002: EffectHandler = async ({
+    playerId,
+    target,
+    week,
+    day,
+  }) => {
+    await this.playerState.updateWithEffect(playerId, target, week, day, {
+      trade: false,
     });
   };
 
   // example effectHandler (chart ban)
-  private effectHandler_0003: EffectHandler = async ({ playerId, target }) => {
-    await this.playerState.updateWithEffect(playerId, target, {
-      category: 'chart',
-      active: false,
+  private effectHandler_0003: EffectHandler = async ({
+    playerId,
+    target,
+    week,
+    day,
+  }) => {
+    await this.playerState.updateWithEffect(playerId, target, week, day, {
+      chart: false,
     });
   };
-
   // example effectHandler (stock price rise 20%)
   private effectHandler_0004: EffectHandler = async ({
     gameId,
@@ -76,7 +87,7 @@ export class EffectProvider {
 
     const increment = stock.price * 0.2;
 
-    await this.corpState.updateWithEffect(gameId, week, day, increment);
+    await this.stockEffectState.updateWithEffect(gameId, week, day, increment);
   };
 
   private effectHandler: { [key: string]: EffectHandler } = {

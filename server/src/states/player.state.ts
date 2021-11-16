@@ -1,18 +1,26 @@
+import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { PlayerEffectStateProvider } from './player.effect.state';
 
 export type PlayerOption = {
-  category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
-  active: boolean;
+  chatting?: boolean;
+  trade?: boolean;
+  chart?: boolean;
+  cash?: boolean;
+  asset?: boolean;
 };
 
 export type PlayerState = {
   gameId: Types.ObjectId | string;
   playerId: Types.ObjectId | string;
   clientId: string;
-  options: PlayerOption[];
+  options: PlayerOption;
 };
 
+@Injectable()
 export class PlayerStateProvider {
+  constructor(private playerEffectState: PlayerEffectStateProvider) {}
+
   private players: PlayerState[] = [];
 
   create(
@@ -31,7 +39,13 @@ export class PlayerStateProvider {
       gameId,
       playerId,
       clientId,
-      options: [{ category: 'chatting', active: true }],
+      options: {
+        chatting: true,
+        trade: true,
+        chart: true,
+        cash: true,
+        asset: true,
+      },
     });
   }
 
@@ -46,7 +60,9 @@ export class PlayerStateProvider {
   async updateWithEffect(
     playerId: Types.ObjectId | string,
     target: string,
-    effect: PlayerOption,
+    week: number,
+    day: number,
+    option: PlayerOption,
   ): Promise<void> {
     if (typeof playerId !== 'string') {
       playerId = playerId.toString();
@@ -60,17 +76,37 @@ export class PlayerStateProvider {
 
       this.players.forEach((player) => {
         if (gameId === player.gameId && playerId !== player.playerId) {
-          player.options = player.options.map((option) =>
-            effect.category === option.category ? effect : option,
-          );
+          for (const key of Object.keys(option)) {
+            player.options[key] = false;
+          }
+
+          this.playerEffectState.updateOrCreate({
+            gameId: player.gameId,
+            playerId: player.playerId,
+            clientId: player.clientId,
+            week,
+            day,
+            option,
+            moment: 'now',
+          });
         }
       });
     } else {
       this.players.forEach((player) => {
         if (target === player.playerId) {
-          player.options = player.options.map((option) =>
-            effect.category === option.category ? effect : option,
-          );
+          for (const key of Object.keys(option)) {
+            player.options[key] = false;
+          }
+
+          this.playerEffectState.updateOrCreate({
+            gameId: player.gameId,
+            playerId: player.playerId,
+            clientId: player.clientId,
+            week,
+            day,
+            option,
+            moment: 'now',
+          });
         }
       });
     }

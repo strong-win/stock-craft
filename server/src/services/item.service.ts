@@ -47,40 +47,18 @@ export class ItemService {
   }
 
   // chatting/trade/chart/cash/asset
-  async useItemsNow(gameId: string, week: number, day: number): Promise<void> {
+  async useItems(
+    gameId: string,
+    week: number,
+    day: number,
+    moment: 'now' | 'before-infer' | 'after-infer' | 'end',
+  ): Promise<void> {
     const items: Item[] = await this.itemModel
       .find({
         game: Types.ObjectId(gameId),
         week,
         day,
-        category: {
-          $in: ['chatting', 'trade', 'chart', 'cash', 'asset'],
-        },
-        moment: 'now',
-      })
-      .exec();
-
-    items.forEach((item) => {
-      if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
-
-      this.effectProvider.handleEffect({
-        gameId,
-        playerId: item.player._id,
-        type: item.type,
-        target: item.target,
-      });
-    });
-  }
-
-  // stocks
-  async useItemsBeforeInfer(gameId: string, week: number, day: number) {
-    const items: Item[] = await this.itemModel
-      .find({
-        game: Types.ObjectId(gameId),
-        week,
-        day,
-        category: 'stock',
-        moment: 'before-infer',
+        moment,
       })
       .exec();
 

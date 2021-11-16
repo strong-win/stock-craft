@@ -6,8 +6,11 @@ import { ChartRequestDto, CorpEvents } from 'src/dto/chart-request.dto';
 import { Game, GameDocument } from 'src/schemas/game.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
 import { TimeState } from 'src/states/game.state';
-import { CorpStateProvider, CorpState } from 'src/states/corp.state';
 import { Player, PlayerDocument } from 'src/schemas/player.schema';
+import {
+  StockEffectState,
+  StockEffectStateProvider,
+} from 'src/states/stock.effect.state';
 
 export type PlayerScore = {
   playerId: Types.ObjectId;
@@ -22,7 +25,7 @@ export class GameService {
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
 
-    private corpState: CorpStateProvider,
+    private stockEffectState: StockEffectStateProvider,
   ) {}
   async composeChartRequest(
     gameId: string,
@@ -33,11 +36,12 @@ export class GameService {
       _id: Types.ObjectId(gameId),
     });
 
-    const corpStates: CorpState[] = this.corpState.findByGameId(
-      gameId,
-      prevTime.week,
-      prevTime.day,
-    );
+    const stockEffectState: StockEffectState[] =
+      this.stockEffectState.findStockEffects(
+        gameId,
+        prevTime.week,
+        prevTime.day,
+      );
 
     const trades: Trade[] = await this.tradeModel
       .find({
@@ -53,7 +57,7 @@ export class GameService {
     game.corps.forEach(({ corpId }) => {
       corps[corpId] = {
         increment:
-          corpStates.find((corpState) => corpId == corpState.corpId)
+          stockEffectState.find((corpState) => corpId == corpState.corpId)
             ?.increment || 0,
         buyQuantity:
           trades

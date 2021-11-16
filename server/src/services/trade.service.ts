@@ -97,9 +97,9 @@ export class TradeService {
           }
           asset.availableQuantity -= quantity;
           if (isDirect) {
-            asset.totalQuantity -= quantity;
             asset.purchaseAmount -=
               (asset.purchaseAmount / asset.totalQuantity) * quantity;
+            asset.totalQuantity -= quantity;
           }
         }
       }
@@ -211,9 +211,9 @@ export class TradeService {
             // update player assets
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
-                asset.totalQuantity -= trade.quantity;
                 asset.purchaseAmount -=
                   (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
+                asset.totalQuantity -= trade.quantity;
               }
             }
 

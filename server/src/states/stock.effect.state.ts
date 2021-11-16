@@ -1,55 +1,46 @@
+import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-export type CorpState = {
+export type StockEffectState = {
   gameId: Types.ObjectId | string;
   corpId: string;
   week: number;
   day: number;
   increment: number;
+  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
 };
 
-export class CorpStateProvider {
-  private corps: CorpState[] = [];
+@Injectable()
+export class StockEffectStateProvider {
+  private stockEffects: StockEffectState[] = [];
 
   create(
     gameId: Types.ObjectId | string,
     corpId: string,
-    increment: number,
     week: number,
     day: number,
+    increment: number,
   ): void {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }
 
-    this.corps.push({ gameId, corpId, increment, week, day });
+    this.stockEffects.push({
+      gameId,
+      corpId,
+      week,
+      day,
+      increment,
+      moment: 'before-infer',
+    });
   }
 
-  findByTarget(
-    gameId: Types.ObjectId | string,
-    target: string,
-    week: number,
-    day: number,
-  ) {
+  findStockEffects(gameId: Types.ObjectId | string, week: number, day: number) {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }
 
-    return this.corps.find(
-      (stock) =>
-        gameId === stock.gameId &&
-        target === stock.corpId &&
-        week === stock.week &&
-        day === stock.day,
-    );
-  }
-
-  findByGameId(gameId: Types.ObjectId | string, week: number, day: number) {
-    if (typeof gameId !== 'string') {
-      gameId = gameId.toString();
-    }
-
-    return this.corps.filter(
+    return this.stockEffects.filter(
       (stock) =>
         gameId === stock.gameId && week === stock.week && day === stock.day,
     );
@@ -65,7 +56,7 @@ export class CorpStateProvider {
       gameId = gameId.toString();
     }
 
-    this.corps.forEach((stock) => {
+    this.stockEffects.forEach((stock) => {
       if (gameId === stock.gameId && week === stock.week && day === stock.day) {
         stock.increment += increment;
       }

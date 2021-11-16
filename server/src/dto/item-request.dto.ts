@@ -17,7 +17,7 @@ export class ItemRequestDto {
   moment: 'now' | 'before-infer' | 'after-infer' | 'end';
 
   @IsNotEmpty()
-  category: 'chat' | 'trade' | 'chart' | 'cash' | 'asset' | 'stock';
+  category: 'chatting' | 'trade' | 'chart' | 'cash' | 'asset';
 
   @IsNotEmpty()
   type: string;
