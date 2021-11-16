@@ -8,7 +8,7 @@ import {
   receiveGameTimeResponseSaga,
   sendGameTimeRequestSaga,
 } from "./game";
-import { sendItemRequestSaga } from "./items";
+import { receiveItemResponseSaga, sendItemRequestSaga } from "./items";
 import {
   receiveJoinConnectedSaga,
   receiveJoinHostSaga,
@@ -53,6 +53,6 @@ export function* handleIO() {
 
     // item
     sendItemRequestSaga(socket),
-    receiveGameTimeResponseSaga(socket),
+    receiveItemResponseSaga(socket),
   ]);
 }

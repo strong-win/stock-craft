@@ -53,7 +53,7 @@ const receiveItemResponseChannel = (socket: Socket) => {
   });
 };
 
-export function* receiveGameTimeResponseSaga(socket: Socket) {
+export function* receiveItemResponseSaga(socket: Socket) {
   const channel: ReturnType<typeof receiveItemResponseChannel> = yield call(
     receiveItemResponseChannel,
     socket
