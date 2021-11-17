@@ -39,6 +39,20 @@ export type CashState = {
   availableCash: number;
 };
 
+export type PlayerOptionState = {
+  chatting?: boolean;
+  trade?: boolean;
+  chart?: boolean;
+  cash?: boolean;
+  asset?: boolean;
+};
+
+export type PlayerScore = {
+  playerId: string;
+  name: string;
+  score: number;
+};
+
 export type userState = {
   name: string;
   room: string;
@@ -53,6 +67,8 @@ export type userState = {
   trades: TradeState[];
   selectedCorpId: string;
   isChartView: boolean;
+  options: PlayerOptionState;
+  scores: PlayerScore[];
 };
 
 const initialState: userState = {
@@ -76,6 +92,8 @@ const initialState: userState = {
   ],
   selectedCorpId: "gyu",
   isChartView: false,
+  options: {},
+  scores: [],
 };
 
 export const gameSlice = createSlice({
@@ -121,6 +139,12 @@ export const gameSlice = createSlice({
     updateIsChartView: (state, action: PayloadAction<boolean>) => {
       state.isChartView = action.payload;
     },
+    updateOptions: (state, action: PayloadAction<PlayerOptionState>) => {
+      state.options = action.payload;
+    },
+    updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
+      state.scores = action.payload;
+    },
     updateTrades: (
       state,
       action: PayloadAction<{
@@ -149,6 +173,7 @@ export const gameSlice = createSlice({
 });
 
 export const {
+  resetUser,
   updateName,
   updateRoom,
   updateStatus,
@@ -160,9 +185,10 @@ export const {
   updateAssets,
   updateCash,
   updateSelectedCorpId,
-  updateTrades,
-  resetUser,
   updateIsChartView,
+  updateOptions,
+  updateScores,
+  updateTrades,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
