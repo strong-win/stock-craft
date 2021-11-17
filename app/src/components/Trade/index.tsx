@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { Row, Card, Col } from "reactstrap";
+import { Row, Col } from "reactstrap";
 
-import "../../styles/Trade.css";
 import { billType } from "../../containers/TradeWrapper";
 import { ChartState } from "../../modules/stock";
 import { TradeState } from "../../modules/user";
 
-import TradeBoard from "./TradeBoard";
 import TradeButton from "./TradeButton";
 import TradeInput from "./TradeInput";
 import TradeTab from "./TradeTab";
 import TradeList from "./TradeList";
+
+import "../../styles/Trade.css";
 
 type TradeProps = {
   trades: TradeState[];
@@ -50,6 +50,7 @@ const Trade = ({
           selectedCorpId={selectedCorpId}
           handleCancel={handleCancel}
           isChartView={true}
+          isTitle={true}
         />
       </Col>
       <Col className="tradeCard">
@@ -65,6 +66,7 @@ const Trade = ({
         corps={corps}
         selectedCorpId={selectedCorpId}
         handleCancel={handleCancel}
+        isTitle={true}
       />
     </Row>
   );

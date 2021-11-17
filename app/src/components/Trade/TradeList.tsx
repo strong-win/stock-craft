@@ -8,6 +8,7 @@ type tradeListProps = {
   corps: ChartState[];
   selectedCorpId: string;
   isChartView?: boolean;
+  isTitle?: boolean;
   handleCancel: (_id: string, corpId: string) => void;
 };
 
@@ -27,13 +28,16 @@ const TradeList = ({
   corps,
   selectedCorpId,
   isChartView,
+  isTitle,
   handleCancel,
 }: tradeListProps) => {
   return (
     <>
-      <div className="tableTitle">
-        {isChartView ? "상세" : "종합"} 주문 내역
-      </div>
+      {isTitle && (
+        <div className="tableTitle">
+          {isChartView ? "상세" : "종합"} 주문 내역
+        </div>
+      )}
       <Table className="tradeTable">
         <thead>
           <tr>
