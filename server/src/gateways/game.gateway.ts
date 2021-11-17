@@ -61,79 +61,29 @@ export class GameGateway {
 
     // refresh trade
     if (nextTime.day > 0 && nextTime.tick > 0 && nextTime.tick < 4) {
-      const tradesResponseDtos: TradeResponseDto[] =
-        await this.tradeService.handleRefresh(
-          gameId,
-          nextTime.week,
-          nextTime.day,
-          nextTime.tick,
-        );
-
-      tradesResponseDtos.forEach((tradeResponseDto) => {
-        this.server
-          .to(tradeResponseDto.clientId)
-          .emit(TRADE_RESPONSE, tradeResponseDto);
-      });
+      this.tradeService
+        .handleRefresh(gameId, nextTime.week, nextTime.day, nextTime.tick)
+        .then((tradesResponseDtos: TradeResponseDto[]) => {
+          tradesResponseDtos.forEach((tradeResponseDto) => {
+            this.server
+              .to(tradeResponseDto.clientId)
+              .emit(TRADE_RESPONSE, tradeResponseDto);
+          });
+        });
     }
 
     // use item and generate chart
     if (nextTime.day > 0 && nextTime.tick == 0) {
-      await this.itemService.useItems(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-        'now',
-      );
-
-      // response effect to player
-      const itemResponseDtos: ItemResponseDto[] =
-        this.playerEffectState.findPlayerEffects(
-          gameId,
-          prevTime.week,
-          prevTime.day,
-          'now',
-        );
-
-      itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
-        this.server
-          .to(itemResponseDto.clientId)
-          .emit(ITEM_RESPONSE, itemResponseDto);
-      });
-
-      // use item with moment before-infer
-      await this.itemService.useItems(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-        'before-infer',
-      );
-
-      const chartRequestDto: ChartRequestDto =
-        await this.gameService.composeChartRequest(gameId, prevTime, nextTime);
-
-      // request chart to ML Server
-      this.marketApi
-        .requestChart(chartRequestDto)
-        .then(async (chartResponseDto: ChartResponseDto) => {
-          console.log(
-            `[CHART GENERATE RESPONSE] week : ${chartResponseDto.nextTime.week} day : ${chartResponseDto.nextTime.day}`,
-          );
-
-          // use item with moment after-infer
-          await this.itemService.useItems(
-            gameId,
-            prevTime.week,
-            prevTime.day,
-            'after-infer',
-          );
-
+      this.itemService
+        .useItems(gameId, prevTime.week, prevTime.day, 'now')
+        .then(() => {
           // response effect to player
           const itemResponseDtos: ItemResponseDto[] =
             this.playerEffectState.findPlayerEffects(
               gameId,
               prevTime.week,
               prevTime.day,
-              'after-infer',
+              'now',
             );
 
           itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
@@ -142,15 +92,55 @@ export class GameGateway {
               .emit(ITEM_RESPONSE, itemResponseDto);
           });
         });
+
+      // use item with moment before-infer
+      this.itemService
+        .useItems(gameId, prevTime.week, prevTime.day, 'before-infer')
+        .then(async () => {
+          const chartRequestDto: ChartRequestDto =
+            await this.gameService.composeChartRequest(
+              gameId,
+              prevTime,
+              nextTime,
+            );
+
+          // request chart to ML Server
+          this.marketApi
+            .requestChart(chartRequestDto)
+            .then(async (chartResponseDto: ChartResponseDto) => {
+              // use item with moment after-infer
+              await this.itemService.useItems(
+                gameId,
+                prevTime.week,
+                prevTime.day,
+                'after-infer',
+              );
+
+              // response effect to player
+              const itemResponseDtos: ItemResponseDto[] =
+                this.playerEffectState.findPlayerEffects(
+                  gameId,
+                  prevTime.week,
+                  prevTime.day,
+                  'after-infer',
+                );
+
+              itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
+                this.server
+                  .to(itemResponseDto.clientId)
+                  .emit(ITEM_RESPONSE, itemResponseDto);
+              });
+            });
+        });
     }
 
     // calculate score
     if (nextTime.week > 0 && nextTime.day === 0 && nextTime.tick == 0) {
-      const playerScores: PlayerScore[] = await this.gameService.calculateScore(
-        gameId,
-      );
-
-      this.server.to(room).emit(GAME_SCORE, playerScores);
+      this.gameService
+        .calculateScore(gameId)
+        .then((playerScores: PlayerScore[]) => {
+          this.server.to(room).emit(GAME_SCORE, playerScores);
+        });
     }
   }
 }
