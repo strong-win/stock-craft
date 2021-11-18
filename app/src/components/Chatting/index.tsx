@@ -28,13 +28,15 @@ const Chatting = ({
   return (
     <Card className="chatting">
       <CardHeader className="chattingHeader">
-        <div ><FiUser /> {name} </div>
-        <div >RoomCode: {room}</div>
+        <div className="nickName">
+          <FiUser /> {name}{" "}
+        </div>
+        <div className="roomCode">RoomCode: {room}</div>
       </CardHeader>
       <CardBody className="chattingBody">
         <Messages name={name} messages={messages} />
       </CardBody>
-      <CardFooter>
+      <CardFooter className="chattingFooter">
         <ChatInput
           message={message}
           setMessage={setMessage}
