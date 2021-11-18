@@ -24,6 +24,8 @@ const Play = ({ location, history }: any) => {
   const { playerId, name, room, status, isHost } = useSelector(
     (state: RootState) => state.user
   );
+
+  const { day, tick } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -90,7 +92,7 @@ const Play = ({ location, history }: any) => {
 
   return status === "play" ? (
     <Container className="playContainer" fluid={true}>
-      <Header isGameStart />
+      <Header isGameStart day={day} tick={tick} />
       <Row className="playRow1">
         <Col md="8">
           <CorporationsWrapper />

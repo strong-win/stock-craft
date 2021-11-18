@@ -47,6 +47,8 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
   const [second, setSecond] = useState<number>(15);
   const timer = useRef(null);
 
+  const isDark = day === 0 || tick % 4 === 0;
+
   useInterval(() => {
     setSecond(second - 1);
   }, 1000);
@@ -64,7 +66,7 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
 
   return (
     <>
-      <Row className="clockWrapper justify-content-end">
+      <Row className={`clockContainer justify-content-end ${isDark && "dark"}`}>
         <Col className="time week">Week {week}</Col>
         {day > 0 ? (
           <>
@@ -74,7 +76,13 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
         ) : (
           <Col className="time day">주말</Col>
         )}
-        <Col className={`time second ${second < 6 && "red"}`}>{second}</Col>
+        <Col
+          className={`time second ${second < 6 && "red"} ${
+            isDark && "darkSecond"
+          }`}
+        >
+          {second}
+        </Col>
       </Row>
     </>
   );
