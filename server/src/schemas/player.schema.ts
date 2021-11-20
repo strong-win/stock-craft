@@ -17,6 +17,14 @@ export interface Cash {
   availableCash: number;
 }
 
+export type PlayerOption = {
+  chatting?: boolean;
+  trade?: boolean;
+  chart?: boolean;
+  cash?: boolean;
+  asset?: boolean;
+};
+
 export type PlayerStatus =
   | 'connected'
   | 'ready'
@@ -62,6 +70,17 @@ export class Player {
 
   @Prop({ type: [Types.ObjectId], ref: 'Trade' })
   trades?: (Types.ObjectId | Trade)[];
+
+  @Prop({
+    type: {
+      chating: Boolean,
+      trade: Boolean,
+      chart: Boolean,
+      cash: Boolean,
+      asset: Boolean,
+    },
+  })
+  options?: PlayerOption;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

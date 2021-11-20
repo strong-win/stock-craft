@@ -9,9 +9,9 @@ import {
   Player,
   PlayerDocument,
   PlayerInfo,
+  PlayerOption,
   PlayerStatus,
 } from 'src/schemas/player.schema';
-import { PlayerStateProvider } from 'src/states/player.state';
 
 export type CorpChart = Corp & {
   totalChart: [];
@@ -23,7 +23,6 @@ export class JoinService {
     @InjectModel(Game.name) private gameModel: mongoose.Model<GameDocument>,
     @InjectModel(Player.name)
     private playerModel: mongoose.Model<PlayerDocument>,
-    private playerState: PlayerStateProvider,
     private marketApi: MarketApi,
   ) {}
 
@@ -71,7 +70,7 @@ export class JoinService {
       await this.gameModel.updateOne({ _id: gameId }, { corps: corps });
 
       // get player acccounts with corportions
-      const { cash, assets } = this.getPlayerAccount(corps);
+      const { cash, assets, options } = this.getPlayerProps(corps);
 
       // update player with accounts
       await this.playerModel.updateMany(
@@ -81,13 +80,9 @@ export class JoinService {
           game: gameId,
           cash,
           assets,
+          options,
         },
       );
-
-      // create players state
-      players.forEach((player) => {
-        this.playerState.create(gameId, player._id, player.clientId);
-      });
 
       const playersInfo: PlayerInfo[] = players.map(({ name }) => ({
         name,
@@ -108,11 +103,16 @@ export class JoinService {
     }
   }
 
-  getPlayerAccount(corps: Corp[]): { cash: Cash; assets: Asset[] } {
+  getPlayerProps(corps: Corp[]): {
+    cash: Cash;
+    assets: Asset[];
+    options: PlayerOption;
+  } {
     const cash: Cash = {
       totalCash: 10_000_000,
       availableCash: 10_000_000,
     };
+
     const assets: Asset[] = corps.map(({ corpId }) => ({
       corpId,
       totalQuantity: 0,
@@ -120,7 +120,14 @@ export class JoinService {
       purchaseAmount: 0,
     }));
 
-    return { cash, assets };
+    const options: PlayerOption = {
+      chatting: true,
+      trade: true,
+      chart: true,
+      asset: true,
+    };
+
+    return { cash, assets, options };
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {

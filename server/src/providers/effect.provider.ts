@@ -3,7 +3,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { StockEffectStateProvider } from 'src/states/stock.effect.state';
-import { PlayerStateProvider } from 'src/states/player.state';
+import {
+  Player,
+  PlayerDocument,
+  PlayerOption,
+} from 'src/schemas/player.schema';
+import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
 
 export type EffectRequest = {
   type: string;
@@ -34,43 +39,92 @@ type EffectHandler = ({
 export class EffectProvider {
   constructor(
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
-    private playerState: PlayerStateProvider,
+    @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    private playerEffectState: PlayerEffectStateProvider,
     private stockEffectState: StockEffectStateProvider,
   ) {}
 
   // example effectHandler (chatting ban)
   private effectHandler_0001: EffectHandler = async ({
+    gameId,
     playerId,
     target,
     week,
     day,
   }) => {
-    await this.playerState.updateWithEffect(playerId, target, week, day, {
-      chatting: false,
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(target),
+    });
+
+    const options: PlayerOption = player.options;
+    options.chatting = false;
+
+    await this.playerModel.updateOne({ _id: playerId }, { options });
+
+    this.playerEffectState.updateOrCreate({
+      gameId,
+      playerId,
+      clientId: target,
+      week,
+      day,
+      options,
+      moment: 'now',
     });
   };
 
   // example effectHandler (trade ban)
   private effectHandler_0002: EffectHandler = async ({
+    gameId,
     playerId,
     target,
     week,
     day,
   }) => {
-    await this.playerState.updateWithEffect(playerId, target, week, day, {
-      trade: false,
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(target),
+    });
+
+    const options: PlayerOption = player.options;
+    options.trade = false;
+
+    await this.playerModel.updateOne({ _id: playerId }, { options });
+
+    this.playerEffectState.updateOrCreate({
+      gameId,
+      playerId,
+      clientId: target,
+      week,
+      day,
+      options,
+      moment: 'now',
     });
   };
 
   // example effectHandler (chart ban)
   private effectHandler_0003: EffectHandler = async ({
+    gameId,
     playerId,
     target,
     week,
     day,
   }) => {
-    await this.playerState.updateWithEffect(playerId, target, week, day, {
-      chart: false,
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(target),
+    });
+
+    const options: PlayerOption = player.options;
+    options.chart = false;
+
+    this.playerModel.updateOne({ _id: playerId }, { options });
+
+    this.playerEffectState.updateOrCreate({
+      gameId,
+      playerId,
+      clientId: target,
+      week,
+      day,
+      options,
+      moment: 'now',
     });
   };
   // example effectHandler (stock price rise 20%)

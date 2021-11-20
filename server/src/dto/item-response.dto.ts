@@ -1,17 +1,9 @@
-import { Asset, Cash } from 'src/schemas/player.schema';
+import { Asset, Cash, PlayerOption } from 'src/schemas/player.schema';
 
 export type Message = {
   user: string;
   text: string;
   statuses: string[];
-};
-
-export type PlayerOption = {
-  chatting?: boolean;
-  trade?: boolean;
-  chart?: boolean;
-  cash?: boolean;
-  asset?: boolean;
 };
 
 export type ItemResponseDto = {
