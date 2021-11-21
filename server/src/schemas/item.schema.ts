@@ -16,7 +16,13 @@ export class Item {
   day: number;
 
   @Prop()
-  item: string[];
+  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
+
+  @Prop()
+  type: string;
+
+  @Prop()
+  target: string;
 
   @Prop({ type: Date, default: Date.now })
   createdAt: Date;

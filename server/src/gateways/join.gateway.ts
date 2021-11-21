@@ -21,9 +21,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
-import { GameService } from 'src/services/game.service';
-import { Game } from 'src/schemas/game.schema';
-import { Types } from 'mongoose';
+import { GameStateProvider } from 'src/states/game.state';
+import { isGame } from 'src/utils/typeGuard';
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -33,9 +32,9 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private logger: Logger = new Logger('AppGateway');
 
   constructor(
+    private gameState: GameStateProvider,
     private playerService: PlayerService,
     private joinService: JoinService,
-    private gameService: GameService,
   ) {}
 
   handleConnection(client: Socket): void {
@@ -81,18 +80,10 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
           statuses: this.getStatuses(status),
         });
 
-        const isGame = (game: Types.ObjectId | Game): game is Game => {
-          return (<Game>game)._id !== undefined;
-        };
-
-        if (!isGame(game)) {
-          const typeGuardError = Error('타입이 일치하지 않습니다.');
-          typeGuardError.name = 'TypeGuardError';
-          throw typeGuardError;
-        }
+        if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
 
         const nowDate: Date = new Date();
-        const nextDate: Date = this.gameService.getNextDate(game._id);
+        const nextDate: Date = this.gameState.getNextDate(game._id);
         const dateDiff: number = nextDate.getTime() - nowDate.getTime();
 
         this.server
@@ -211,7 +202,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('play'),
       });
 
-      this.gameService.createGame(gameInfo.gameId, room);
+      this.gameState.createGameState(gameInfo.gameId, room);
     } else {
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',

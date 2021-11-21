@@ -1,83 +1,99 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 
-export type TimeState = {
-  week: number;
-  day: number;
-  tick: number;
-};
+import { ChartRequestDto, CorpEvents } from 'src/dto/chart-request.dto';
+import { Game, GameDocument } from 'src/schemas/game.schema';
+import { Trade, TradeDocument } from 'src/schemas/trade.schema';
+import { TimeState } from 'src/states/game.state';
+import { Player, PlayerDocument } from 'src/schemas/player.schema';
+import {
+  StockEffectState,
+  StockEffectStateProvider,
+} from 'src/states/stock.effect.state';
 
-export type GameState = {
-  gameId: string;
-  room: string;
-  time: TimeState;
-  date?: Date;
+export type PlayerScore = {
+  playerId: Types.ObjectId;
+  name: string;
+  score: number;
 };
 
 @Injectable()
 export class GameService {
-  private games: GameState[] = [];
+  constructor(
+    @InjectModel(Game.name) private gameModel: Model<GameDocument>,
+    @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
+    @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
 
-  createGame(gameId: string, room: string) {
-    this.games.push({ gameId, room, time: { week: 1, day: 0, tick: 0 } });
+    private stockEffectState: StockEffectStateProvider,
+  ) {}
+  async composeChartRequest(
+    gameId: string,
+    prevTime: TimeState,
+    nextTime: TimeState,
+  ): Promise<ChartRequestDto> {
+    const game: Game = await this.gameModel.findOne({
+      _id: Types.ObjectId(gameId),
+    });
+
+    const stockEffectState: StockEffectState[] =
+      this.stockEffectState.findStockEffects(
+        gameId,
+        prevTime.week,
+        prevTime.day,
+      );
+
+    const trades: Trade[] = await this.tradeModel
+      .find({
+        game: Types.ObjectId(gameId),
+        week: prevTime.week,
+        day: prevTime.day,
+        status: 'disposed',
+      })
+      .exec();
+
+    const corps: CorpEvents = {};
+
+    game.corps.forEach(({ corpId }) => {
+      corps[corpId] = {
+        increment:
+          stockEffectState.find((corpState) => corpId == corpState.corpId)
+            ?.increment || 0,
+        buyQuantity:
+          trades
+            .filter((trade) => corpId === trade.corpId && trade.deal === 'buy')
+            .map((trade) => trade.quantity)
+            .reduce((acc, cur) => acc + cur, 0) || 0,
+        sellQuantity:
+          trades
+            .filter((trade) => corpId === trade.corpId && trade.deal === 'sell')
+            .map((trade) => trade.quantity)
+            .reduce((acc, cur) => acc + cur, 0) || 0,
+      };
+    });
+
+    const chartRequestDto: ChartRequestDto = {
+      gameId,
+      prevTime,
+      nextTime,
+      corps,
+    };
+    return chartRequestDto;
   }
 
-  getTime(gameId: Types.ObjectId | string): TimeState {
-    if (typeof gameId !== 'string') {
-      gameId = gameId.toString();
-    }
-    return this.games.find((game) => game.gameId === gameId).time;
-  }
+  async calculateScore(gameId: string): Promise<PlayerScore[]> {
+    const initialCash = 10_000_000;
 
-  updateTime(gameId: string): {
-    room: string;
-    timeChanged: TimeState;
-  } {
-    let room: string;
-    let timeChanged: TimeState;
+    const players: Player[] = await this.playerModel
+      .find({ game: Types.ObjectId(gameId) })
+      .exec();
 
-    for (const game of this.games) {
-      if (game.gameId === gameId) {
-        // get room, time
-        room = game.room;
-        timeChanged = this.getNextTime(game.time);
+    const playerScores: PlayerScore[] = players.map((player) => ({
+      playerId: player._id,
+      name: player.name,
+      score: player.cash.totalCash - initialCash,
+    }));
 
-        // update time
-        game.time = timeChanged;
-        game.date = new Date();
-      }
-    }
-    return { room, timeChanged };
-  }
-
-  getNextTime({ week, day, tick }: TimeState): TimeState {
-    if (day === 0) {
-      return tick < 2
-        ? { week: week, day: day, tick: tick + 1 }
-        : { week: week, day: day + 1, tick: 0 };
-    }
-    if (day === 5) {
-      return tick < 4
-        ? { week: week, day: day, tick: tick + 1 }
-        : { week: week + 1, day: 0, tick: 0 };
-    } else {
-      return tick < 4
-        ? { week: week, day: day, tick: tick + 1 }
-        : { week: week, day: day + 1, tick: 0 };
-    }
-  }
-
-  getNextDate(gameId: Types.ObjectId | string): Date {
-    const game: GameState = this.games.find((game) => game.gameId === gameId);
-
-    const { time, date } = game;
-    const timeChanged: TimeState = this.getNextTime(time);
-
-    if (timeChanged.tick === 0) {
-      date.setSeconds(date.getSeconds() + 5);
-    } else {
-      date.setSeconds(date.getSeconds() + 15);
-    }
-    return date;
+    return playerScores;
   }
 }
