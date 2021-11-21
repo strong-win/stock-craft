@@ -6,6 +6,7 @@ import {
 import { Server } from 'socket.io';
 import { ItemRequestDto } from 'src/dto/item-request.dto';
 import { ItemService } from 'src/services/item.service';
+
 import { ITEM_REQUEST } from './events';
 
 @WebSocketGateway()
@@ -17,6 +18,6 @@ export class GameGateway {
 
   @SubscribeMessage(ITEM_REQUEST)
   async receiveItemRequest(client: any, payload: ItemRequestDto) {
-    this.itemService.create(payload);
+    await this.itemService.create(payload);
   }
 }

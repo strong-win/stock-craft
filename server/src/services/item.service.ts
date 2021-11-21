@@ -1,21 +1,24 @@
+import { EffectProvider } from './../providers/effect.provider';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ItemRequestDto } from 'src/dto/item-request.dto';
 
 import { Item, ItemDocument } from 'src/schemas/item.schema';
-import { GameService } from './game.service';
+import { GameStateProvider } from 'src/states/game.state';
+import { isPlayer } from 'src/utils/typeGuard';
 
 @Injectable()
 export class ItemService {
   constructor(
     @InjectModel(Item.name) private itemModel: Model<ItemDocument>,
-    private gameService: GameService,
+    private gameState: GameStateProvider,
+    private effectProvider: EffectProvider,
   ) {}
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
-    const { playerId, gameId, week, day, item } = itemRequestDto;
-    const time = this.gameService.getTime(gameId);
+    const { playerId, gameId, week, day, type, target } = itemRequestDto;
+    const time = this.gameState.getTime(gameId);
 
     if (
       time.week !== week ||
@@ -35,17 +38,38 @@ export class ItemService {
       game: Types.ObjectId(gameId),
       week,
       day,
-      item,
+      type,
+      target,
     });
   }
 
-  findByGameIdAndTime(
+  // chatting/trade/chart/cash/asset
+  async useItems(
     gameId: string,
     week: number,
     day: number,
-  ): Promise<Item[]> {
-    return this.itemModel
-      .find({ game: Types.ObjectId(gameId), week, day })
+    moment: 'now' | 'before-infer' | 'after-infer' | 'end',
+  ): Promise<void> {
+    const items: Item[] = await this.itemModel
+      .find({
+        game: Types.ObjectId(gameId),
+        week,
+        day,
+        moment,
+      })
       .exec();
+
+    items.forEach((item) => {
+      if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
+
+      this.effectProvider.handleEffect({
+        gameId,
+        playerId: item.player._id,
+        type: item.type,
+        target: item.target,
+        week,
+        day,
+      });
+    });
   }
 }

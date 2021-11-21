@@ -4,7 +4,10 @@ import { Player } from './player.schema';
 
 export type GameDocument = Game & Document;
 
-export type Corp = { corpId: string; corpName: string };
+export type Corp = {
+  corpId: string;
+  corpName: string;
+};
 
 @Schema()
 export class Game {

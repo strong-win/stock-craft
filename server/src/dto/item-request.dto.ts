@@ -14,5 +14,8 @@ export class ItemRequestDto {
   day: number;
 
   @IsNotEmpty()
-  item: string[];
+  type: string;
+
+  @IsNotEmpty()
+  target: string;
 }

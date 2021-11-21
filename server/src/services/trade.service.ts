@@ -7,7 +7,8 @@ import { TradeResponseDto } from 'src/dto/trade-response.dto';
 import { Player, PlayerDocument } from 'src/schemas/player.schema';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
-import { GameService, TimeState } from './game.service';
+import { GameStateProvider, TimeState } from 'src/states/game.state';
+import { isTrade } from 'src/utils/typeGuard';
 
 @Injectable()
 export class TradeService {
@@ -15,7 +16,7 @@ export class TradeService {
     @InjectModel(Trade.name) private tradeModel: Model<TradeDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
-    private gameService: GameService,
+    private gameState: GameStateProvider,
   ) {}
 
   async handleTrade(
@@ -24,7 +25,7 @@ export class TradeService {
     const { playerId, gameId, week, day, tick, corpId, price, quantity, deal } =
       tradeRequestDto;
 
-    const time: TimeState = this.gameService.getTime(gameId);
+    const time: TimeState = this.gameState.getTime(gameId);
 
     if (
       time.week !== week ||
@@ -72,6 +73,7 @@ export class TradeService {
           if (isDirect) {
             asset.availableQuantity += quantity;
             asset.totalQuantity += quantity;
+            asset.purchaseAmount += price * quantity;
           }
         }
       }
@@ -95,6 +97,8 @@ export class TradeService {
           }
           asset.availableQuantity -= quantity;
           if (isDirect) {
+            asset.purchaseAmount -=
+              (asset.purchaseAmount / asset.totalQuantity) * quantity;
             asset.totalQuantity -= quantity;
           }
         }
@@ -108,6 +112,7 @@ export class TradeService {
 
     // add to trade collection if player cannot directly trade
     const trade = await this.tradeModel.create({
+      game: Types.ObjectId(gameId),
       player,
       week,
       day,
@@ -171,15 +176,7 @@ export class TradeService {
 
     for (const player of players) {
       for (const trade of player.trades) {
-        const isTrade = (trade: Types.ObjectId | Trade): trade is Trade => {
-          return (<Trade>trade)._id !== undefined;
-        };
-
-        if (!isTrade(trade)) {
-          const typeGuardError = Error('타입이 일치하지 않습니다.');
-          typeGuardError.name = 'TypeGuardError';
-          throw typeGuardError;
-        }
+        if (!isTrade(trade)) throw TypeError('타입이 일치하지 않습니다.');
 
         const stock = stocks.find((stock) => stock.corpId === trade.corpId);
 
@@ -193,6 +190,7 @@ export class TradeService {
               if (asset.corpId === trade.corpId) {
                 asset.totalQuantity += trade.quantity;
                 asset.availableQuantity += trade.quantity;
+                asset.purchaseAmount += trade.price * trade.quantity;
               }
             }
             await this.tradeModel.updateOne(
@@ -213,6 +211,8 @@ export class TradeService {
             // update player assets
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
+                asset.purchaseAmount -=
+                  (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
                 asset.totalQuantity -= trade.quantity;
               }
             }
@@ -259,23 +259,6 @@ export class TradeService {
     tradeCancelDto: TradeCancelDto,
   ): Promise<TradeResponseDto> {
     const { playerId, corpId, _id } = tradeCancelDto;
-
-    // const time: TimeState = this.gameService.getTime(gameId);
-
-    // if (
-    //   time.week !== week ||
-    //   time.day !== day ||
-    //   time.tick !== tick ||
-    //   time.tick < 1 ||
-    //   time.tick > 3 ||
-    //   day < 1
-    // ) {
-    //   const timeError = new Error(
-    //     '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
-    //   );
-    //   timeError.name = 'TimeException';
-    //   throw timeError;
-    // }
 
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
