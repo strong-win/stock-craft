@@ -9,10 +9,11 @@ import {
   PlayerOptionState,
   updateAssets,
   updateCash,
+  updateItemCoolTime,
   updateMessage,
   updateOptions,
 } from "../user";
-import { eventChannel } from "@redux-saga/core";
+import { channel, eventChannel } from "@redux-saga/core";
 
 export type ItemRequest = {
   gameId: string;
@@ -36,10 +37,25 @@ export const sendItemRequest = createAction(
   (payload: ItemRequest) => ({ payload })
 );
 
+const receiveItemRequestChannel = channel<string>();
+
 export function* sendItemRequestSaga(socket: Socket) {
   while (true) {
     const { payload } = yield take(ITEM_REQUEST);
-    yield apply(socket, socket.emit, [ITEM_REQUEST, payload]);
+    yield apply(socket, socket.emit, [
+      ITEM_REQUEST,
+      payload,
+      () => {
+        receiveItemRequestChannel.put(payload.type);
+      },
+    ]);
+  }
+}
+
+export function* receiveItemRequestSaga() {
+  while (true) {
+    const payload: string = yield take(receiveItemRequestChannel);
+    yield put(updateItemCoolTime(payload));
   }
 }
 

@@ -8,14 +8,14 @@ import { tradeCancel } from "../modules/sockets/trade";
 import ItemsAndTradeListTab from "../components/ItemsAndTradeListTab";
 import Items from "../components/Items";
 import TradeList from "../components/Trade/TradeList";
-const itemsMockData = ["informationPaper", "allocation"];
+import { sendItemRequest } from "../modules/sockets/items";
 
 const ItemsWrapper = () => {
   // redux state
   const [selectedTab, setSelectedTab] = useState<"items" | "tradeList">(
     "items"
   );
-  const { gameId, playerId, trades, selectedCorpId } = useSelector(
+  const { gameId, playerId, trades, selectedCorpId, items } = useSelector(
     (state: RootState) => state.user
   );
   const { corps } = useSelector((state: RootState) => state.stock);
@@ -29,16 +29,26 @@ const ItemsWrapper = () => {
   const handleChangeSelected = (e) => {
     setSelectedTab(e.target.id);
   };
+
   const handleCancel = (_id: string, corpId: string) => {
     dispatch(tradeCancel({ gameId, playerId, week, day, tick, corpId, _id }));
   };
+
+  const handleApplyItem = (id: string, target?: string) => {
+    dispatch(
+      sendItemRequest({ gameId, playerId, week, day, type: id, target })
+    );
+  };
+
   return (
     <>
       <ItemsAndTradeListTab
         selected={selectedTab}
         handleChangeSelected={handleChangeSelected}
       />
-      {selectedTab === "items" && <Items items={itemsMockData} />}
+      {selectedTab === "items" && (
+        <Items items={items} handleApplyItem={handleApplyItem} />
+      )}
       {selectedTab === "tradeList" && (
         <TradeList
           trades={trades}

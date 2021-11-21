@@ -33,7 +33,7 @@ export const stockSlice = createSlice({
   reducers: {
     updateDayChart(state, action: PayloadAction<DayChartState>) {
       state.corps.forEach((corp) => {
-        corp.totalChart = [...corp.totalChart, ...corp.todayChart];
+        corp.totalChart = corp.totalChart.concat(corp.todayChart);
       });
       for (const corpId in action.payload) {
         state.corps.map((corp) =>

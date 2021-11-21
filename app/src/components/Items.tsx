@@ -1,26 +1,54 @@
+import { useState } from "react";
 import { Row, Button, Col } from "reactstrap";
 
-import ITEMS from "../constants/item";
+import { ITEM } from "../constants/item";
 
-const ItemComponant = ({ itemId }) => {
+const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
   return (
-    <Col className="itemComponant">
-      <div className="itemTitle">{ITEMS[itemId]?.NAME}</div>
-      <div className="itemContent">{ITEMS[itemId]?.CONTENT}</div>
+    <Col
+      className={`itemComponent ${isSelected ? "selectedItem" : ""} ${
+        disabled ? "disabled" : ""
+      }`}
+      id={itemId}
+      onClick={handleSelectItem}
+    >
+      <div className="itemTitle" id={itemId}>
+        {ITEM[itemId]?.NAME}
+      </div>
+      <div className="itemContent" id={itemId}>
+        {ITEM[itemId]?.CONTENT}
+      </div>
     </Col>
   );
 };
 
-const Items = ({ items }) => {
+const Items = ({ items, handleApplyItem }) => {
+  const [selectedItemId, setSelectedItemId] = useState<string>("");
+
+  const handleSelectedItemId = (e) => {
+    if (items[e.target.id] === 0) setSelectedItemId(e.target.id);
+  };
+
   return (
     <>
       <Row className="itemsWrapper">
-        {items.map((itemId) => (
-          <ItemComponant itemId={itemId} />
+        {Object.keys(items).map((itemId) => (
+          <ItemComponent
+            key={itemId}
+            itemId={itemId}
+            handleSelectItem={handleSelectedItemId}
+            disabled={!!items[itemId]}
+            isSelected={selectedItemId === itemId}
+          />
         ))}
       </Row>
       <Row className="itemsButtonWrapper">
-        <Button className="itemButton">사용하기</Button>
+        <Button
+          className="itemButton"
+          onClick={() => handleApplyItem(selectedItemId)}
+        >
+          사용하기
+        </Button>
       </Row>
     </>
   );

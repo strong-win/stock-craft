@@ -1,4 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import _ from "lodash";
+
+import { ITEM_TYPE, ITEM } from "../constants/item";
 
 export type PlayerStatus =
   | "connected"
@@ -67,6 +70,7 @@ export type userState = {
   trades: TradeState[];
   selectedCorpId: string;
   isChartView: boolean;
+  items: { [key: string]: number };
   options: PlayerOptionState;
   scores: PlayerScore[];
 };
@@ -80,6 +84,7 @@ const initialState: userState = {
   gameId: "",
   messages: [],
   players: [],
+  items: {},
   cash: { totalCash: 100_000, availableCash: 100_000 },
   assets: [
     // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
@@ -145,6 +150,23 @@ export const gameSlice = createSlice({
     updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
       state.scores = action.payload;
     },
+    setItems: (state, action: PayloadAction<string>) => {
+      // set items after role is decided
+      // const roleItems = ITEM_TYPE[action.payload];
+      // const randomCommonItems = _.sampleSize(ITEM_TYPE.COMMON, 2);
+      // [...roleItems, ...randomCommonItems].forEach(
+      //   (id) => (state.items[id] = 0)
+      //);
+      state.items = { salary: 0, leverage: 0, chatoff: 1, tradeoff: 0 }; //for test
+    },
+    updateItemsBytime: (state) => {
+      Object.keys(state.items).forEach((itemId) => {
+        if (state.items[itemId] > 0) state.items[itemId] -= 1;
+      });
+    },
+    updateItemCoolTime: (state, action: PayloadAction<string>) => {
+      state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+    },
     updateTrades: (
       state,
       action: PayloadAction<{
@@ -189,6 +211,9 @@ export const {
   updateOptions,
   updateScores,
   updateTrades,
+  updateItemsBytime,
+  updateItemCoolTime,
+  setItems,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

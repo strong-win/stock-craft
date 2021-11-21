@@ -12,6 +12,7 @@ import {
   updateGameId,
   updateIsHost,
   updateStatus,
+  setItems,
 } from "../user";
 import {
   JOIN_CANCEL,
@@ -150,6 +151,7 @@ export function* receiveJoinPlaySaga(socket: Socket) {
     yield put(initChart(payload.corps));
     yield put(updateAssets(assets));
     yield put(updateStatus("play"));
+    yield put(setItems());
   }
 }
 
