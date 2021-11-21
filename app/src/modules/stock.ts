@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { CorpResponse } from "./sockets/join";
 
 export type CorpState = {
   corpId: string;
@@ -42,16 +43,15 @@ export const stockSlice = createSlice({
         );
       }
     },
-    initializeCharts(state, action: PayloadAction<CorpState[]>) {
-      state.corps = action.payload.map((corp) => ({
+    initChart(state, action: PayloadAction<CorpResponse[]>) {
+      state.corps = action.payload.map((corp: CorpResponse) => ({
         ...corp,
-        totalChart: [],
         todayChart: [],
       }));
     },
   },
 });
 
-export const { updateDayChart, initializeCharts } = stockSlice.actions;
+export const { updateDayChart, initChart } = stockSlice.actions;
 
 export default stockSlice.reducer;
