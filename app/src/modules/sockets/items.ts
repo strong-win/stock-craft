@@ -3,6 +3,7 @@ import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { apply, call, put, take } from "@redux-saga/core/effects";
 import {
+  appendMessages,
   AssetState,
   CashState,
   MessageState,
@@ -29,7 +30,7 @@ export type ItemResponse = {
   options?: PlayerOptionState;
   cash?: CashState;
   assets?: AssetState[];
-  messages?: MessageState;
+  messages?: MessageState[];
 };
 
 export const sendItemRequest = createAction(
@@ -81,6 +82,6 @@ export function* receiveItemResponseSaga(socket: Socket) {
     if (payload.options) yield put(updateOptions(payload.options));
     if (payload.cash) yield put(updateCash(payload.cash));
     if (payload.assets) yield put(updateAssets(payload.assets));
-    if (payload.messages) yield put(updateMessage(payload.messages));
+    if (payload.messages) yield put(appendMessages(payload.messages));
   }
 }

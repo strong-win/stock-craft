@@ -138,6 +138,9 @@ export const gameSlice = createSlice({
         state.messages = [...state.messages, action.payload];
       }
     },
+    appendMessages: (state, action: PayloadAction<MessageState[]>) => {
+      state.messages = [...state.messages, ...action.payload];
+    },
     updateAssets: (state, action: PayloadAction<AssetState[]>) => {
       state.assets = action.payload;
     },
@@ -212,6 +215,7 @@ export const {
   updatePlayerId,
   updateGameId,
   updateMessage,
+  appendMessages,
   updatePlayers,
   updateAssets,
   updateCash,
