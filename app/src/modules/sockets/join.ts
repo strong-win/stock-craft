@@ -1,5 +1,6 @@
+import { Role, updateRole } from "./../user";
 import { channel, eventChannel } from "@redux-saga/core";
-import { apply, call, put, take } from "@redux-saga/core/effects";
+import { apply, call, put, select, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { CorpState, initChart } from "../stock";
@@ -24,6 +25,7 @@ import {
   JOIN_READY,
   JOIN_START,
 } from "./events";
+import { RootState } from "../..";
 
 export type CorpResponse = {
   corpId: string;
@@ -77,6 +79,19 @@ export function* receiveJoinPlayersSaga(socket: Socket) {
   while (true) {
     const payload: PlayerState[] = yield take(channel);
     yield put(updatePlayers(payload));
+
+    let role: Role;
+    const playerId = yield select((state: RootState) => state.user.playerId);
+
+    payload.forEach((player: PlayerState) => {
+      if (playerId === player.playerId) {
+        role = player.role;
+      }
+    });
+
+    if (role) {
+      yield put(updateRole(role));
+    }
   }
 }
 

@@ -3,6 +3,8 @@ import _ from "lodash";
 
 import { ITEM_TYPE, ITEM } from "../constants/item";
 
+export type Role = "" | "individual" | "institutional" | "party";
+
 export type PlayerStatus =
   | "connected"
   | "ready"
@@ -17,8 +19,10 @@ export type MessageState = {
 };
 
 export type PlayerState = {
+  playerId: string;
   name: string;
   status: PlayerStatus;
+  role: Role;
 };
 
 export type AssetState = {
@@ -56,7 +60,7 @@ export type PlayerScore = {
   score: number;
 };
 
-export type userState = {
+export type UserState = {
   name: string;
   room: string;
   status: PlayerStatus;
@@ -73,9 +77,10 @@ export type userState = {
   items: { [key: string]: number };
   options: PlayerOptionState;
   scores: PlayerScore[];
+  role: Role;
 };
 
-const initialState: userState = {
+const initialState: UserState = {
   name: "",
   room: "",
   status: "connected",
@@ -99,6 +104,7 @@ const initialState: userState = {
   isChartView: false,
   options: {},
   scores: [],
+  role: "",
 };
 
 export const gameSlice = createSlice({
@@ -167,6 +173,9 @@ export const gameSlice = createSlice({
     updateItemCoolTime: (state, action: PayloadAction<string>) => {
       state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
     },
+    updateRole: (state, action: PayloadAction<Role>) => {
+      state.role = action.payload;
+    },
     updateTrades: (
       state,
       action: PayloadAction<{
@@ -210,6 +219,7 @@ export const {
   updateIsChartView,
   updateOptions,
   updateScores,
+  updateRole,
   updateTrades,
   updateItemsBytime,
   updateItemCoolTime,
