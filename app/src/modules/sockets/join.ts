@@ -1,14 +1,16 @@
-import { AssetState, updateGameId, updateIsHost } from "./../user";
 import { channel, eventChannel } from "@redux-saga/core";
 import { apply, call, put, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { CorpState, initializeCharts } from "../stock";
+import { CorpState, initChart } from "../stock";
 import {
+  AssetState,
   PlayerState,
   updateAssets,
   updatePlayerId,
   updatePlayers,
+  updateGameId,
+  updateIsHost,
   updateStatus,
 } from "../user";
 import {
@@ -21,6 +23,12 @@ import {
   JOIN_READY,
   JOIN_START,
 } from "./events";
+
+export type CorpResponse = {
+  corpId: string;
+  corpName: string;
+  totalChart: number[];
+};
 
 export const sendJoinConnected = createAction(
   JOIN_CONNECTED,
@@ -125,15 +133,22 @@ export function* receiveJoinPlaySaga(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: {
-      gameId: string;
-      corps: CorpState[];
-      assets: AssetState[];
-    } = yield take(channel);
+    const payload: { gameId: string; corps: CorpResponse[] } = yield take(
+      channel
+    );
 
-    yield put(initializeCharts(payload.corps));
-    yield put(updateAssets(payload.assets));
+    const assets: AssetState[] = payload.corps.map(
+      ({ corpId }: CorpResponse) => ({
+        corpId,
+        totalQuantity: 0,
+        availableQuantity: 0,
+        purchaseAmount: 0,
+      })
+    );
+
     yield put(updateGameId(payload.gameId));
+    yield put(initChart(payload.corps));
+    yield put(updateAssets(assets));
     yield put(updateStatus("play"));
   }
 }
