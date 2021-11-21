@@ -7,6 +7,7 @@ export type GameDocument = Game & Document;
 export type Corp = {
   corpId: string;
   corpName: string;
+  totalChart: number[];
 };
 
 @Schema()

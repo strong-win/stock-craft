@@ -19,10 +19,25 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
+import { Player, PlayerStatus, Role } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
 import { GameStateProvider } from 'src/states/game.state';
 import { isGame } from 'src/utils/typeGuard';
+import { MarketApi } from 'src/api/market.api';
+import { Corp } from 'src/schemas/game.schema';
+import { Types } from 'mongoose';
+
+export type PlayerInfo = {
+  playerId: string;
+  name: string;
+  status: PlayerStatus;
+  role?: Role;
+};
+
+export type GameInfo = {
+  gameId: string;
+  corps: Corp[];
+};
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -35,6 +50,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private gameState: GameStateProvider,
     private playerService: PlayerService,
     private joinService: JoinService,
+    private marketApi: MarketApi,
   ) {}
 
   handleConnection(client: Socket): void {
@@ -66,10 +82,13 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         room,
         this.getStatuses('all'),
       );
-      const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-        name,
-        status,
-      }));
+      const playersInfo: PlayerInfo[] = players.map(
+        ({ _id: playerId, name, status }: Player) => ({
+          playerId: playerId.toString(),
+          name,
+          status,
+        }),
+      );
 
       if (isHost && players.length) {
         const newHost: Player = players[0];
@@ -128,10 +147,13 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room,
       this.getStatuses('all'),
     );
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+      }),
+    );
     this.server.emit(JOIN_PLAYERS, playersInfo);
 
     return { playerId: playerId.toString() };
@@ -151,10 +173,13 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room,
       this.getStatuses('all'),
     );
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+      }),
+    );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
   }
 
@@ -173,10 +198,13 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
 
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+      }),
+    );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
   }
 
@@ -186,12 +214,33 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     payload: { playerId: string; room: string },
   ): Promise<void> {
     const { playerId, room } = payload;
-    const { playersInfo, gameInfo, start } = await this.joinService.startGame(
+    const gameId: Types.ObjectId = await this.joinService.createGame(
       playerId,
       room,
     );
 
-    if (start) {
+    if (gameId) {
+      const corps: Corp[] = await this.marketApi.postModel(gameId);
+      await this.joinService.initGame(gameId, room, corps);
+
+      const players: Player[] = await this.playerService.findByRoomAndStatuses(
+        room,
+        this.getStatuses('play'),
+      );
+
+      const playersInfo: PlayerInfo[] = players.map(
+        ({ _id: playerId, name, status, role }: Player) => ({
+          playerId: playerId.toString(),
+          name,
+          status,
+          role,
+        }),
+      );
+      const gameInfo: GameInfo = {
+        gameId: gameId.toString(),
+        corps,
+      };
+
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
       this.server.to(room).emit(JOIN_PLAY, gameInfo);
@@ -202,7 +251,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('play'),
       });
 
-      this.gameState.createGameState(gameInfo.gameId, room);
+      this.gameState.createGameState(gameId, room);
     } else {
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',

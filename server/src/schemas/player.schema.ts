@@ -5,6 +5,8 @@ import { Trade } from './trade.schema';
 
 export type PlayerDocument = Player & Document;
 
+export type Role = 'individual' | 'institutional' | 'party';
+
 export type Asset = {
   corpId: string;
   totalQuantity: number;
@@ -32,11 +34,6 @@ export type PlayerStatus =
   | 'finish'
   | 'disconnected';
 
-export type PlayerInfo = {
-  name: string;
-  status: PlayerStatus;
-};
-
 @Schema()
 export class Player {
   _id: Types.ObjectId;
@@ -61,6 +58,9 @@ export class Player {
 
   @Prop({ type: Types.ObjectId, ref: 'Game' })
   game: Types.ObjectId | Game;
+
+  @Prop()
+  role?: Role;
 
   @Prop({ type: { totalCash: Number, availableCash: Number } })
   cash?: Cash;

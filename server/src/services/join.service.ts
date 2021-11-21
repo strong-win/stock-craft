@@ -1,39 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as mongoose from 'mongoose';
-import { MarketApi } from 'src/api/market.api';
+import { Model, Types } from 'mongoose';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
   Cash,
   Player,
   PlayerDocument,
-  PlayerInfo,
   PlayerOption,
   PlayerStatus,
+  Role,
 } from 'src/schemas/player.schema';
-
-export type CorpChart = Corp & {
-  totalChart: [];
-};
 
 @Injectable()
 export class JoinService {
   constructor(
-    @InjectModel(Game.name) private gameModel: mongoose.Model<GameDocument>,
+    @InjectModel(Game.name) private gameModel: Model<GameDocument>,
     @InjectModel(Player.name)
-    private playerModel: mongoose.Model<PlayerDocument>,
-    private marketApi: MarketApi,
+    private playerModel: Model<PlayerDocument>,
   ) {}
 
-  async startGame(
-    playerId: string,
-    room: string,
-  ): Promise<{
-    playersInfo: PlayerInfo[];
-    gameInfo?: { gameId: string; corps: Corp[]; assets: Asset[] };
-    start: boolean;
-  }> {
+  async createGame(playerId: string, room: string): Promise<Types.ObjectId> {
     const players: Player[] = await this.playerModel
       .find({
         room,
@@ -58,60 +45,52 @@ export class JoinService {
         room,
         players,
       });
-
-      // get start response from Market Server
-      const corpCharts: CorpChart[] = await this.marketApi.requestStart(gameId);
-      const corps: Corp[] = corpCharts.map(({ corpId, corpName }) => ({
-        corpId,
-        corpName,
-      }));
-
-      // update game with corps
-      await this.gameModel.updateOne({ _id: gameId }, { corps: corps });
-
-      // get player acccounts with corportions
-      const { cash, assets, options } = this.getPlayerProps(corps);
-
-      // update player with accounts
-      await this.playerModel.updateMany(
-        { room, status: { $in: ['connected', 'ready'] } },
-        {
-          status: 'play',
-          game: gameId,
-          cash,
-          assets,
-          options,
-        },
-      );
-
-      const playersInfo: PlayerInfo[] = players.map(({ name }) => ({
-        name,
-        status: 'play',
-      }));
-
-      return {
-        playersInfo,
-        gameInfo: { gameId: gameId.toString(), corps, assets },
-        start: true,
-      };
-    } else {
-      const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-        name,
-        status,
-      }));
-      return { playersInfo, start: false };
+      return gameId;
     }
+
+    return null;
   }
 
-  getPlayerProps(corps: Corp[]): {
-    cash: Cash;
-    assets: Asset[];
-    options: PlayerOption;
-  } {
-    const cash: Cash = {
-      totalCash: 10_000_000,
-      availableCash: 10_000_000,
-    };
+  async initGame(
+    gameId: Types.ObjectId | string,
+    room: string,
+    corps: Corp[],
+  ): Promise<void> {
+    if (typeof gameId === 'string') {
+      gameId = Types.ObjectId(gameId);
+    }
+
+    // game
+    await this.gameModel.updateOne({ _id: gameId }, { corps });
+
+    // players
+    const players: Player[] = await this.playerModel
+      .find({ room, status: { $in: ['connected', 'ready'] } })
+      .exec();
+
+    // give random role
+    let NUM_INSTITUTIONAL = 1;
+    let NUM_PARTY = 1;
+
+    if (players.length >= 3) {
+      while (NUM_INSTITUTIONAL) {
+        const randNum = Math.floor(Math.random() * players.length);
+        if (players[randNum].role === 'individual') {
+          NUM_INSTITUTIONAL -= 1;
+          players[randNum].role = 'institutional';
+        }
+      }
+    }
+
+    if (players.length >= 4) {
+      while (NUM_PARTY) {
+        const randNum = Math.floor(Math.random() * players.length);
+        if (players[randNum].role === 'individual') {
+          NUM_PARTY -= 1;
+          players[randNum].role = 'party';
+        }
+      }
+    }
 
     const assets: Asset[] = corps.map(({ corpId }) => ({
       corpId,
@@ -127,7 +106,53 @@ export class JoinService {
       asset: true,
     };
 
-    return { cash, assets, options };
+    const individualIds = players
+      .filter((player: Player) => !player.role)
+      .map(({ _id }) => _id);
+
+    await this.playerModel.updateMany(
+      { _id: { $in: individualIds } },
+      {
+        status: 'play',
+        game: gameId,
+        role: 'individual',
+        assets,
+        options,
+        cash: this.getCash('individual'),
+      },
+    );
+
+    const institutionalIds = players
+      .filter((player: Player) => player.role === 'institutional')
+      .map(({ _id }) => _id);
+
+    await this.playerModel.updateMany(
+      { _id: { $in: institutionalIds } },
+      {
+        status: 'play',
+        game: gameId,
+        role: 'institutional',
+        assets,
+        options,
+        cash: this.getCash('institutional'),
+      },
+    );
+
+    const partyIds = players
+      .filter((player: Player) => player.role === 'party')
+      .map(({ _id }) => _id);
+
+    await this.playerModel.updateMany(
+      { _id: { $in: partyIds } },
+      {
+        status: 'play',
+        role: 'party',
+        game: gameId,
+        assets,
+        options,
+        cash: this.getCash('party'),
+      },
+    );
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
@@ -139,6 +164,25 @@ export class JoinService {
     }
     if (status === 'play') {
       return ['play'];
+    }
+  }
+
+  getCash(role: Role): Cash {
+    if (role === 'individual') {
+      return {
+        totalCash: 1_000_000,
+        availableCash: 1_000_000,
+      };
+    } else if (role === 'institutional') {
+      return {
+        totalCash: 100_000_000,
+        availableCash: 100_000_000,
+      };
+    } else {
+      return {
+        totalCash: 5_000_000,
+        availableCash: 5_000_000,
+      };
     }
   }
 }

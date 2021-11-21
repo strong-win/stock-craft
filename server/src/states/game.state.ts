@@ -18,7 +18,11 @@ export type GameState = {
 export class GameStateProvider {
   private games: GameState[] = [];
 
-  createGameState(gameId: string, room: string) {
+  createGameState(gameId: Types.ObjectId | string, room: string) {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
     this.games.push({ gameId, room, time: { week: 1, day: 0, tick: 0 } });
   }
 

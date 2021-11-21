@@ -106,7 +106,7 @@ export class GameGateway {
 
           // request chart to ML Server
           this.marketApi
-            .requestChart(chartRequestDto)
+            .putModel(chartRequestDto)
             .then(async (chartResponseDto: ChartResponseDto) => {
               // use item with moment after-infer
               await this.itemService.useItems(
