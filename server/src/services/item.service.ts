@@ -23,8 +23,7 @@ export class ItemService {
     if (
       time.week !== week ||
       time.day !== day ||
-      (time.week == 0 && time.week > 4) ||
-      (time.week > 0 && time.tick !== 4)
+      (time.day > 0 && time.tick !== 4)
     ) {
       const timeError = new Error(
         '아이템 사용시간이 불일치하거나 사용 불가능한 시간입니다.',
@@ -33,14 +32,43 @@ export class ItemService {
       throw timeError;
     }
 
-    return this.itemModel.create({
-      player: Types.ObjectId(playerId),
-      game: Types.ObjectId(gameId),
-      week,
-      day,
-      type,
-      target,
-    });
+    const moment =
+      type === 'chatoff'
+        ? 'now'
+        : type === 'tradeoff'
+        ? 'now'
+        : type === 'cloaking'
+        ? 'now'
+        : type === 'dividend'
+        ? 'now'
+        : type === 'news'
+        ? 'now'
+        : type === 'lotto'
+        ? 'now'
+        : type === 'salary'
+        ? 'now'
+        : type === 'leverage'
+        ? 'now'
+        : type === 'blackout'
+        ? 'now'
+        : type === 'leading'
+        ? 'now'
+        : type === 'short'
+        ? 'before-infer'
+        : type === 'long'
+        ? 'before-infer'
+        : null;
+
+    if (type)
+      return this.itemModel.create({
+        player: Types.ObjectId(playerId),
+        game: Types.ObjectId(gameId),
+        week,
+        day,
+        type,
+        target,
+        moment,
+      });
   }
 
   // chatting/trade/chart/cash/asset
@@ -59,10 +87,10 @@ export class ItemService {
       })
       .exec();
 
-    items.forEach((item) => {
+    for (const item of items) {
       if (!isPlayer(item.player)) throw TypeError('타입이 일치하지 않습니다.');
 
-      this.effectProvider.handleEffect({
+      await this.effectProvider.handleEffect({
         gameId,
         playerId: item.player._id,
         type: item.type,
@@ -70,6 +98,6 @@ export class ItemService {
         week,
         day,
       });
-    });
+    }
   }
 }

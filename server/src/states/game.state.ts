@@ -66,9 +66,7 @@ export class GameStateProvider {
 
   getNextTime({ week, day, tick }: TimeState): TimeState {
     if (day === 0) {
-      return tick < 1
-        ? { week: week, day: day, tick: tick + 1 }
-        : { week: week, day: day + 1, tick: 0 };
+      return { week: week, day: day + 1, tick: 0 };
     }
     if (day === 5) {
       return tick < 4

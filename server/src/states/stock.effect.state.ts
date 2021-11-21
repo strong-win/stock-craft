@@ -46,12 +46,12 @@ export class StockEffectStateProvider {
     );
   }
 
-  async updateWithEffect(
+  updateWithEffect(
     gameId: Types.ObjectId | string,
     week: number,
     day: number,
     increment: number,
-  ): Promise<void> {
+  ): void {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }

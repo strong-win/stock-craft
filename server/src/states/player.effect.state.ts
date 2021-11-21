@@ -18,7 +18,7 @@ export type PlayerEffectState = {
 
 @Injectable()
 export class PlayerEffectStateProvider {
-  private playerEffects: PlayerEffectState[] = [];
+  public playerEffects: PlayerEffectState[] = [];
 
   updateOrCreate({
     gameId,

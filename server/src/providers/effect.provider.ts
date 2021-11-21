@@ -47,7 +47,6 @@ export class EffectProvider {
   // example effectHandler (chatting ban)
   private effectHandler_0001: EffectHandler = async ({
     gameId,
-    playerId,
     target,
     week,
     day,
@@ -59,12 +58,15 @@ export class EffectProvider {
     const options: PlayerOption = player.options;
     options.chatting = false;
 
-    await this.playerModel.updateOne({ _id: playerId }, { options });
+    await this.playerModel.updateOne(
+      { _id: Types.ObjectId(target) },
+      { options },
+    );
 
     this.playerEffectState.updateOrCreate({
       gameId,
-      playerId,
-      clientId: target,
+      playerId: player._id,
+      clientId: player.clientId,
       week,
       day,
       options,
@@ -75,7 +77,6 @@ export class EffectProvider {
   // example effectHandler (trade ban)
   private effectHandler_0002: EffectHandler = async ({
     gameId,
-    playerId,
     target,
     week,
     day,
@@ -87,12 +88,15 @@ export class EffectProvider {
     const options: PlayerOption = player.options;
     options.trade = false;
 
-    await this.playerModel.updateOne({ _id: playerId }, { options });
+    await this.playerModel.updateOne(
+      { _id: Types.ObjectId(target) },
+      { options },
+    );
 
     this.playerEffectState.updateOrCreate({
       gameId,
-      playerId,
-      clientId: target,
+      playerId: player._id,
+      clientId: player.clientId,
       week,
       day,
       options,
@@ -103,7 +107,6 @@ export class EffectProvider {
   // example effectHandler (chart ban)
   private effectHandler_0003: EffectHandler = async ({
     gameId,
-    playerId,
     target,
     week,
     day,
@@ -115,12 +118,15 @@ export class EffectProvider {
     const options: PlayerOption = player.options;
     options.chart = false;
 
-    this.playerModel.updateOne({ _id: playerId }, { options });
+    await this.playerModel.updateOne(
+      { _id: Types.ObjectId(target) },
+      { options },
+    );
 
     this.playerEffectState.updateOrCreate({
       gameId,
-      playerId,
-      clientId: target,
+      playerId: player._id,
+      clientId: player.clientId,
       week,
       day,
       options,
@@ -141,14 +147,57 @@ export class EffectProvider {
 
     const increment = stock.price * 0.2;
 
-    await this.stockEffectState.updateWithEffect(gameId, week, day, increment);
+    this.stockEffectState.updateWithEffect(gameId, week, day, increment);
+  };
+
+  private effectHandler_salary: EffectHandler = async ({
+    gameId,
+    playerId,
+    week,
+    day,
+  }) => {
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(playerId),
+    });
+
+    const increment = Math.floor(player.cash.totalCash * 0.05);
+    const cash = player.cash;
+
+    cash.totalCash += increment;
+    cash.availableCash += increment;
+
+    await this.playerModel.updateOne(
+      { _id: Types.ObjectId(playerId) },
+      { cash },
+    );
+
+    const message = {
+      user: '관리자',
+      text: `월급날 아이템 사용으로 현금이 ${increment} 원 증가하였습니다.`,
+      statuses: ['play'],
+    };
+
+    this.playerEffectState.updateOrCreate({
+      gameId,
+      playerId: player._id,
+      clientId: player.clientId,
+      week,
+      day,
+      cash,
+      messages: [message],
+      moment: 'now',
+    });
   };
 
   private effectHandler: { [key: string]: EffectHandler } = {
+    // example
     '0001': this.effectHandler_0001,
     '0002': this.effectHandler_0002,
     '0003': this.effectHandler_0003,
     '0004': this.effectHandler_0004,
+
+    // real
+    salary: this.effectHandler_salary,
   };
 
   async handleEffect({
@@ -165,6 +214,7 @@ export class EffectProvider {
     if (typeof playerId !== 'string') {
       playerId = playerId.toString();
     }
+
     await this.effectHandler[type]({ gameId, playerId, target, week, day });
   }
 }
