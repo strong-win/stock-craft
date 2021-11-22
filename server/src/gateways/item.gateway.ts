@@ -20,7 +20,9 @@ export class ItemGateway {
   async receiveItemRequest(
     client: Socket,
     payload: ItemRequestDto,
-  ): Promise<void> {
+  ): Promise<Record<string, never>> {
     await this.itemService.create(payload);
+
+    return {};
   }
 }
