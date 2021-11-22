@@ -4,7 +4,8 @@ import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { DayChartState, updateDayChart } from "../stock";
 import { TimeState, updateTime } from "../time";
-import { GAME_TIME_REQUEST, GAME_TIME_RESPONSE } from "./events";
+import { PlayerScore, updateItemsBytime, updateScores } from "../user";
+import { GAME_SCORE, GAME_TIME_REQUEST, GAME_TIME_RESPONSE } from "./events";
 
 export const sendGameTimeRequest = createAction(
   GAME_TIME_REQUEST,
@@ -40,5 +41,28 @@ export function* receiveGameTimeResponseSaga(socket: Socket) {
     );
     yield put(updateTime(payload.time));
     if (payload.dayChart) yield put(updateDayChart(payload.dayChart));
+    if (payload.time.tick === 0) yield put(updateItemsBytime());
+  }
+}
+
+const receiveGameScoreChannel = (socket: Socket) => {
+  return eventChannel<PlayerScore[]>((emit) => {
+    socket.on(GAME_SCORE, (payload: PlayerScore[]) => {
+      emit(payload);
+    });
+
+    return () => {};
+  });
+};
+
+export function* receiveGameScoreSaga(socket: Socket) {
+  const channel: ReturnType<typeof receiveGameScoreChannel> = yield call(
+    receiveGameScoreChannel,
+    socket
+  );
+
+  while (true) {
+    const payload: PlayerScore[] = yield take(channel);
+    yield put(updateScores(payload));
   }
 }

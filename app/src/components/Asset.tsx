@@ -33,27 +33,34 @@ const AssetItem = ({ name, value, unit, color = false }: AssetItemType) => {
 };
 
 const Asset = ({ cash, assets, corps, tick }) => {
-  const totalPurchaseAmout = assets.reduce(
-    (previousValue, currentValue) =>
-      previousValue.purchaseAmount + currentValue.purchaseAmount
-  );
+  const totalPurchaseAmount = assets
+    .map((asset: AssetState) => asset.purchaseAmount)
+    .reduce(
+      (previousValue: number, currentValue: number) =>
+        previousValue + currentValue
+    );
 
-  const currentAmounts = corps.map((corp) => {
-    const nowPrice = corp.todayChart[tick - 1] || corp.totalChart.at(-1) || 0;
+  const currentAmounts: number[] = corps.map((corp) => {
+    const nowPrice =
+      corp?.todayChart[tick - 1] || corp?.totalChart?.at(-1) || 0;
     return (
       nowPrice *
-      assets.find((asset) => asset.corpId === corp.corpId)?.totalQuantity
+      assets.find((asset: AssetState) => asset.corpId === corp.corpId)
+        ?.totalQuantity
     );
   });
 
-  const totalCurrentAmout = currentAmounts.reduce(
-    (previousValue, currentValue) => previousValue + currentValue
+  const totalCurrentAmount = currentAmounts.reduce(
+    (previousValue: number, currentValue: number) =>
+      previousValue + currentValue
   );
+
+  const totalDiff = totalCurrentAmount - totalPurchaseAmount;
 
   const AssetData = [
     {
       name: "총 자산",
-      value: cash?.totalCash + totalCurrentAmout,
+      value: cash?.totalCash + totalCurrentAmount,
       unit: "원",
     },
     {
@@ -63,22 +70,24 @@ const Asset = ({ cash, assets, corps, tick }) => {
     },
     {
       name: "매입금액",
-      value: totalPurchaseAmout || 0,
+      value: totalPurchaseAmount || 0,
       unit: "원",
     },
     {
       name: "평가금액",
-      value: totalCurrentAmout,
+      value: totalCurrentAmount,
       unit: "원",
     },
     {
       name: "평가손익",
-      value: totalCurrentAmout - totalPurchaseAmout || 0,
+      value: totalDiff || 0,
       unit: "원",
     },
     {
       name: "평균 수익률",
-      value: (totalCurrentAmout - totalPurchaseAmout) / totalPurchaseAmout || 0,
+      value: totalPurchaseAmount
+        ? ((totalDiff / totalPurchaseAmount) * 100).toFixed(2)
+        : 0,
       unit: "%",
     },
   ];

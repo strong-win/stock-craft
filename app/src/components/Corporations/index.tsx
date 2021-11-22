@@ -119,8 +119,8 @@ const MyStockMarket = ({
 
 const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
   const CorpItem = ({ corp }) => {
-    const prevPrice = corp.totalChart.at(-1);
-    const nowPrice = corp.todayChart[tick - 1];
+    const prevPrice = corp?.totalChart?.at(-1);
+    const nowPrice = corp?.todayChart[tick - 1];
     const rate = ((nowPrice - prevPrice) / prevPrice) * 100;
     const gap = nowPrice - prevPrice;
     let color = "";

@@ -1,15 +1,19 @@
-import { AssetState, updateGameId, updateIsHost } from "./../user";
+import { Role, updateRole } from "./../user";
 import { channel, eventChannel } from "@redux-saga/core";
-import { apply, call, put, take } from "@redux-saga/core/effects";
+import { apply, call, put, select, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
-import { CorpState, initializeCharts } from "../stock";
+import { CorpState, initChart } from "../stock";
 import {
+  AssetState,
   PlayerState,
   updateAssets,
   updatePlayerId,
   updatePlayers,
+  updateGameId,
+  updateIsHost,
   updateStatus,
+  setItems,
 } from "../user";
 import {
   JOIN_CANCEL,
@@ -21,6 +25,13 @@ import {
   JOIN_READY,
   JOIN_START,
 } from "./events";
+import { RootState } from "../..";
+
+export type CorpResponse = {
+  corpId: string;
+  corpName: string;
+  totalChart: number[];
+};
 
 export const sendJoinConnected = createAction(
   JOIN_CONNECTED,
@@ -68,6 +79,20 @@ export function* receiveJoinPlayersSaga(socket: Socket) {
   while (true) {
     const payload: PlayerState[] = yield take(channel);
     yield put(updatePlayers(payload));
+
+    let role: Role;
+    const playerId = yield select((state: RootState) => state.user.playerId);
+
+    payload.forEach((player: PlayerState) => {
+      if (playerId === player.playerId) {
+        role = player.role;
+      }
+    });
+
+    if (role) {
+      yield put(updateRole(role));
+      yield put(setItems(role));
+    }
   }
 }
 
@@ -125,15 +150,22 @@ export function* receiveJoinPlaySaga(socket: Socket) {
     socket
   );
   while (true) {
-    const payload: {
-      gameId: string;
-      corps: CorpState[];
-      assets: AssetState[];
-    } = yield take(channel);
+    const payload: { gameId: string; corps: CorpResponse[] } = yield take(
+      channel
+    );
 
-    yield put(initializeCharts(payload.corps));
-    yield put(updateAssets(payload.assets));
+    const assets: AssetState[] = payload.corps.map(
+      ({ corpId }: CorpResponse) => ({
+        corpId,
+        totalQuantity: 0,
+        availableQuantity: 0,
+        purchaseAmount: 0,
+      })
+    );
+
     yield put(updateGameId(payload.gameId));
+    yield put(initChart(payload.corps));
+    yield put(updateAssets(assets));
     yield put(updateStatus("play"));
   }
 }

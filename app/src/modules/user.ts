@@ -1,4 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import _ from "lodash";
+
+import { ITEM_TYPE, ITEM } from "../constants/item";
+
+export type Role = "" | "individual" | "institutional" | "party";
 
 export type PlayerStatus =
   | "connected"
@@ -14,8 +19,10 @@ export type MessageState = {
 };
 
 export type PlayerState = {
+  playerId: string;
   name: string;
   status: PlayerStatus;
+  role: Role;
 };
 
 export type AssetState = {
@@ -39,7 +46,21 @@ export type CashState = {
   availableCash: number;
 };
 
-export type userState = {
+export type PlayerOptionState = {
+  chatting?: boolean;
+  trade?: boolean;
+  chart?: boolean;
+  cash?: boolean;
+  asset?: boolean;
+};
+
+export type PlayerScore = {
+  playerId: string;
+  name: string;
+  score: number;
+};
+
+export type UserState = {
   name: string;
   room: string;
   status: PlayerStatus;
@@ -53,9 +74,13 @@ export type userState = {
   trades: TradeState[];
   selectedCorpId: string;
   isChartView: boolean;
+  items: { [key: string]: number };
+  options: PlayerOptionState;
+  scores: PlayerScore[];
+  role: Role;
 };
 
-const initialState: userState = {
+const initialState: UserState = {
   name: "",
   room: "",
   status: "connected",
@@ -64,6 +89,7 @@ const initialState: userState = {
   gameId: "",
   messages: [],
   players: [],
+  items: {},
   cash: { totalCash: 100_000, availableCash: 100_000 },
   assets: [
     // { corpId: "gyu", totalQuantity: 0, availbleQuantity: 0, purchaseAmount: 0 },
@@ -76,6 +102,9 @@ const initialState: userState = {
   ],
   selectedCorpId: "gyu",
   isChartView: false,
+  options: {},
+  scores: [],
+  role: "",
 };
 
 export const gameSlice = createSlice({
@@ -109,6 +138,9 @@ export const gameSlice = createSlice({
         state.messages = [...state.messages, action.payload];
       }
     },
+    appendMessages: (state, action: PayloadAction<MessageState[]>) => {
+      state.messages = [...state.messages, ...action.payload];
+    },
     updateAssets: (state, action: PayloadAction<AssetState[]>) => {
       state.assets = action.payload;
     },
@@ -120,6 +152,33 @@ export const gameSlice = createSlice({
     },
     updateIsChartView: (state, action: PayloadAction<boolean>) => {
       state.isChartView = action.payload;
+    },
+    updateOptions: (state, action: PayloadAction<PlayerOptionState>) => {
+      state.options = action.payload;
+    },
+    updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
+      state.scores = action.payload;
+    },
+    setItems: (state, action: PayloadAction<string>) => {
+      // set items after role is decided
+      // const roleItems = ITEM_TYPE[action.payload];
+
+      // const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
+      // [...roleItems, ...randomCommonItems].forEach(
+      //   (id) => (state.items[id] = 0)
+      // );
+      state.items = { salary: 0, dividend: 0, chatoff: 0, tradeoff: 0 }; //for test
+    },
+    updateItemsBytime: (state) => {
+      Object.keys(state.items).forEach((itemId) => {
+        if (state.items[itemId] > 0) state.items[itemId] -= 1;
+      });
+    },
+    updateItemCoolTime: (state, action: PayloadAction<string>) => {
+      state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+    },
+    updateRole: (state, action: PayloadAction<Role>) => {
+      state.role = action.payload;
     },
     updateTrades: (
       state,
@@ -149,6 +208,7 @@ export const gameSlice = createSlice({
 });
 
 export const {
+  resetUser,
   updateName,
   updateRoom,
   updateStatus,
@@ -156,13 +216,19 @@ export const {
   updatePlayerId,
   updateGameId,
   updateMessage,
+  appendMessages,
   updatePlayers,
   updateAssets,
   updateCash,
   updateSelectedCorpId,
-  updateTrades,
-  resetUser,
   updateIsChartView,
+  updateOptions,
+  updateScores,
+  updateRole,
+  updateTrades,
+  updateItemsBytime,
+  updateItemCoolTime,
+  setItems,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
