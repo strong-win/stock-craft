@@ -67,13 +67,13 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
         )}
       </Row>
       <LineChart
-        width={800}
-        height={400}
+        width={850}
+        height={350}
         data={chartData.map((value, index) => ({ time: index, value }))}
         margin={{
           top: 5,
           right: 30,
-          left: 20,
+          left: 30,
           bottom: 5,
         }}
       >

@@ -20,7 +20,7 @@ type AssetItemType = {
 
 const AssetItem = ({ name, value, unit, color = false }: AssetItemType) => {
   return (
-    <Row className="assetItemRow">
+    <Row className="assetItemRow my-2">
       <Col md="3" className="assetKey">
         {name}
       </Col>
