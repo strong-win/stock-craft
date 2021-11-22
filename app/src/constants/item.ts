@@ -10,7 +10,7 @@ export const ITEM = {
   salary: {
     NAME: "월급날",
     IMAGE: "",
-    CONTENT: "월급날 설명 예시입니다.",
+    CONTENT: "오늘은 월급날! 현재 보유 현금의 5%를 월급으로 받습니다.",
     COOLTIME: 3,
   },
   leverage: {
@@ -36,14 +36,14 @@ export const ITEM = {
   chatoff: {
     NAME: "채팅밴",
     IMAGE: "",
-    CONTENT: "채팅밴 설명 예시입니다.",
-    COOLTIME: 3,
+    CONTENT: "지정 플레이어 1명의 채팅을 하루동안 금지시킬 수 있습니다.",
+    COOLTIME: 5,
   },
   tradeoff: {
     NAME: "거래밴",
     IMAGE: "",
-    CONTENT: "거래밴 설명 예시입니다.",
-    COOLTIME: 3,
+    CONTENT: "지정 플레이어 1명의 거래를 하루동안 금지시킬 수 있습니다.",
+    COOLTIME: 5,
   },
   cloaking: {
     NAME: "사칭",
@@ -54,7 +54,7 @@ export const ITEM = {
   dividend: {
     NAME: "배당",
     IMAGE: "",
-    CONTENT: "배당 설명 예시입니다.",
+    CONTENT: "현재 평가금액(주식 보유 금액)의 5%를 배당금으로 받습니다. ",
     COOLTIME: 3,
   },
   lotto: {

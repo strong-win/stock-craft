@@ -162,11 +162,12 @@ export const gameSlice = createSlice({
     setItems: (state, action: PayloadAction<string>) => {
       // set items after role is decided
       // const roleItems = ITEM_TYPE[action.payload];
-      // const randomCommonItems = _.sampleSize(ITEM_TYPE.COMMON, 2);
+
+      // const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
       // [...roleItems, ...randomCommonItems].forEach(
       //   (id) => (state.items[id] = 0)
-      //);
-      state.items = { salary: 0, dividend: 0, chatoff: 1, tradeoff: 0 }; //for test
+      // );
+      state.items = { salary: 0, dividend: 0, chatoff: 0, tradeoff: 0 }; //for test
     },
     updateItemsBytime: (state) => {
       Object.keys(state.items).forEach((itemId) => {

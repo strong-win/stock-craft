@@ -18,6 +18,9 @@ const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
       <div className="itemContent" id={itemId}>
         {ITEM[itemId]?.CONTENT}
       </div>
+      <div className="itemContent itemCooltime" id={itemId}>
+        아이템 쿨타임: {ITEM[itemId]?.COOLTIME}
+      </div>
     </Col>
   );
 };
@@ -27,6 +30,11 @@ const Items = ({ items, handleApplyItem }) => {
 
   const handleSelectedItemId = (e) => {
     if (items[e.target.id] === 0) setSelectedItemId(e.target.id);
+  };
+
+  const onClickApplyItemButton = () => {
+    handleApplyItem(selectedItemId);
+    setSelectedItemId("");
   };
 
   return (
@@ -43,10 +51,7 @@ const Items = ({ items, handleApplyItem }) => {
         ))}
       </Row>
       <Row className="itemsButtonWrapper">
-        <Button
-          className="itemButton"
-          onClick={() => handleApplyItem(selectedItemId)}
-        >
+        <Button className="itemButton" onClick={onClickApplyItemButton}>
           사용하기
         </Button>
       </Row>

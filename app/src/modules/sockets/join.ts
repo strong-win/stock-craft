@@ -91,6 +91,7 @@ export function* receiveJoinPlayersSaga(socket: Socket) {
 
     if (role) {
       yield put(updateRole(role));
+      yield put(setItems(role));
     }
   }
 }
@@ -166,7 +167,6 @@ export function* receiveJoinPlaySaga(socket: Socket) {
     yield put(initChart(payload.corps));
     yield put(updateAssets(assets));
     yield put(updateStatus("play"));
-    yield put(setItems());
   }
 }
 
