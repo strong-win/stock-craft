@@ -46,7 +46,7 @@ export function* sendItemRequestSaga(socket: Socket) {
     yield apply(socket, socket.emit, [
       ITEM_REQUEST,
       payload,
-      () => {
+      ({}) => {
         receiveItemRequestChannel.put(payload.type);
       },
     ]);

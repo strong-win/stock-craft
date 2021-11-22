@@ -2,7 +2,7 @@ export const ITEM_TYPE = {
   individual: ["salary", "leverage"],
   institutional: ["short", "long"],
   party: ["blackout", "leading"],
-  common: ["chatoff", "tradeoff", "cloaking", "divdend", "lotto", "news"],
+  common: ["chatoff", "tradeoff", "cloaking", "dividend", "lotto", "news"],
 };
 
 export const ITEM = {
@@ -51,7 +51,7 @@ export const ITEM = {
     CONTENT: "사칭 설명 예시입니다.",
     COOLTIME: 3,
   },
-  divdend: {
+  dividend: {
     NAME: "배당",
     IMAGE: "",
     CONTENT: "배당 설명 예시입니다.",

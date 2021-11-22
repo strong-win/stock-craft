@@ -166,7 +166,7 @@ export const gameSlice = createSlice({
       // [...roleItems, ...randomCommonItems].forEach(
       //   (id) => (state.items[id] = 0)
       //);
-      state.items = { salary: 0, leverage: 0, chatoff: 1, tradeoff: 0 }; //for test
+      state.items = { salary: 0, dividend: 0, chatoff: 1, tradeoff: 0 }; //for test
     },
     updateItemsBytime: (state) => {
       Object.keys(state.items).forEach((itemId) => {
