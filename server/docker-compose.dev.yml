@@ -21,3 +21,14 @@ services:
     restart: always
     ports:
       - '27017:27017'
+
+  mock:
+    image: stockcraft_nestjs_mock
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.mock
+    volumes:
+      - ./:/usr/proj/server
+      - /usr/proj/server/node_modules
+    ports:
+      - '8081:8081'

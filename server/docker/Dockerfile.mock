@@ -1,0 +1,11 @@
+# https://nodejs.org/ko/docs/guides/nodejs-docker-webapp/
+
+FROM node:14.17.6-alpine
+
+WORKDIR /usr/proj/server
+
+COPY package*.json ./
+
+RUN npm install
+
+CMD ["npm", "run", "mock"]

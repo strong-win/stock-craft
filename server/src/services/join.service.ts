@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { MarketApi } from 'src/api/market.api';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import {
   Asset,
@@ -9,8 +9,13 @@ import {
   Player,
   PlayerDocument,
   PlayerInfo,
+  PlayerOption,
   PlayerStatus,
 } from 'src/schemas/player.schema';
+
+export type CorpChart = Corp & {
+  totalChart: [];
+};
 
 @Injectable()
 export class JoinService {
@@ -18,7 +23,7 @@ export class JoinService {
     @InjectModel(Game.name) private gameModel: mongoose.Model<GameDocument>,
     @InjectModel(Player.name)
     private playerModel: mongoose.Model<PlayerDocument>,
-    private configService: ConfigService,
+    private marketApi: MarketApi,
   ) {}
 
   async startGame(
@@ -48,16 +53,26 @@ export class JoinService {
     ).length;
 
     if (numHost + numGuest === players.length) {
-      const { cash, corps, assets } = this.getSampleData();
-
       // create game
       const { _id: gameId } = await this.gameModel.create({
         room,
-        corps,
         players,
       });
 
-      // update player
+      // get start response from Market Server
+      const corpCharts: CorpChart[] = await this.marketApi.requestStart(gameId);
+      const corps: Corp[] = corpCharts.map(({ corpId, corpName }) => ({
+        corpId,
+        corpName,
+      }));
+
+      // update game with corps
+      await this.gameModel.updateOne({ _id: gameId }, { corps: corps });
+
+      // get player acccounts with corportions
+      const { cash, assets, options } = this.getPlayerProps(corps);
+
+      // update player with accounts
       await this.playerModel.updateMany(
         { room, status: { $in: ['connected', 'ready'] } },
         {
@@ -65,6 +80,7 @@ export class JoinService {
           game: gameId,
           cash,
           assets,
+          options,
         },
       );
 
@@ -72,6 +88,7 @@ export class JoinService {
         name,
         status: 'play',
       }));
+
       return {
         playersInfo,
         gameInfo: { gameId: gameId.toString(), corps, assets },
@@ -86,20 +103,31 @@ export class JoinService {
     }
   }
 
-  getSampleData() {
-    // get sample data from config
+  getPlayerProps(corps: Corp[]): {
+    cash: Cash;
+    assets: Asset[];
+    options: PlayerOption;
+  } {
     const cash: Cash = {
-      totalCash: 100_000,
-      availableCash: 100_000,
+      totalCash: 10_000_000,
+      availableCash: 10_000_000,
     };
-    const corps: Corp[] = this.configService.get<Corp[]>('corps');
+
     const assets: Asset[] = corps.map(({ corpId }) => ({
       corpId,
       totalQuantity: 0,
       availableQuantity: 0,
+      purchaseAmount: 0,
     }));
 
-    return { cash, corps, assets };
+    const options: PlayerOption = {
+      chatting: true,
+      trade: true,
+      chart: true,
+      asset: true,
+    };
+
+    return { cash, assets, options };
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
