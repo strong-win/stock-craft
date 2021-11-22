@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter, Tooltip } from "reactstrap";
-import { MessageState } from "../../modules/user";
+import { AssetState, CashState, MessageState } from "../../modules/user";
 import { FiUser } from "react-icons/fi";
 
 import "../../styles/Chatting.css";
@@ -8,12 +8,17 @@ import "../../styles/Chatting.css";
 import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import RoleCard from "./RoleCard";
+import { ChartState } from "../../modules/stock";
 
 type ChattingProps = {
   name: string;
   room: string;
   message: string;
   userStatus: string;
+  cash: CashState;
+  assets: AssetState[];
+  corps: ChartState[];
+  tick: number;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
   messages: MessageState[];
@@ -25,6 +30,10 @@ const Chatting = ({
   message,
   messages,
   userStatus,
+  cash,
+  corps,
+  tick,
+  assets,
   setMessage,
   sendMessage,
 }: ChattingProps) => {
@@ -48,7 +57,13 @@ const Chatting = ({
       </CardHeader>
       <CardBody className="chattingBody">
         {userStatus === "play" && isNickNameHover && (
-          <RoleCard role="individual" />
+          <RoleCard
+            assets={assets}
+            corps={corps}
+            tick={tick}
+            cash={cash}
+            role="individual"
+          />
         )}
         <Messages name={name} messages={messages} />
       </CardBody>

@@ -28,7 +28,6 @@ const Play = ({ location, history }: any) => {
     (state: RootState) => state.user
   );
 
-  const { day, tick } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();
 
   const isShowItems: boolean = day === 0 || tick % 4 === 0;
