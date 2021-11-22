@@ -70,7 +70,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     },
     {
       name: "매입금액",
-      value: totalPurchaseAmount || 0,
+      value: Math.floor(totalPurchaseAmount) || 0,
       unit: "원",
     },
     {
@@ -80,13 +80,13 @@ const Asset = ({ cash, assets, corps, tick }) => {
     },
     {
       name: "평가손익",
-      value: totalDiff || 0,
+      value: Math.floor(totalDiff) || 0,
       unit: "원",
     },
     {
       name: "평균 수익률",
       value: totalPurchaseAmount
-        ? ((totalDiff / totalPurchaseAmount) * 100).toFixed(2)
+        ? Math.floor((totalDiff / totalPurchaseAmount) * 100)
         : 0,
       unit: "%",
     },

@@ -48,12 +48,12 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
         {asset ? (
           <>
             <Col>{asset.totalQuantity}</Col>
-            <Col>{averagePrice.toFixed(2)}</Col>
+            <Col>{Math.floor(averagePrice)}</Col>
             <Col>{nowPrice ? nowPrice : "-"}</Col>
-            <Col className={color}>{nowPrice - averagePrice}</Col>
+            <Col className={color}>{Math.floor(nowPrice - averagePrice)}</Col>
             <Col className={color}>
               {asset.totalQuantity
-                ? (((nowPrice - averagePrice) / averagePrice) * 100).toFixed(2)
+                ? Math.floor(((nowPrice - averagePrice) / averagePrice) * 100)
                 : 0}
               %
             </Col>
@@ -62,7 +62,7 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
           <>
             <Col>{nowPrice ? nowPrice : "-"}</Col>
             <Col className={color}>{gap ? gap : "-"}</Col>
-            <Col className={color}>{rate ? rate.toFixed(2) : "-"}%</Col>
+            <Col className={color}>{rate ? Math.floor(rate) : "-"}%</Col>
           </>
         )}
       </Row>

@@ -41,7 +41,7 @@ const RoleCard = ({ role, cash, assets, corps, tick }) => {
   const assetData = [
     {
       name: "거래 이익",
-      value: totalDiff || 0,
+      value: Math.floor(totalDiff) || 0,
       unit: "점",
     },
     {

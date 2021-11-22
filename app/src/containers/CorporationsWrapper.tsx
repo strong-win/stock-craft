@@ -9,8 +9,8 @@ import { updateSelectedCorpId, updateIsChartView } from "../modules/user";
 const CorporationsWrapper = () => {
   // redux state
   const { corps } = useSelector((state: RootState) => state.stock);
-  const { tick } = useSelector((state: RootState) => state.time);
-  const { assets } = useSelector((state: RootState) => state.user);
+  const { week, day, tick } = useSelector((state: RootState) => state.time);
+  const { assets, scores } = useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
 
@@ -32,8 +32,11 @@ const CorporationsWrapper = () => {
   return (
     <ChartTab
       tick={tick}
+      week={week}
+      day={day}
       assets={assets}
       corps={corps}
+      scores={scores}
       onClickCorpItem={onClickCorpItem}
       selectedCorpId={selectedCorpId}
     />
