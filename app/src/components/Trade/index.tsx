@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Row, Col } from "reactstrap";
 
 import { billType } from "../../containers/TradeWrapper";
@@ -36,6 +36,10 @@ const Trade = ({
   handleCancel,
 }: TradeProps) => {
   const [tradeType, setTradeType] = useState<"sell" | "buy">("buy");
+
+  useEffect(() => {
+    setTradeBill({ ...tradeBill, price: stockBill.price });
+  }, [stockBill]);
 
   const handleChangeType = (e) => {
     setTradeType(e.target.id);
