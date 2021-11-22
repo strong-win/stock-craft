@@ -7,6 +7,7 @@
     "bootstrap": "^5.1.2",
     "cra-template-typescript": "1.1.2",
     "dotenv": "10.0.0",
+    "lodash": "^4.17.21",
     "query-string": "^7.0.1",
     "react": "17.0.2",
     "react-countdown-circle-timer": "2.5.4",

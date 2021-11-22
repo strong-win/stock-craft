@@ -21,9 +21,11 @@ const TradeInput = ({ tradeBill, setTradeBill }: InputProps) => {
   };
 
   return (
-    <Col className="input">
-      <FormGroup>
-        <Label for="price">거래가</Label>
+    <div className="tradeInputWrapper">
+      <FormGroup className="tradeInputGroup">
+        <Label for="price" className="col-md-2">
+          가격
+        </Label>
         <Input
           name="price"
           id="price"
@@ -34,8 +36,10 @@ const TradeInput = ({ tradeBill, setTradeBill }: InputProps) => {
           onChange={onPriceChange}
         />
       </FormGroup>
-      <FormGroup>
-        <Label for="quantity">거래수량</Label>
+      <FormGroup className="tradeInputGroup">
+        <Label for="quantity" className="col-md-2">
+          수량
+        </Label>
         <Input
           name="quantity"
           id="quantity"
@@ -47,7 +51,7 @@ const TradeInput = ({ tradeBill, setTradeBill }: InputProps) => {
           step="1"
         />
       </FormGroup>
-    </Col>
+    </div>
   );
 };
 

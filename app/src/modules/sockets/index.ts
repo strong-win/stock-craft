@@ -3,8 +3,16 @@ import { Socket } from "socket.io-client";
 
 import connectSocket from "../../configs/socket";
 import { receiveChattingSaga, sendChattingSaga } from "./chatting";
-import { receiveGameTimeResponseSaga, sendGameTimeRequestSaga } from "./game";
-import { sendItemRequestSaga } from "./items";
+import {
+  receiveGameScoreSaga,
+  receiveGameTimeResponseSaga,
+  sendGameTimeRequestSaga,
+} from "./game";
+import {
+  receiveItemRequestSaga,
+  receiveItemResponseSaga,
+  sendItemRequestSaga,
+} from "./items";
 import {
   receiveJoinConnectedSaga,
   receiveJoinHostSaga,
@@ -45,8 +53,11 @@ export function* handleIO() {
     // game
     sendGameTimeRequestSaga(socket),
     receiveGameTimeResponseSaga(socket),
+    receiveGameScoreSaga(socket),
 
     // item
     sendItemRequestSaga(socket),
+    receiveItemResponseSaga(socket),
+    receiveItemRequestSaga(),
   ]);
 }

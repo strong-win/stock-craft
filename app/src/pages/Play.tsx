@@ -5,8 +5,8 @@ import { Container, Row, Col } from "reactstrap";
 
 import { RootState } from "..";
 import ChattingWrapper from "../containers/ChattingWrapper";
-import ClockWrapper from "../containers/ClockWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
+import ItemsWrapper from "../containers/ItemsWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import AssetWrapper from "../containers/AssetWrapper";
 import { updateName, updateRoom, resetUser } from "../modules/user";
@@ -19,14 +19,19 @@ import "../styles/Play.css";
 
 const Play = ({ location, history }: any) => {
   const [isBlocking, setIsBlocking] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<"items" | "tradeList">(
+    "items"
+  );
   const { room: initRoom } = queryString.parse(location.search);
-
+  const { week, day, tick } = useSelector((state: RootState) => state.time);
   const { playerId, name, room, status, isHost } = useSelector(
     (state: RootState) => state.user
   );
 
   const { day, tick } = useSelector((state: RootState) => state.time);
   const dispatch = useDispatch();
+
+  const isShowItems: boolean = day === 0 || tick % 4 === 0;
 
   useEffect(() => {
     history.block((loc, action) => {
@@ -103,7 +108,7 @@ const Play = ({ location, history }: any) => {
       </Row>
       <Row className="playRow2">
         <Col md="8" className="h-100">
-          <TradeWrapper />
+          {isShowItems ? <ItemsWrapper /> : <TradeWrapper />}
         </Col>
         <Col md="4">
           <AssetWrapper />

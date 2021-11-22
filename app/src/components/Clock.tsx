@@ -64,6 +64,10 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
     else setSecond(30);
   }, [tick]);
 
+  useEffect(() => {
+    if (day === 1) setSecond(Tick[tick].duration);
+  }, [day]);
+
   return (
     <>
       <Row className={`clockContainer justify-content-end ${isDark && "dark"}`}>
