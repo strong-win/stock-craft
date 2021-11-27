@@ -1,7 +1,6 @@
 # 기능 Issue
 <!-- Bug Fix / Feature Develop -->
-Linked Bug report : #{Git Bug Issue Number}
-Linked Feature backlog : #KDSK- { }
+Linked Feature backlog : #STRW- { }
 
 ## PR 목적
 
