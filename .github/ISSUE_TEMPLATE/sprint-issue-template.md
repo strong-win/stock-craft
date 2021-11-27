@@ -25,18 +25,16 @@ YYYYMMDD 부터 YYYYMMDD 까지
 
 ## 진행사항 체크리스트
 1. 핵심 작업사항에 대한 Git Issue 생성 후 첫 PR 게시
-- [ ] @handal95
-- [ ] @edit8080
 - [ ] @rxdcxdrnine
-- [ ] @YubeenSon
-- [ ] @owao
+- [ ] @handal95
+- [ ] @hojunee
+- [ ] @gyuZzang
 
 2. 핵심 작업사항 마무리
-- [ ] @handal95
-- [ ] @edit8080
 - [ ] @rxdcxdrnine
-- [ ] @YubeenSon
-- [ ] @owao
+- [ ] @handal95
+- [ ] @hojunee
+- [ ] @gyuZzang
 
 ## 관련 링크
 [ 스프린트 # { number } 문서함 ](http://)
