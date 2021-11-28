@@ -16,17 +16,20 @@ import Header from "../components/Header";
 import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
 
 import "../styles/Play.css";
+import RoleNoticeModal from "../components/RoleNoticeModal";
 
 const Play = ({ location, history }: any) => {
   const [isBlocking, setIsBlocking] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<"items" | "tradeList">(
     "items"
   );
+  const [isShowRoleModal, setIsShowRoleModal] = useState<boolean>(true);
   const { room: initRoom } = queryString.parse(location.search);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
-  const { playerId, name, room, status, isHost } = useSelector(
+  const { playerId, name, room, status, isHost, role } = useSelector(
     (state: RootState) => state.user
   );
+
   const dispatch = useDispatch();
 
   const isShowItems: boolean = day === 0 || tick % 4 === 0;
@@ -69,6 +72,15 @@ const Play = ({ location, history }: any) => {
   }, []);
 
   useEffect(() => {
+    if (status === "play") {
+      setIsShowRoleModal(true);
+      setTimeout(() => {
+        setIsShowRoleModal(false);
+      }, 5000);
+    }
+  }, [status]);
+
+  useEffect(() => {
     let createdName: string;
     if (!name) {
       createdName = createName();
@@ -92,10 +104,14 @@ const Play = ({ location, history }: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
-
   return status === "play" ? (
     <Container className="playContainer" fluid={true}>
-      <Header isGameStart />
+      <RoleNoticeModal
+        isShowRoleModal={isShowRoleModal}
+        setIsShowRoleModal={setIsShowRoleModal}
+        role={role}
+      />
+      <Header isGameStart day={day} tick={tick} />
       <Row className="playRow1">
         <Col md="8">
           <CorporationsWrapper />

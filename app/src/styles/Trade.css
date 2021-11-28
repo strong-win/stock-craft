@@ -64,6 +64,14 @@
   width: 100%;
 }
 
+.tradeTable thead tr {
+  border-bottom: none;
+}
+
+.tradeTable thead th {
+  border-bottom: none;
+}
+
 .tradeTable th,
 td {
   width: 17%;

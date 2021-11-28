@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "reactstrap";
 
 import { ChartState } from "../../modules/stock";
 import MyStock from "./MyStock";
 import Chart from "./Chart";
 import "../../styles/Corporations.css";
+import ScoreBoard from "./ScoreBoard";
 
 type CorperationsProps = {
   tick: number;
@@ -14,12 +15,28 @@ type CorperationsProps = {
 
 const ChartTab = (props) => {
   const [activeTab, setActiveTab] = useState<string>("StockMarket");
-  const { tick, assets, corps, onClickCorpItem, selectedCorpId } = props;
+  const {
+    day,
+    week,
+    tick,
+    scores,
+    assets,
+    corps,
+    onClickCorpItem,
+    selectedCorpId,
+  } = props;
 
   const handleTabClick = (e) => {
     const tab = e.target.id;
     setActiveTab(tab);
   };
+
+  const isShowScoreBoard = week > 1 && day === 0;
+
+  useEffect(() => {
+    if (isShowScoreBoard) setActiveTab("ScoreBoard");
+    if (day === 1) setActiveTab("StockMarket");
+  }, [week, day]);
 
   return (
     <>
@@ -47,6 +64,20 @@ const ChartTab = (props) => {
               주식 잔고
             </a>
           </li>
+          {isShowScoreBoard && (
+            <li>
+              <a
+                id="ScoreBoard"
+                className={`chartTab ${
+                  activeTab === "ScoreBoard" ? "active" : ""
+                }`}
+                onClick={handleTabClick}
+                data-toggle="tab"
+              >
+                중간 결과
+              </a>
+            </li>
+          )}
         </ul>
       </div>
       {activeTab === "StockMarket" && (
@@ -66,6 +97,7 @@ const ChartTab = (props) => {
           selectedCorpId={selectedCorpId}
         />
       )}
+      {activeTab === "ScoreBoard" && <ScoreBoard scores={scores} />}
     </>
   );
 };
@@ -132,7 +164,7 @@ const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
         <th scope="row">{corp.corpName}</th>
         <td>{nowPrice ? nowPrice : "-"}</td>
         <td className={color}>{gap ? gap : "-"}</td>
-        <td className={color}>{rate ? rate.toFixed(2) : "-"}%</td>
+        <td className={color}>{rate ? Math.floor(rate) : "-"}%</td>
       </tr>
     );
   };

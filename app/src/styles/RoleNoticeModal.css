@@ -1,0 +1,32 @@
+.roleNoticeModal {
+  width: 80%;
+  height: 60%;
+  margin-top: 10%;
+  font-family: "IBM Plex Sans KR";
+  font-size: 1.3rem;
+}
+
+.roleNoticeModalHeader {
+  border-bottom: none;
+}
+
+.roleNoticeModalHeader button {
+  background-color: white;
+  border: none;
+}
+.roleNoticeModal .modal-content {
+  height: 100%;
+}
+.roleNoticeModalBody {
+  height: 100%;
+  text-align: center;
+}
+
+.roleNoticeModalBody b {
+  color: #04b400;
+}
+
+.noticeTitle {
+  font-size: 3rem;
+  margin: 4rem;
+}
