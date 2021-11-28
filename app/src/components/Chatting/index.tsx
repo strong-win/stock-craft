@@ -18,6 +18,7 @@ type ChattingProps = {
   cash: CashState;
   assets: AssetState[];
   corps: ChartState[];
+  role: string;
   tick: number;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
@@ -31,6 +32,7 @@ const Chatting = ({
   messages,
   userStatus,
   cash,
+  role,
   corps,
   tick,
   assets,
@@ -62,7 +64,7 @@ const Chatting = ({
             corps={corps}
             tick={tick}
             cash={cash}
-            role="individual"
+            role={role}
           />
         )}
         <Messages name={name} messages={messages} />

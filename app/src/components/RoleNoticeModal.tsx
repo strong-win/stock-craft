@@ -23,9 +23,7 @@ const RoleNoticeModal = ({ isShowRoleModal, setIsShowRoleModal, role }) => {
         <div className="noticeTitle">
           당신은 <b>{ROLE_TYPE[role].NAME}</b>입니다
         </div>
-        <div>
-          적절한 주식 매수와 매도를 통해 수익을 극대화해야하는 것이 목표입니다!
-        </div>
+        <div>{ROLE_TYPE[role].CONTENT}</div>
       </ModalBody>
     </Modal>
   );

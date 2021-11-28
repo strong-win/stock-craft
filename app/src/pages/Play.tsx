@@ -104,7 +104,6 @@ const Play = ({ location, history }: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
-  console.log(isShowRoleModal);
   return status === "play" ? (
     <Container className="playContainer" fluid={true}>
       <RoleNoticeModal

@@ -6,7 +6,7 @@ import Chatting from "../components/Chatting";
 import { sendChatting } from "../modules/sockets/chatting";
 
 const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
-  const { playerId, messages, status, cash, assets } = useSelector(
+  const { playerId, messages, status, cash, assets, role } = useSelector(
     (state: RootState) => state.user
   );
 
@@ -39,6 +39,7 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
       cash={cash}
       corps={corps}
       tick={tick}
+      role={role}
       assets={assets}
     />
   );
