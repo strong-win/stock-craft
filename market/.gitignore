@@ -1,2 +1,10 @@
 data/*
+pydb
+venv
+full_data_0929.zip
 
+.dummy.py
+core.py
+conn.py
+launcher.py
+schema.py
