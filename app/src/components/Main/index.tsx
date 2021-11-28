@@ -7,6 +7,7 @@ import RoomCodeModal from "./RoomCodeModal";
 type MainProps = {
   name: string;
   room: string;
+  isButtonDisabled: boolean;
   onChangeName: (e: any) => void;
   onChangeRoom: (e: any) => void;
   onCreateRoom: React.MouseEventHandler<HTMLButtonElement>;
@@ -15,6 +16,7 @@ type MainProps = {
 const Main = ({
   name,
   room,
+  isButtonDisabled,
   onChangeName,
   onChangeRoom,
   onCreateRoom,
@@ -22,7 +24,13 @@ const Main = ({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleModalOpen = () => {
-    setIsModalOpen(!isModalOpen);
+    if (isButtonDisabled) {
+      window.alert(
+        "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
+      );
+    } else {
+      setIsModalOpen(!isModalOpen);
+    }
   };
   return (
     <div className="mainContainer">
@@ -31,17 +39,32 @@ const Main = ({
       </div>
       <Input
         className="mainInput mx-auto"
-        placeholder="닉네임을 입력하세요"
+        placeholder="2~16 글자 닉네임을 입력하세요"
         onChange={onChangeName}
         value={name}
       />
       <Link
-        to={`/play?room=${Math.random()
-          .toString(36)
-          .toUpperCase()
-          .slice(2, 8)}`}
+        onClick={() => {
+          if (isButtonDisabled) {
+            window.alert(
+              "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
+            );
+          }
+        }}
+        to={
+          isButtonDisabled
+            ? ""
+            : `/play?room=${Math.random()
+                .toString(36)
+                .toUpperCase()
+                .slice(2, 8)}`
+        }
       >
-        <Button className="mainButton" onClick={onCreateRoom}>
+        <Button
+          className="mainButton"
+          onClick={onCreateRoom}
+          disabled={isButtonDisabled}
+        >
           방 만들기
         </Button>
       </Link>

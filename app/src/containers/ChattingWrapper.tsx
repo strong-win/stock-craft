@@ -40,7 +40,7 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
       tick={tick}
       role={role}
       assets={assets}
-      disabled={options?.chatting}
+      disabled={options?.chatoff}
     />
   );
 };

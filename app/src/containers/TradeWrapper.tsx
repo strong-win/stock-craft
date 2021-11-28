@@ -80,7 +80,7 @@ const TradeWrapper = () => {
       setTradeBill={setTradeBill}
       handleDeal={handleDeal}
       handleCancel={handleCancel}
-      disabled={options?.trade}
+      disabled={options?.tradeoff}
     />
   );
 };

@@ -191,11 +191,14 @@ export function* receiveJoinHostSaga(socket: Socket) {
   }
 }
 
-export const sendJoinLeave = createAction<null>(JOIN_LEAVE);
+export const sendJoinLeave = createAction(
+  JOIN_LEAVE,
+  (payload: { room: string }) => ({ payload })
+);
 
 export function* sendJoinLeaveSaga(socket: Socket) {
   while (true) {
-    yield take(JOIN_LEAVE);
-    yield apply(socket, socket.emit, [JOIN_LEAVE]);
+    const { payload } = yield take(JOIN_LEAVE);
+    yield apply(socket, socket.emit, [JOIN_LEAVE, payload]);
   }
 }

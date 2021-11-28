@@ -47,8 +47,8 @@ export type CashState = {
 };
 
 export type PlayerOptionState = {
-  chatting?: boolean;
-  trade?: boolean;
+  chatoff?: boolean;
+  tradeoff?: boolean;
   chart?: boolean;
   cash?: boolean;
   asset?: boolean;
@@ -160,14 +160,13 @@ export const gameSlice = createSlice({
       state.scores = action.payload;
     },
     setItems: (state, action: PayloadAction<string>) => {
-      // set items after role is decided
-      // const roleItems = ITEM_TYPE[action.payload];
+      //set items after role is decided
+      const roleItems = ITEM_TYPE[action.payload];
 
-      // const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
-      // [...roleItems, ...randomCommonItems].forEach(
-      //   (id) => (state.items[id] = 0)
-      // );
-      state.items = { salary: 0, dividend: 0, chatoff: 0, tradeoff: 0 }; //for test
+      const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
+      [...roleItems, ...randomCommonItems].forEach(
+        (id) => (state.items[id] = 0)
+      );
     },
     updateItemsBytime: (state) => {
       Object.keys(state.items).forEach((itemId) => {
