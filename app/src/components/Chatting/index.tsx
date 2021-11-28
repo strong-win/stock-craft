@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter, Tooltip } from "reactstrap";
 import { AssetState, CashState, MessageState } from "../../modules/user";
 import { FiUser } from "react-icons/fi";
-import { BiLock } from "react-icons/bi";
 
 import "../../styles/Chatting.css";
 
@@ -10,6 +9,7 @@ import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import RoleCard from "./RoleCard";
 import { ChartState } from "../../modules/stock";
+import Ban from "../Ban";
 
 type ChattingProps = {
   name: string;
@@ -30,7 +30,7 @@ type ChattingProps = {
 const Chatting = ({
   name,
   room,
-  disabled,
+  disabled = false,
   message,
   messages,
   userStatus,
@@ -49,11 +49,7 @@ const Chatting = ({
   };
   return (
     <>
-      {disabled && (
-        <div className="chattingBan">
-          <BiLock />
-        </div>
-      )}
+      <Ban disabled={disabled} />
       <Card className="chatting">
         <CardHeader className="chattingHeader">
           <div
@@ -83,6 +79,7 @@ const Chatting = ({
             message={message}
             setMessage={setMessage}
             sendMessage={sendMessage}
+            disabled={disabled}
           />
         </CardFooter>
       </Card>

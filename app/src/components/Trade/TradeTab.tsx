@@ -9,7 +9,7 @@ type TradeTabProps = {
 
 const TradeTab = ({ tradeType, handleChangeType }: TradeTabProps) => {
   return (
-    <Row className="tradeTab">
+    <Row className="tradeTab px-3">
       <Col
         className={`tabButton ${tradeType === "buy" && "selectedBuyTab"}`}
         id="buy"

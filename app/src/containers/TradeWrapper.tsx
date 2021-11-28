@@ -14,9 +14,8 @@ export type billType = {
 
 const TradeWrapper = () => {
   // redux state
-  const { gameId, playerId, assets, trades, selectedCorpId } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { gameId, playerId, assets, trades, selectedCorpId, options } =
+    useSelector((state: RootState) => state.user);
   const { corps } = useSelector((state: RootState) => state.stock);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
   const { isChartView } = useSelector((state: RootState) => state.user);
@@ -81,6 +80,7 @@ const TradeWrapper = () => {
       setTradeBill={setTradeBill}
       handleDeal={handleDeal}
       handleCancel={handleCancel}
+      disabled={options?.trade}
     />
   );
 };
