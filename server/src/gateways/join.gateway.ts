@@ -93,23 +93,28 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (isHost && players.length) {
         const newHost: Player = players[0];
 
+        await this.playerService.updateByPlayerId(newHost._id, {
+          isHost: true,
+        });
+
         this.server.to(newHost.clientId).emit(CHATTING_SERVER_MESSAGE, {
           user: '관리자',
           text: `${newHost.name} 님이 새로운 방장이 되었습니다.`,
           statuses: this.getStatuses(status),
         });
 
+        let dateDiff: number = null;
         if (game) {
           if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
 
           const nowDate: Date = new Date();
           const nextDate: Date = this.gameState.getNextDate(game._id);
-          const dateDiff: number = nextDate.getTime() - nowDate.getTime();
-
-          this.server
-            .to(newHost.clientId)
-            .emit(JOIN_HOST, { isHost: true, dateDiff });
+          dateDiff = nextDate.getTime() - nowDate.getTime();
         }
+
+        this.server
+          .to(newHost.clientId)
+          .emit(JOIN_HOST, { isHost: true, dateDiff });
       }
 
       // emit playersInfo to wait room

@@ -187,7 +187,7 @@ export class EffectProvider {
 
     const message: Message = {
       user: '관리자',
-      text: `로또 아이템 사용으로 현금의 5% 인 ${increment} 원 증가하였습니다.`,
+      text: `로또 아이템 사용으로 ${increment} 원 증가하였습니다.`,
       statuses: ['play'],
     };
 
@@ -320,12 +320,18 @@ export class EffectProvider {
     };
 
     await this.playerModel.updateMany(
-      { game: Types.ObjectId(gameId), player: { $ne: playerId } },
+      {
+        _id: { $ne: Types.ObjectId(playerId) },
+        game: Types.ObjectId(gameId),
+      },
       { options },
     );
 
     const players: Player[] = await this.playerModel
-      .find({ game: Types.ObjectId(gameId) })
+      .find({
+        _id: { $ne: Types.ObjectId(playerId) },
+        game: Types.ObjectId(gameId),
+      })
       .exec();
 
     const message: Message = {

@@ -11,6 +11,9 @@ export class PlayerUpdateDto {
   status?: PlayerStatus;
 
   @IsOptional()
+  isHost?: boolean;
+
+  @IsOptional()
   gameId?: string;
 
   @IsOptional()

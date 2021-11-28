@@ -80,6 +80,10 @@ export class GameStateProvider {
   }
 
   getNextDate(gameId: Types.ObjectId | string): Date {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
     const game: GameState = this.games.find((game) => game.gameId === gameId);
 
     const { time, date } = game;

@@ -51,6 +51,7 @@ export class PlayerEffectStateProvider {
       day,
       options,
       skills,
+      messages: [],
       moment,
     });
   }
