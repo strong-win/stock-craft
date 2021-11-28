@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter, Tooltip } from "reactstrap";
 import { AssetState, CashState, MessageState } from "../../modules/user";
 import { FiUser } from "react-icons/fi";
+import { BiLock } from "react-icons/bi";
 
 import "../../styles/Chatting.css";
 
@@ -20,6 +21,7 @@ type ChattingProps = {
   corps: ChartState[];
   role: string;
   tick: number;
+  disabled: boolean;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
   messages: MessageState[];
@@ -28,6 +30,7 @@ type ChattingProps = {
 const Chatting = ({
   name,
   room,
+  disabled,
   message,
   messages,
   userStatus,
@@ -45,38 +48,45 @@ const Chatting = ({
     setIsNickNameHover(!isNickNameHover);
   };
   return (
-    <Card className="chatting">
-      <CardHeader className="chattingHeader">
-        <div
-          className="nickName"
-          id="chattingNickName"
-          onMouseOver={handleNickNameHover}
-          onMouseOut={handleNickNameHover}
-        >
-          <FiUser /> {name}{" "}
+    <>
+      {disabled && (
+        <div className="chattingBan">
+          <BiLock />
         </div>
-        <div className="roomCode">RoomCode: {room}</div>
-      </CardHeader>
-      <CardBody className="chattingBody">
-        {userStatus === "play" && isNickNameHover && (
-          <RoleCard
-            assets={assets}
-            corps={corps}
-            tick={tick}
-            cash={cash}
-            role={role}
+      )}
+      <Card className="chatting">
+        <CardHeader className="chattingHeader">
+          <div
+            className="nickName"
+            id="chattingNickName"
+            onMouseOver={handleNickNameHover}
+            onMouseOut={handleNickNameHover}
+          >
+            <FiUser /> {name}{" "}
+          </div>
+          <div className="roomCode">RoomCode: {room}</div>
+        </CardHeader>
+        <CardBody className="chattingBody">
+          {userStatus === "play" && isNickNameHover && (
+            <RoleCard
+              assets={assets}
+              corps={corps}
+              tick={tick}
+              cash={cash}
+              role={role}
+            />
+          )}
+          <Messages name={name} messages={messages} />
+        </CardBody>
+        <CardFooter className="chattingFooter">
+          <ChatInput
+            message={message}
+            setMessage={setMessage}
+            sendMessage={sendMessage}
           />
-        )}
-        <Messages name={name} messages={messages} />
-      </CardBody>
-      <CardFooter className="chattingFooter">
-        <ChatInput
-          message={message}
-          setMessage={setMessage}
-          sendMessage={sendMessage}
-        />
-      </CardFooter>
-    </Card>
+        </CardFooter>
+      </Card>
+    </>
   );
 };
 

@@ -116,7 +116,7 @@ const Play = ({ location, history }: any) => {
         <Col md="8">
           <CorporationsWrapper />
         </Col>
-        <Col md="4">
+        <Col md="4" className="chattingContainer">
           <ChattingWrapper room={room} name={name} />
         </Col>
       </Row>
