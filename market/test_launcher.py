@@ -1,4 +1,4 @@
-from libs.models.launcher import launcher
+from libs.models.launcher import main
 
 if __name__ == "__main__":
-    launcher()
+    main()
