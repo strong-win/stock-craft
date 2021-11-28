@@ -8,6 +8,7 @@ import {
   Player,
   PlayerDocument,
   PlayerOption,
+  PlayerSkill,
   PlayerStatus,
   Role,
 } from 'src/schemas/player.schema';
@@ -75,7 +76,7 @@ export class JoinService {
     if (players.length >= 3) {
       while (NUM_INSTITUTIONAL) {
         const randNum = Math.floor(Math.random() * players.length);
-        if (players[randNum].role === 'individual') {
+        if (!players[randNum].role || players[randNum].role === 'individual') {
           NUM_INSTITUTIONAL -= 1;
           players[randNum].role = 'institutional';
         }
@@ -85,7 +86,7 @@ export class JoinService {
     if (players.length >= 4) {
       while (NUM_PARTY) {
         const randNum = Math.floor(Math.random() * players.length);
-        if (players[randNum].role === 'individual') {
+        if (!players[randNum].role || players[randNum].role === 'individual') {
           NUM_PARTY -= 1;
           players[randNum].role = 'party';
         }
@@ -100,10 +101,13 @@ export class JoinService {
     }));
 
     const options: PlayerOption = {
-      chatting: true,
-      trade: true,
-      chart: true,
-      asset: true,
+      chatoff: false,
+      tradeoff: false,
+    };
+
+    const skills: PlayerSkill = {
+      leverage: false,
+      cloaking: '',
     };
 
     const individualIds = players
@@ -117,8 +121,9 @@ export class JoinService {
         game: gameId,
         role: 'individual',
         assets,
-        options,
         cash: this.getCash('individual'),
+        options,
+        skills,
       },
     );
 
@@ -133,8 +138,9 @@ export class JoinService {
         game: gameId,
         role: 'institutional',
         assets,
-        options,
         cash: this.getCash('institutional'),
+        options,
+        skills,
       },
     );
 
@@ -149,8 +155,9 @@ export class JoinService {
         role: 'party',
         game: gameId,
         assets,
-        options,
         cash: this.getCash('party'),
+        options,
+        skills,
       },
     );
   }

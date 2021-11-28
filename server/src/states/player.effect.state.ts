@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { ItemResponseDto, Message } from 'src/dto/item-response.dto';
-import { Asset, Cash, PlayerOption } from 'src/schemas/player.schema';
+import {
+  Asset,
+  Cash,
+  PlayerOption,
+  PlayerSkill,
+} from 'src/schemas/player.schema';
 
 export type PlayerEffectState = {
   gameId: Types.ObjectId | string;
@@ -10,6 +15,7 @@ export type PlayerEffectState = {
   week: number;
   day: number;
   options?: PlayerOption;
+  skills?: PlayerSkill;
   cash?: Cash;
   assets?: Asset[];
   messages?: Message[];
@@ -18,15 +24,44 @@ export type PlayerEffectState = {
 
 @Injectable()
 export class PlayerEffectStateProvider {
-  public playerEffects: PlayerEffectState[] = [];
+  private playerEffects: PlayerEffectState[] = [];
 
-  updateOrCreate({
+  create({ gameId, playerId, clientId, week, day, moment }: PlayerEffectState) {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+    if (typeof playerId !== 'string') {
+      playerId = playerId.toString();
+    }
+
+    const options: PlayerOption = {
+      chatoff: false,
+      tradeoff: false,
+    };
+
+    const skills: PlayerSkill = {
+      leverage: false,
+    };
+
+    this.playerEffects.push({
+      gameId,
+      playerId,
+      clientId,
+      week,
+      day,
+      options,
+      skills,
+      moment,
+    });
+  }
+
+  update({
     gameId,
     playerId,
-    clientId,
     week,
     day,
     options,
+    skills,
     cash,
     assets,
     messages,
@@ -39,7 +74,6 @@ export class PlayerEffectStateProvider {
       playerId = playerId.toString();
     }
 
-    let flag = false;
     this.playerEffects.forEach((playerEffect: PlayerEffectState) => {
       if (
         playerId === playerEffect.playerId &&
@@ -47,30 +81,14 @@ export class PlayerEffectStateProvider {
         day === playerEffect.day &&
         moment === playerEffect.moment
       ) {
-        flag = true;
-
         if (options) playerEffect.options = options;
+        if (skills) playerEffect.skills = skills;
         if (cash) playerEffect.cash = cash;
         if (assets) playerEffect.assets = assets;
         if (messages)
           playerEffect.messages = [...playerEffect.messages, ...messages];
       }
     });
-
-    if (!flag) {
-      this.playerEffects.push({
-        gameId,
-        playerId,
-        clientId,
-        week,
-        day,
-        options,
-        cash,
-        assets,
-        messages,
-        moment,
-      });
-    }
   }
 
   findPlayerEffects(
@@ -92,9 +110,17 @@ export class PlayerEffectStateProvider {
           moment === player.moment,
       )
       .map(
-        ({ clientId, options, cash, assets, messages }: PlayerEffectState) => ({
+        ({
           clientId,
           options,
+          skills,
+          cash,
+          assets,
+          messages,
+        }: PlayerEffectState) => ({
+          clientId,
+          options,
+          skills,
           cash,
           assets,
           messages,

@@ -20,11 +20,13 @@ export interface Cash {
 }
 
 export type PlayerOption = {
-  chatting?: boolean;
-  trade?: boolean;
-  chart?: boolean;
-  cash?: boolean;
-  asset?: boolean;
+  chatoff?: boolean;
+  tradeoff?: boolean;
+};
+
+export type PlayerSkill = {
+  leverage?: boolean;
+  cloaking?: string;
 };
 
 export type PlayerStatus =
@@ -73,14 +75,18 @@ export class Player {
 
   @Prop({
     type: {
-      chating: Boolean,
-      trade: Boolean,
-      chart: Boolean,
-      cash: Boolean,
-      asset: Boolean,
+      chatoff: Boolean,
+      tradeoff: Boolean,
     },
   })
   options?: PlayerOption;
+
+  @Prop({
+    type: {
+      leverage: Boolean,
+    },
+  })
+  skills?: PlayerSkill;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

@@ -4,11 +4,15 @@ import { Player, PlayerDocument, PlayerStatus } from '../schemas/player.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
+import { TimeState } from 'src/states/game.state';
+import { isGame } from 'src/utils/typeGuard';
 
 @Injectable()
 export class PlayerService {
   constructor(
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
+    private playerEffectState: PlayerEffectStateProvider,
   ) {}
 
   async create(playerCreateDto: PlayerCreateDto): Promise<Player> {
@@ -58,5 +62,39 @@ export class PlayerService {
       { room, status: { $in: statuses } },
       playerUpdateDto,
     );
+  }
+
+  async initializeOptionsAndSkills(room: string, time: TimeState) {
+    await this.playerModel.updateMany(
+      { room, status: 'play' },
+      {
+        options: {
+          chatoff: false,
+          tradeoff: false,
+        },
+        skills: {
+          leverage: false,
+          cloaking: '',
+        },
+      },
+    );
+
+    const players: Player[] = await this.playerModel
+      .find({ room, status: 'play' })
+      .sort({ createdAt: 1 })
+      .exec();
+
+    players.forEach(({ _id: playerId, game, clientId }: Player) => {
+      if (!isGame(game)) throw TypeError('타입이 일치하지 않습니다.');
+
+      this.playerEffectState.create({
+        playerId: playerId,
+        gameId: game._id,
+        clientId,
+        week: time.week,
+        day: time.day,
+        moment: 'now',
+      });
+    });
   }
 }

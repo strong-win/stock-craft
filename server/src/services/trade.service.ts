@@ -105,8 +105,11 @@ export class TradeService {
       }
       // if corp is included in assets
       if (isDirect) {
-        player.cash.totalCash += price * quantity;
-        player.cash.availableCash += price * quantity;
+        let amount = price * quantity;
+        if (player.skills.leverage) amount *= 2;
+
+        player.cash.totalCash += amount;
+        player.cash.availableCash += amount;
       }
     }
 
@@ -205,8 +208,11 @@ export class TradeService {
         if (trade.deal === 'sell') {
           if (trade.price <= stock.price) {
             // update player cash
-            player.cash.totalCash += trade.price * trade.quantity;
-            player.cash.availableCash += trade.price * trade.quantity;
+            let amount = 2 * trade.price * trade.quantity;
+            if (player.skills.leverage) amount *= 2;
+
+            player.cash.totalCash += amount;
+            player.cash.availableCash += amount;
 
             // update player assets
             for (const asset of player.assets) {

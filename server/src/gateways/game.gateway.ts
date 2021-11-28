@@ -23,6 +23,7 @@ import { ChartRequestDto } from 'src/dto/chart-request.dto';
 import { ChartResponseDto } from 'src/dto/chart-response.dto';
 import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
 import { ItemResponseDto } from 'src/dto/item-response.dto';
+import { PlayerService } from 'src/services/player.service';
 
 @WebSocketGateway()
 export class GameGateway {
@@ -35,6 +36,7 @@ export class GameGateway {
     private tradeService: TradeService,
     private stockService: StockService,
     private itemService: ItemService,
+    private playerService: PlayerService,
     private playerEffectState: PlayerEffectStateProvider,
     private marketApi: MarketApi,
   ) {}
@@ -74,6 +76,10 @@ export class GameGateway {
 
     // use item and generate chart
     if (nextTime.day > 0 && nextTime.tick == 0) {
+      // initialize player options
+      await this.playerService.initializeOptionsAndSkills(room, prevTime);
+
+      // apply item
       this.itemService
         .useItems(gameId, prevTime.week, prevTime.day, 'now')
         .then(() => {

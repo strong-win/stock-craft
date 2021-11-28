@@ -99,16 +99,19 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
           statuses: this.getStatuses(status),
         });
 
-        if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
+        if (game) {
+          if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
 
-        const nowDate: Date = new Date();
-        const nextDate: Date = this.gameState.getNextDate(game._id);
-        const dateDiff: number = nextDate.getTime() - nowDate.getTime();
+          const nowDate: Date = new Date();
+          const nextDate: Date = this.gameState.getNextDate(game._id);
+          const dateDiff: number = nextDate.getTime() - nowDate.getTime();
 
-        this.server
-          .to(newHost.clientId)
-          .emit(JOIN_HOST, { isHost: true, dateDiff });
+          this.server
+            .to(newHost.clientId)
+            .emit(JOIN_HOST, { isHost: true, dateDiff });
+        }
       }
+
       // emit playersInfo to wait room
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
     }
@@ -154,7 +157,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         status,
       }),
     );
-    this.server.emit(JOIN_PLAYERS, playersInfo);
+    this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
     return { playerId: playerId.toString() };
   }
