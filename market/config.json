@@ -1,0 +1,88 @@
+{
+    "seed": 31,
+    "train_mode": true,
+    "clean_mode": true,
+    "preds_mode": true,
+
+    "core":{
+        "TAG": "all",
+        "data_name": "stock.sample",
+        "directory": "data/",
+        
+        "pretrain": true,
+        
+        "workers": 2,
+        "batch_size": 128,
+        "observed_len": 5,
+        "forecast_len": 10,
+
+        "verbosity": 1
+    },
+    
+    "dataset": {
+        "reset": false,
+
+        "targets": ["close"],
+        "drops": [],
+
+        "time_index": "date",
+        "time_format": "%y/%m/%d",
+        "time_encode":{
+            "year": true,
+            "month": true,
+            "weekday": true,
+            "day": true,
+            "hour": false,
+            "minute": false
+        },
+        "fill_timegap": false,
+
+        "stride": 1,
+        "split_rate": 0.8,
+        "min_valid_scale": 2,
+        "sliding_step": 1
+    },
+    "models": {
+        "save_opt": true,
+        "load_opt": true,
+
+        "best_score": 0.5,
+        "hidden_dim": 256,
+        "layers_num": 1
+    },
+    "losses": {
+        "l1_weight": 1,
+        "l2_weight": 1,
+        "gp_weight": 1
+    },
+    "trainer": {
+        "models":{
+            "reload": true,
+            "reload_interval": 25,
+            "save_interval": 10
+        },
+        "critic": 3,
+        "epochs": 20,
+        "learning_rate": {
+            "base": 2e-4,
+            "decay": 0.9,
+            "gammaD": 0.5,
+            "gammaG": 1.0
+        },
+        "band_width": 3,
+        "missing_gamma": 0.1,
+        "anomaly_gamma": 0.1,
+        "print_interval": 5
+    },
+    "dashboard": {
+        "vis_opt": false,
+        "vis_column": 2, 
+        "scope": 90,
+        
+        "feats_by_rows": 1,
+        "xinterval": 60,
+
+        "height": 10,
+        "width": 25
+    }
+}
