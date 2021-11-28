@@ -75,8 +75,13 @@ def get_current_price(buying_volume: list[int], selling_volume: list[int], stock
 	return res
 
 def shift_current_price(increment: list[int], price: 'pd.DataFrame') -> 'pd.DataFrame':
-
-
+	"""
+	Args:
+		increment: 증감량 List
+		price: shift를 진행한 price DataFrame
+	Returns: 직접 변동을 적용한 최종 가격을 반환
+	"""
+	pass
 
 @app.post("/model")
 def init_model(game_info: GameInfo):
