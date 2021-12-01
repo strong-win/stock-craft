@@ -33,9 +33,13 @@ const ItemTargetModal = ({
   };
 
   const handleApplyItemWithTarget = () => {
-    handleApplyItem(selectedItemId, selectedTargetId);
-    setSelectedItemId("");
-    setSelectedTargetId("");
+    if (selectedTargetId == "") {
+      alert("사용자를 선택해주세요!");
+    } else {
+      handleApplyItem(selectedItemId, selectedTargetId);
+      setSelectedItemId("");
+      setSelectedTargetId("");
+    }
   };
 
   return (
@@ -58,6 +62,7 @@ const ItemTargetModal = ({
           value={selectedTargetId}
           onChange={onChangeSelection}
         >
+          <option value="">사용자를 선택해주세요.</option>
           {playerItems}
         </Input>
       </ModalBody>
