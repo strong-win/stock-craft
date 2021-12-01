@@ -11,6 +11,7 @@ import RoleCard from "./RoleCard";
 import { ChartState } from "../../modules/stock";
 import Ban from "../Ban";
 
+
 type ChattingProps = {
   name: string;
   room: string;
@@ -84,6 +85,7 @@ const Chatting = ({
         </CardFooter>
       </Card>
     </>
+
   );
 };
 
