@@ -370,7 +370,7 @@ export class EffectProvider {
     });
 
     const skills = player.skills;
-    skills.cloaking = targetPlayer.name;
+    skills.cloaking = targetPlayer._id.toString();
 
     await this.playerModel.updateMany(
       { _id: Types.ObjectId(playerId) },
@@ -379,7 +379,7 @@ export class EffectProvider {
 
     const message: Message = {
       user: '관리자',
-      text: `클로킹 아이템 사용으로 1일간 ${targetPlayer.name}으로 이름이 변경됩니다.`,
+      text: `사칭 아이템 사용으로 1일간 ${targetPlayer.name}으로 이름이 변경됩니다.`,
       statuses: ['play'],
     };
 
