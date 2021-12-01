@@ -7,23 +7,36 @@
   height: 4.375rem;
 }
 
-.clockWrapper {
+.clockContainer {
   font-family: "IBM Plex Sans KR";
   height: 100%;
   font-size: 1.5rem;
   vertical-align: middle;
 }
 
-.time {
+.dark {
   color: white;
+}
+
+.time {
   vertical-align: middle;
   line-height: 4rem;
-  width: 2rem;
+  flex: 2;
+}
+.week {
+  flex: 4;
+}
+.day {
+  flex: 3;
 }
 
 .second {
-  color: wheat;
   font-weight: bold;
+  flex: 1;
+}
+
+.darkSecond {
+  color: wheat;
 }
 
 .red {

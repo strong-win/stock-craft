@@ -68,7 +68,11 @@ const TradeList = ({
                 <td>{trade.quantity}</td>
                 <td>{trade.price}</td>
                 <td>{trade.quantity * trade.price}</td>
-                <td className={`${trade.status}Text status`}>
+                <td
+                  className={`${trade.status}Text ${
+                    isChartView ? "" : "status"
+                  }`}
+                >
                   {tradeStatusToText[trade.status] || trade.status}
                   {trade.status === "pending" ? (
                     <Button

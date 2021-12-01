@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300;400&display=swap");
 
 .header {
-  max-height: 10%;
+  height: 10%;
   color: #f0e583;
   background-color: #615f54;
   font-size: 5vh;
@@ -11,10 +11,46 @@
   text-align: center;
 }
 
+.dawn {
+  background-color: #80828f;
+}
+
+.morning {
+  background-color: #f0f6d0;
+  color: #615f54;
+}
+
+.noon {
+  background-color: #fbefd1;
+  color: #615f54;
+}
+
+.evening {
+  background-color: #f6e1cd;
+  color: #615f54;
+}
+
+.night {
+  background-color: #32445b;
+}
+
+.weekend {
+  background-color: #b29496;
+}
+
 .logo {
   max-width: 50%;
 }
 
 b {
   font-weight: 700;
+}
+
+.clockWrapper {
+  width: 20rem;
+  margin-left: auto;
+}
+
+.weekendClockWrapper {
+  width: 15rem;
 }

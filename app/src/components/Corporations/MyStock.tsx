@@ -29,10 +29,10 @@ const MyStock = ({ tick, corps, assets, onClickCorpItem }: MyStockProps) => {
       <tr className="corpItem" onClick={() => onClickCorpItem(corp.corpId)}>
         <th scope="row">{corp.corpName}</th>
         <td>{asset.totalQuantity}</td>
-        <td>{averagePrice ? averagePrice.toFixed(2) : "-"}</td>
+        <td>{averagePrice ? Math.floor(averagePrice) : "-"}</td>
         <td>{nowPrice}</td>
-        <td className={color}>{gap ? gap.toFixed(2) : "-"}</td>
-        <td className={color}>{rate ? rate.toFixed(2) : "-"}%</td>
+        <td className={color}>{gap ? Math.floor(gap) : "-"}</td>
+        <td className={color}>{rate ? Math.floor(rate) : "-"}%</td>
       </tr>
     );
   };

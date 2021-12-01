@@ -52,3 +52,10 @@
 .active {
   background-color: white;
 }
+
+.ScoreBoard {
+  text-align: center;
+  font-size: 2rem;
+  margin: 3rem;
+  font-family: "IBM Plex Sans KR";
+}
