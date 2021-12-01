@@ -213,7 +213,7 @@ export class EffectProvider {
       _id: Types.ObjectId(target),
     });
 
-    const options: PlayerOption = { ...player.options, chatoff: false };
+    const options: PlayerOption = { ...player.options, chatoff: true };
 
     await this.playerModel.updateOne(
       { _id: Types.ObjectId(target) },
@@ -248,7 +248,7 @@ export class EffectProvider {
       _id: Types.ObjectId(target),
     });
 
-    const options: PlayerOption = { ...player.options, tradeoff: false };
+    const options: PlayerOption = { ...player.options, tradeoff: true };
 
     await this.playerModel.updateOne(
       { _id: Types.ObjectId(target) },
