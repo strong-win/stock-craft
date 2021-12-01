@@ -26,6 +26,7 @@ export const ITEM = {
     IMAGE: "",
     CONTENT: "블랙아웃 설명 예시입니다.",
     COOLTIME: 3,
+    NEED_TARGET: true,
   },
   leading: {
     NAME: "리딩방",
@@ -38,18 +39,21 @@ export const ITEM = {
     IMAGE: "",
     CONTENT: "지정 플레이어 1명의 채팅을 하루동안 금지시킬 수 있습니다.",
     COOLTIME: 5,
+    NEED_TARGET: true,
   },
   tradeoff: {
     NAME: "거래밴",
     IMAGE: "",
     CONTENT: "지정 플레이어 1명의 거래를 하루동안 금지시킬 수 있습니다.",
     COOLTIME: 5,
+    NEED_TARGET: true,
   },
   cloaking: {
     NAME: "사칭",
     IMAGE: "",
     CONTENT: "사칭 설명 예시입니다.",
     COOLTIME: 3,
+    NEED_TARGET: true,
   },
   dividend: {
     NAME: "배당",

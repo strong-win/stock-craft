@@ -71,3 +71,27 @@
 .itemCooltime {
   margin-top: 2rem;
 }
+
+.itemTargetModal {
+  width: 80%;
+  height: 17rem;
+  margin-top: 20%;
+  font-family: "IBM Plex Sans KR";
+}
+
+.itemTargetModal .modal-content {
+  height: 100%;
+}
+
+.itemTargetModalHeader button {
+  background-color: white;
+  border: none;
+}
+
+.itemTargetModalBody {
+  text-align: center;
+}
+
+.targetSelectLabel {
+  margin: 1rem;
+}

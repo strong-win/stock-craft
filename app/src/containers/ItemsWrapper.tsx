@@ -15,9 +15,8 @@ const ItemsWrapper = () => {
   const [selectedTab, setSelectedTab] = useState<"items" | "tradeList">(
     "items"
   );
-  const { gameId, playerId, trades, selectedCorpId, items } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { gameId, playerId, trades, selectedCorpId, items, players } =
+    useSelector((state: RootState) => state.user);
   const { corps } = useSelector((state: RootState) => state.stock);
 
   const { week, day, tick } = useSelector((state: RootState) => state.time);
@@ -47,7 +46,12 @@ const ItemsWrapper = () => {
         handleChangeSelected={handleChangeSelected}
       />
       {selectedTab === "items" && (
-        <Items items={items} handleApplyItem={handleApplyItem} />
+        <Items
+          players={players}
+          playerId={playerId}
+          items={items}
+          handleApplyItem={handleApplyItem}
+        />
       )}
       {selectedTab === "tradeList" && (
         <TradeList
