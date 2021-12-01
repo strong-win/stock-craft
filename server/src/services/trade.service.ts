@@ -105,11 +105,14 @@ export class TradeService {
       }
       // if corp is included in assets
       if (isDirect) {
-        let amount = price * quantity;
-        if (player.skills.leverage) amount *= 2;
-
-        player.cash.totalCash += amount;
-        player.cash.availableCash += amount;
+        const amount = price * quantity;
+        if (player.skills.leverage) {
+          player.cash.totalCash += 2 * amount;
+          player.cash.availableCash += 2 * amount;
+        } else {
+          player.cash.totalCash += amount;
+          player.cash.availableCash += amount;
+        }
       }
     }
 
@@ -121,7 +124,7 @@ export class TradeService {
       day,
       tick,
       corpId,
-      price,
+      price: deal === 'sell' && player.skills.leverage ? 2 * price : price,
       quantity,
       deal,
       status: isDirect ? 'disposed' : 'pending',
@@ -208,11 +211,14 @@ export class TradeService {
         if (trade.deal === 'sell') {
           if (trade.price <= stock.price) {
             // update player cash
-            let amount = 2 * trade.price * trade.quantity;
-            if (player.skills.leverage) amount *= 2;
-
-            player.cash.totalCash += amount;
-            player.cash.availableCash += amount;
+            const amount = trade.price * trade.quantity;
+            if (player.skills.leverage) {
+              player.cash.totalCash += 2 * amount;
+              player.cash.availableCash += 2 * amount;
+            } else {
+              player.cash.totalCash += amount;
+              player.cash.availableCash += amount;
+            }
 
             // update player assets
             for (const asset of player.assets) {
@@ -225,7 +231,15 @@ export class TradeService {
 
             await this.tradeModel.updateOne(
               { _id: trade._id },
-              { $set: { status: 'disposed' } },
+              {
+                $set: {
+                  price:
+                    trade.deal === 'sell' && player.skills.leverage
+                      ? 2 * trade.price
+                      : trade.price,
+                  status: 'disposed',
+                },
+              },
             );
             trade.status = 'disposed';
             tradesResponse.push(trade);

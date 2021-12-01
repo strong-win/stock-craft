@@ -292,7 +292,7 @@ export class EffectProvider {
 
     const message: Message = {
       user: '관리자',
-      text: '레버리지 아이템 사용으로 1일 간 거래 대금이 2배가 됩니다.',
+      text: '레버리지 아이템 사용으로 1일 간 판매 대금이 2배가 됩니다.',
       statuses: ['play'],
     };
 

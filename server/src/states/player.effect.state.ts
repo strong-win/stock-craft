@@ -41,6 +41,7 @@ export class PlayerEffectStateProvider {
 
     const skills: PlayerSkill = {
       leverage: false,
+      cloaking: '',
     };
 
     this.playerEffects.push({
