@@ -454,6 +454,7 @@ export class EffectProvider {
 
   private effectHandler_news: EffectHandler = async ({
     gameId,
+    playerId,
     week,
     day,
     data,
@@ -474,11 +475,17 @@ export class EffectProvider {
     const corp: Corp = game.corps[IND_STOCK];
     const corpResult: CorpResult = data.corps[corp.corpId];
 
-    const message: Message = {
+    const messagePlayer: Message = {
       user: '관리자',
-      text: `뉴스 아이템 사용으로 ${corp.corpName} 종목이 곧 ${
+      text: '뉴스 아이템을 사용하였습니다.',
+      statuses: ['play'],
+    };
+
+    const messageAll: Message = {
+      user: '관리자',
+      text: `[정보] ${corp.corpName} 종목이 곧 ${
         corpResult.info ? '상승' : '하락'
-      }한다는 정보를 입수했습니다.`,
+      }합니다.`,
       statuses: ['play'],
     };
 
@@ -489,7 +496,10 @@ export class EffectProvider {
         clientId: player.clientId,
         week,
         day,
-        messages: [message],
+        messages:
+          playerId !== player._id.toString()
+            ? [messageAll]
+            : [messagePlayer, messageAll],
         moment: 'after-infer',
       });
     });
@@ -497,6 +507,7 @@ export class EffectProvider {
 
   private effectHandler_leading: EffectHandler = async ({
     gameId,
+    playerId,
     week,
     day,
     data,
@@ -505,18 +516,26 @@ export class EffectProvider {
       throw new Error('데이터 타입이 일치하지 않습니다.');
     }
 
-    const game: Game = await this.gameModel.findOne({
-      _id: Types.ObjectId(gameId),
-    });
+    const game: Game = await this.gameModel
+      .findOne({
+        _id: Types.ObjectId(gameId),
+      })
+      .populate('players');
 
-    const corp: Corp = game.corps.find((corp: Corp) => corp.target === true);
+    const corp: Corp = game.corps.find((corp: Corp) => corp.target);
     const corpResult: CorpResult = data.corps[corp.corpId];
 
-    const message: Message = {
+    const messagePlayer: Message = {
       user: '관리자',
-      text: `리딩방 아이템 사용으로 ${corp.corpName} 종목이 곧 ${
-        corpResult.info ? '하락' : '상승'
-      }한다는 정보를 입수했습니다`,
+      text: '리딩방 아이템을 사용하였습니다.',
+      statuses: ['play'],
+    };
+
+    const messageAll: Message = {
+      user: '관리자',
+      text: `[정보] ${corp.corpName} 종목이 곧 ${
+        corpResult.info ? '상승' : '하락'
+      }합니다.`,
       statuses: ['play'],
     };
 
@@ -527,7 +546,10 @@ export class EffectProvider {
         clientId: player.clientId,
         week,
         day,
-        messages: [message],
+        messages:
+          playerId !== player._id.toString()
+            ? [messageAll]
+            : [messagePlayer, messageAll],
         moment: 'after-infer',
       });
     });

@@ -91,8 +91,6 @@ export class GameGateway {
               'now',
             );
 
-          console.log({ now: itemResponseDtos });
-
           itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
             this.server
               .to(itemResponseDto.clientId)
@@ -130,8 +128,6 @@ export class GameGateway {
               prevTime.day,
               'after-infer',
             );
-
-          console.log({ afterInfer: itemResponseDtos });
 
           itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
             this.server

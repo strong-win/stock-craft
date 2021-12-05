@@ -49,8 +49,6 @@ export class ItemService {
         ? 'now'
         : type === 'blackout'
         ? 'now'
-        : type === 'leading'
-        ? 'now'
         : type === 'short'
         ? 'before-infer'
         : type === 'long'
