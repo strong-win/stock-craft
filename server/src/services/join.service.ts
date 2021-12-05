@@ -61,8 +61,20 @@ export class JoinService {
       gameId = Types.ObjectId(gameId);
     }
 
+    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
+    const IND_STOCK = Math.floor(Math.random() * NUM_STOCKS);
+
     // game
-    await this.gameModel.updateOne({ _id: gameId }, { corps });
+    await this.gameModel.updateOne(
+      { _id: gameId },
+      {
+        corps: corps.map((corp: Corp, ind: number) =>
+          ind === IND_STOCK
+            ? { ...corp, target: true }
+            : { ...corp, target: false },
+        ),
+      },
+    );
 
     // players
     const players: Player[] = await this.playerModel

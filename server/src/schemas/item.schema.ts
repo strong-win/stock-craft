@@ -16,7 +16,7 @@ export class Item {
   day: number;
 
   @Prop()
-  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
+  moment: 'now' | 'before-infer' | 'after-infer';
 
   @Prop()
   type: string;

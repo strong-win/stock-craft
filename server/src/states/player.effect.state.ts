@@ -19,30 +19,31 @@ export type PlayerEffectState = {
   cash?: Cash;
   assets?: Asset[];
   messages?: Message[];
-  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
+  moment: 'now' | 'before-infer' | 'after-infer';
 };
 
 @Injectable()
 export class PlayerEffectStateProvider {
   private playerEffects: PlayerEffectState[] = [];
 
-  create({ gameId, playerId, clientId, week, day, moment }: PlayerEffectState) {
+  create({
+    gameId,
+    playerId,
+    clientId,
+    week,
+    day,
+    options,
+    skills,
+    assets,
+    messages,
+    moment,
+  }: PlayerEffectState) {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }
     if (typeof playerId !== 'string') {
       playerId = playerId.toString();
     }
-
-    const options: PlayerOption = {
-      chatoff: false,
-      tradeoff: false,
-    };
-
-    const skills: PlayerSkill = {
-      leverage: false,
-      cloaking: '',
-    };
 
     this.playerEffects.push({
       gameId,
@@ -52,7 +53,8 @@ export class PlayerEffectStateProvider {
       day,
       options,
       skills,
-      messages: [],
+      assets,
+      messages,
       moment,
     });
   }
@@ -60,6 +62,7 @@ export class PlayerEffectStateProvider {
   update({
     gameId,
     playerId,
+    clientId,
     week,
     day,
     options,
@@ -76,6 +79,7 @@ export class PlayerEffectStateProvider {
       playerId = playerId.toString();
     }
 
+    let flag = false;
     this.playerEffects.forEach((playerEffect: PlayerEffectState) => {
       if (
         playerId === playerEffect.playerId &&
@@ -83,21 +87,38 @@ export class PlayerEffectStateProvider {
         day === playerEffect.day &&
         moment === playerEffect.moment
       ) {
+        flag = true;
         if (options) playerEffect.options = options;
         if (skills) playerEffect.skills = skills;
         if (cash) playerEffect.cash = cash;
         if (assets) playerEffect.assets = assets;
         if (messages)
-          playerEffect.messages = [...playerEffect.messages, ...messages];
+          playerEffect.messages = playerEffect.messages
+            ? [...playerEffect.messages, ...messages]
+            : [...messages];
       }
     });
+
+    if (!flag)
+      this.create({
+        gameId,
+        playerId,
+        clientId,
+        week,
+        day,
+        options,
+        skills,
+        assets,
+        messages,
+        moment,
+      });
   }
 
   findPlayerEffects(
     gameId: Types.ObjectId | string,
     week: number,
     day: number,
-    moment: 'now' | 'before-infer' | 'after-infer' | 'end',
+    moment: 'now' | 'before-infer' | 'after-infer',
   ): ItemResponseDto[] {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();

@@ -13,6 +13,9 @@ import {
 } from 'src/schemas/player.schema';
 import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
 import { Message } from 'src/dto/item-response.dto';
+import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
+import { CorpResult } from 'src/dto/chart-response.dto';
+import { instanceOfChartResponseDto } from 'src/utils/typeGuard';
 
 export type EffectRequest = {
   type: string;
@@ -21,6 +24,7 @@ export type EffectRequest = {
   target: string;
   week?: number;
   day?: number;
+  data?: any;
 };
 
 export type EffectHandlerParams = {
@@ -29,6 +33,7 @@ export type EffectHandlerParams = {
   target: string;
   week?: number;
   day?: number;
+  data?: any;
 };
 
 type EffectHandler = ({
@@ -37,11 +42,13 @@ type EffectHandler = ({
   target,
   week,
   day,
+  data,
 }: EffectHandlerParams) => Promise<void>;
 
 @Injectable()
 export class EffectProvider {
   constructor(
+    @InjectModel(Game.name) private gameModel: Model<GameDocument>,
     @InjectModel(Stock.name) private stockModel: Model<StockDocument>,
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
     private playerEffectState: PlayerEffectStateProvider,
@@ -96,58 +103,76 @@ export class EffectProvider {
     const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
     const LAST_TICK = 3;
 
-    const stocks: Stock[] = await this.stockModel
-      .find({ game: Types.ObjectId(gameId), week, day, tick: LAST_TICK })
-      .exec();
-
-    if (stocks.length !== NUM_STOCKS) {
-      const stockError = new Error('주가를 정상적으로 불러오지 못하였습니다.');
-      stockError.name = 'stockException';
-      throw stockError;
-    }
-
-    const prices: { [key: string]: number } = {};
-    stocks.forEach((stock: Stock) => {
-      prices[stock.corpId] = stock.price;
-    });
-
     const player: Player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
 
-    let purchaseAmount = 0;
-    player.assets.forEach((asset: Asset) => {
-      if (prices[asset.corpId])
-        purchaseAmount += prices[asset.corpId] * asset.totalQuantity;
-    });
+    const stocks: Stock[] = await this.stockModel
+      .find({ game: Types.ObjectId(gameId), week, day, tick: LAST_TICK })
+      .exec();
 
-    const increment = Math.floor(purchaseAmount * 0.05);
-    const cash: Cash = player.cash;
+    // if (stocks.length !== NUM_STOCKS) {
+    //   const stockError = new Error('주가를 정상적으로 불러오지 못하였습니다.');
+    //   stockError.name = 'stockException';
+    //   throw stockError;
+    // }
 
-    cash.totalCash += increment;
-    cash.availableCash += increment;
+    if (stocks.length !== NUM_STOCKS) {
+      const message: Message = {
+        user: '관리자',
+        text: `주가 정보를 불러오지 못하여 배당을 받을 수 없습니다.`,
+        statuses: ['play'],
+      };
 
-    await this.playerModel.updateOne(
-      { _id: Types.ObjectId(playerId) },
-      { cash },
-    );
+      this.playerEffectState.update({
+        gameId,
+        playerId: playerId,
+        clientId: player.clientId,
+        week,
+        day,
+        messages: [message],
+        moment: 'now',
+      });
+    } else {
+      const prices: { [key: string]: number } = {};
+      stocks.forEach((stock: Stock) => {
+        prices[stock.corpId] = stock.price;
+      });
 
-    const message: Message = {
-      user: '관리자',
-      text: `배당금 아이템 사용으로 총 평가금액의 5% 인 ${increment} 원 증가하였습니다.`,
-      statuses: ['play'],
-    };
+      let purchaseAmount = 0;
+      player.assets.forEach((asset: Asset) => {
+        if (prices[asset.corpId])
+          purchaseAmount += prices[asset.corpId] * asset.totalQuantity;
+      });
 
-    this.playerEffectState.update({
-      gameId,
-      playerId: player._id,
-      clientId: player.clientId,
-      week,
-      day,
-      cash,
-      messages: [message],
-      moment: 'now',
-    });
+      const increment = Math.floor(purchaseAmount * 0.05);
+      const cash: Cash = player.cash;
+
+      cash.totalCash += increment;
+      cash.availableCash += increment;
+
+      await this.playerModel.updateOne(
+        { _id: Types.ObjectId(playerId) },
+        { cash },
+      );
+
+      const message: Message = {
+        user: '관리자',
+        text: `배당금 아이템 사용으로 총 평가금액의 5% 인 ${increment} 원 증가하였습니다.`,
+        statuses: ['play'],
+      };
+
+      this.playerEffectState.update({
+        gameId,
+        playerId: player._id,
+        clientId: player.clientId,
+        week,
+        day,
+        cash,
+        messages: [message],
+        moment: 'now',
+      });
+    }
   };
 
   private effectHandler_lotto: EffectHandler = async ({
@@ -379,7 +404,7 @@ export class EffectProvider {
 
     const message: Message = {
       user: '관리자',
-      text: `사칭 아이템 사용으로 1일간 ${targetPlayer.name}으로 이름이 변경됩니다.`,
+      text: `사칭 아이템 사용으로 1일간 ${targetPlayer.name}(으)로 이름이 변경됩니다.`,
       statuses: ['play'],
     };
 
@@ -406,9 +431,9 @@ export class EffectProvider {
       .sort({ week: -1, day: -1, tick: -1 })
       .limit(1)[0];
 
-    const increment = -stock.price * 0.2;
+    const increment = -stock.price * 0.1;
 
-    this.stockEffectState.updateWithEffect(gameId, week, day, increment);
+    this.stockEffectState.update(gameId, target, week, day, increment);
   };
 
   private effectHandler_long: EffectHandler = async ({
@@ -422,9 +447,90 @@ export class EffectProvider {
       .sort({ week: -1, day: -1, tick: -1 })
       .limit(1)[0];
 
-    const increment = stock.price * 0.2;
+    const increment = stock.price * 0.1;
 
-    this.stockEffectState.updateWithEffect(gameId, week, day, increment);
+    this.stockEffectState.update(gameId, target, week, day, increment);
+  };
+
+  private effectHandler_news: EffectHandler = async ({
+    gameId,
+    week,
+    day,
+    data,
+  }) => {
+    if (!instanceOfChartResponseDto(data)) {
+      throw new Error('데이터 타입이 일치하지 않습니다.');
+    }
+
+    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
+    const IND_STOCK = Math.floor(Math.random() * NUM_STOCKS);
+
+    const game: Game = await this.gameModel
+      .findOne({
+        _id: Types.ObjectId(gameId),
+      })
+      .populate('players');
+
+    const corp: Corp = game.corps[IND_STOCK];
+    const corpResult: CorpResult = data.corps[corp.corpId];
+
+    const message: Message = {
+      user: '관리자',
+      text: `뉴스 아이템 사용으로 ${corp.corpName} 종목이 곧 ${
+        corpResult.info ? '상승' : '하락'
+      }한다는 정보를 입수했습니다.`,
+      statuses: ['play'],
+    };
+
+    game.players.forEach((player: Player) => {
+      this.playerEffectState.update({
+        gameId,
+        playerId: player._id,
+        clientId: player.clientId,
+        week,
+        day,
+        messages: [message],
+        moment: 'after-infer',
+      });
+    });
+  };
+
+  private effectHandler_leading: EffectHandler = async ({
+    gameId,
+    week,
+    day,
+    data,
+  }) => {
+    if (!instanceOfChartResponseDto(data)) {
+      throw new Error('데이터 타입이 일치하지 않습니다.');
+    }
+
+    const game: Game = await this.gameModel.findOne({
+      _id: Types.ObjectId(gameId),
+    });
+
+    const corp: Corp = game.corps.find((corp: Corp) => corp.target === true);
+    const corpResult: CorpResult = data.corps[corp.corpId];
+
+    const message: Message = {
+      user: '관리자',
+      text: `리딩방 아이템 사용으로 ${corp.corpName} 종목이 곧 ${
+        corpResult.info ? '하락' : '상승'
+      }한다는 정보를 입수했습니다`,
+      statuses: ['play'],
+    };
+
+    game.players.forEach((player: Player) => {
+      this.playerEffectState.update({
+        gameId,
+        playerId: player._id,
+        clientId: player.clientId,
+        week,
+        day,
+        messages: [message],
+        moment: 'after-infer',
+      });
+    });
   };
 
   private effectHandler: { [key: string]: EffectHandler } = {
@@ -438,6 +544,8 @@ export class EffectProvider {
     cloaking: this.effectHandler_cloaking,
     short: this.effectHandler_short,
     long: this.effectHandler_long,
+    news: this.effectHandler_news,
+    leading: this.effectHandler_leading,
   };
 
   async handleEffect({
@@ -447,6 +555,7 @@ export class EffectProvider {
     target,
     week,
     day,
+    data,
   }: EffectRequest): Promise<void> {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
@@ -455,6 +564,13 @@ export class EffectProvider {
       playerId = playerId.toString();
     }
 
-    await this.effectHandler[type]({ gameId, playerId, target, week, day });
+    await this.effectHandler[type]({
+      gameId,
+      playerId,
+      target,
+      week,
+      day,
+      data,
+    });
   }
 }

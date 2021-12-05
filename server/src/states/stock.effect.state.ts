@@ -7,7 +7,7 @@ export type StockEffectState = {
   week: number;
   day: number;
   increment: number;
-  moment: 'now' | 'before-infer' | 'after-infer' | 'end';
+  moment: 'now' | 'before-infer' | 'after-infer';
 };
 
 @Injectable()
@@ -35,6 +35,33 @@ export class StockEffectStateProvider {
     });
   }
 
+  update(
+    gameId: Types.ObjectId | string,
+    corpId: string,
+    week: number,
+    day: number,
+    increment: number,
+  ): void {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
+    let flag = false;
+    this.stockEffects.forEach((stock) => {
+      if (
+        gameId === stock.gameId &&
+        corpId === stock.corpId &&
+        week === stock.week &&
+        day === stock.day
+      ) {
+        flag = true;
+        stock.increment += increment;
+      }
+    });
+
+    if (!flag) this.create(gameId, corpId, week, day, increment);
+  }
+
   findStockEffects(gameId: Types.ObjectId | string, week: number, day: number) {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
@@ -44,22 +71,5 @@ export class StockEffectStateProvider {
       (stock) =>
         gameId === stock.gameId && week === stock.week && day === stock.day,
     );
-  }
-
-  updateWithEffect(
-    gameId: Types.ObjectId | string,
-    week: number,
-    day: number,
-    increment: number,
-  ): void {
-    if (typeof gameId !== 'string') {
-      gameId = gameId.toString();
-    }
-
-    this.stockEffects.forEach((stock) => {
-      if (gameId === stock.gameId && week === stock.week && day === stock.day) {
-        stock.increment += increment;
-      }
-    });
   }
 }

@@ -1,6 +1,12 @@
 import { PlayerUpdateDto } from '../dto/player-update.dto';
 import { PlayerCreateDto } from '../dto/player-create.dto';
-import { Player, PlayerDocument, PlayerStatus } from '../schemas/player.schema';
+import {
+  Player,
+  PlayerDocument,
+  PlayerOption,
+  PlayerSkill,
+  PlayerStatus,
+} from '../schemas/player.schema';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -84,6 +90,16 @@ export class PlayerService {
       .sort({ createdAt: 1 })
       .exec();
 
+    const options: PlayerOption = {
+      chatoff: false,
+      tradeoff: false,
+    };
+
+    const skills: PlayerSkill = {
+      leverage: false,
+      cloaking: '',
+    };
+
     players.forEach(({ _id: playerId, game, clientId }: Player) => {
       if (!isGame(game)) throw TypeError('타입이 일치하지 않습니다.');
 
@@ -93,6 +109,8 @@ export class PlayerService {
         clientId,
         week: time.week,
         day: time.day,
+        options,
+        skills,
         moment: 'now',
       });
     });

@@ -79,11 +79,10 @@ export class GameGateway {
       // initialize player options
       await this.playerService.initializeOptionsAndSkills(room, prevTime);
 
-      // apply item
+      // apply item with moment now
       this.itemService
         .useItems(gameId, prevTime.week, prevTime.day, 'now')
         .then(() => {
-          // response effect to player
           const itemResponseDtos: ItemResponseDto[] =
             this.playerEffectState.findPlayerEffects(
               gameId,
@@ -91,6 +90,8 @@ export class GameGateway {
               prevTime.day,
               'now',
             );
+
+          console.log({ now: itemResponseDtos });
 
           itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
             this.server
@@ -110,33 +111,33 @@ export class GameGateway {
               nextTime,
             );
 
-          // request chart to ML Server
-          this.marketApi
-            .putModel(chartRequestDto)
-            .then(async (chartResponseDto: ChartResponseDto) => {
-              // use item with moment after-infer
-              await this.itemService.useItems(
-                gameId,
-                prevTime.week,
-                prevTime.day,
-                'after-infer',
-              );
+          const chartResponseDto: ChartResponseDto =
+            await this.marketApi.putModel(chartRequestDto);
 
-              // response effect to player
-              const itemResponseDtos: ItemResponseDto[] =
-                this.playerEffectState.findPlayerEffects(
-                  gameId,
-                  prevTime.week,
-                  prevTime.day,
-                  'after-infer',
-                );
+          // use item with moment after-infer
+          await this.itemService.useItems(
+            gameId,
+            prevTime.week,
+            prevTime.day,
+            'after-infer',
+            chartResponseDto,
+          );
 
-              itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
-                this.server
-                  .to(itemResponseDto.clientId)
-                  .emit(ITEM_RESPONSE, itemResponseDto);
-              });
-            });
+          const itemResponseDtos: ItemResponseDto[] =
+            this.playerEffectState.findPlayerEffects(
+              gameId,
+              prevTime.week,
+              prevTime.day,
+              'after-infer',
+            );
+
+          console.log({ afterInfer: itemResponseDtos });
+
+          itemResponseDtos.forEach((itemResponseDto: ItemResponseDto) => {
+            this.server
+              .to(itemResponseDto.clientId)
+              .emit(ITEM_RESPONSE, itemResponseDto);
+          });
         });
     }
 

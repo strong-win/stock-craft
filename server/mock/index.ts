@@ -26,10 +26,18 @@ type ChartRequestDto = {
   corps: CorpEvents;
 };
 
-type ChartResponseDto = {
-  gameId: string;
-  nextTime: TimeState;
+export type CorpResult = {
+  info: number;
 };
+
+export type CorpResults = {
+  [key: string]: CorpResult;
+};
+
+export class ChartResponseDto {
+  gameId: string;
+  corps: CorpResults;
+}
 
 const PORT = process.env.PORT || 8081;
 
@@ -42,7 +50,7 @@ app.post('/model', (req: express.Request, res: express.Response) => {
 });
 
 app.put('/model', (req: express.Request, res: express.Response) => {
-  const { gameId, prevTime, nextTime, corps }: ChartRequestDto = req.body;
+  const { gameId, prevTime, nextTime }: ChartRequestDto = req.body;
 
   MongoClient.connect(
     'mongodb://mongodb:27017/stockcraft',
@@ -65,9 +73,14 @@ app.put('/model', (req: express.Request, res: express.Response) => {
     },
   );
 
+  const corps = {};
+  sample.corps.forEach(
+    (corp) => (corps[corp.corpId] = { info: Math.round(Math.random()) }),
+  );
+
   const chartResponseDto: ChartResponseDto = {
     gameId,
-    nextTime,
+    corps,
   };
   res.json(chartResponseDto);
 });

@@ -41,8 +41,6 @@ export class ItemService {
         ? 'now'
         : type === 'dividend'
         ? 'now'
-        : type === 'news'
-        ? 'now'
         : type === 'lotto'
         ? 'now'
         : type === 'salary'
@@ -57,6 +55,10 @@ export class ItemService {
         ? 'before-infer'
         : type === 'long'
         ? 'before-infer'
+        : type === 'news'
+        ? 'after-infer'
+        : type === 'leading'
+        ? 'after-infer'
         : null;
 
     if (type)
@@ -76,7 +78,8 @@ export class ItemService {
     gameId: string,
     week: number,
     day: number,
-    moment: 'now' | 'before-infer' | 'after-infer' | 'end',
+    moment: 'now' | 'before-infer' | 'after-infer',
+    data?: any,
   ): Promise<void> {
     const items: Item[] = await this.itemModel
       .find({
@@ -97,6 +100,7 @@ export class ItemService {
         target: item.target,
         week,
         day,
+        data,
       });
     }
   }
