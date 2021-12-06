@@ -30,6 +30,7 @@ import { RootState } from "../..";
 export type CorpResponse = {
   corpId: string;
   corpName: string;
+  target: number;
   totalChart: number[];
 };
 

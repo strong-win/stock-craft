@@ -4,6 +4,7 @@ import { CorpResponse } from "./sockets/join";
 export type CorpState = {
   corpId: string;
   corpName: string;
+  target: number;
 };
 
 export type ChartState = CorpState & {
