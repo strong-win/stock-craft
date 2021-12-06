@@ -17,7 +17,7 @@ def get_random_date(train_days: int, init_days: int) -> "pd.Timestamp":
     return pd.Timestamp(start_date + timedelta(days=target))
 
 
-def get_data_by_datetime_in_one_row(
+def stock_generator(
     quantity: int = 5, train_days: int = 365, init_days: int = 14
 ) -> "pd.DataFrame":
     """
@@ -68,17 +68,18 @@ def get_data_by_datetime_in_one_row(
     # 6. Merge Dataframe, reset labelname, and return final DataFrame
     result = pd.concat(res, axis=1)
     df_label = []
+    ticker_list = ["{0:>06d}".format(i) for i in ticker_list]
     for i in range(0, quantity):
         df_label += [
             "date",
-            str(ticker_list[i]) + "_open",
-            str(ticker_list[i]) + "_high",
-            str(ticker_list[i]) + "_low",
-            str(ticker_list[i]) + "_close",
-            str(ticker_list[i]) + "_volume",
+            ticker_list[i] + "_open",
+            ticker_list[i] + "_high",
+            ticker_list[i] + "_low",
+            ticker_list[i] + "_close",
+            ticker_list[i] + "_volume",
         ]
     df_label += ["kospi", "exchange_rate"]
     result.columns = df_label
     result = result.loc[:, ~result.columns.duplicated()]
     result.set_index("date", inplace=True)
-    return result
+    return result, ticker_list
