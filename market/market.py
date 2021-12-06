@@ -141,7 +141,7 @@ def update_model(game_info_with_event: CorpEventInfo):
 
 		# 3. 찾은 pred_band를 기반으로 get_current_price 진행(예측)
 		stock_info, increment, buy_quantity, sell_quantity = [], [], [], []
-		for ticker, corp_market_info in sorted(game_info_with_event.event.items(), key=lambda x: int(x[0])):
+		for ticker, corp_market_info in sorted(game_info_with_event.corps.items(), key=lambda x: int(x[0])):
 			stock_info.append(ticker)
 			increment.append(corp_market_info.increment)
 			buy_quantity.append(corp_market_info.buyQuantity)
