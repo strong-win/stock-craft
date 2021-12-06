@@ -11,7 +11,7 @@ from random import sample
 import pickle
 
 # TODO: Remove temp files
-from core import dummy_df
+from core import generate_dummy_df
 import traceback
 
 MODEL_PATH = "./model/TEMP.pkl"  # Model `.pkl` 파일이 있는 경로
@@ -57,11 +57,11 @@ def get_current_price(buying_volume: list[int], selling_volume: list[int], stock
 	`result_df`의 데이터를 바탕으로 샘플링을 진행한 후, (2*days, 2*stock) 형태의 dictionary를 반환하는 function
 	"""
 	res = {k:{} for k in sorted(stock_info)}
-	print(stock_info)
 	target_df = result_df
 	for i in range(1, target_stocks + 1):
 		price_list = []
 		for j in range(target_days):
+			print(target_df)
 			upper = target_df[stock_info[i-1] + '_close_upper'][j] + add_sell_trend(target_df[stock_info[i-1] + '_close_upper'][j], selling_volume[i-1])
 			lower = target_df[stock_info[i-1] + '_close_lower'][j] + add_buy_trend(target_df[stock_info[i-1] + '_close_lower'][j], buying_volume[i-1])
 			target_range = abs(upper - lower)
@@ -119,7 +119,7 @@ def init_model(game_info: GameInfo):
 		res = {'corps': new_data}
 		return JSONResponse(res)
 	except Exception as e:
-		return JSONResponse({'gameId': game_info.gameId, "data": "Error : {}".format(e)})
+		return JSONResponse({'gameId': game_info.gameId, "data": "Error : {}".format(e)},  status_code=500)
 
 @app.put("/model")
 def update_model(game_info_with_event: CorpEventInfo):
@@ -147,7 +147,8 @@ def update_model(game_info_with_event: CorpEventInfo):
 			buy_quantity.append(corp_market_info.buyQuantity)
 			sell_quantity.append(corp_market_info.sellQuantity)
 
-		pick_result = get_current_price(buy_quantity, sell_quantity, stock_info, dummy_df)
+		res_df = generate_dummy_df(stock_info)
+		pick_result = get_current_price(buy_quantity, sell_quantity, stock_info, res_df) # TODO: dummy_df
 		final_result = shift_current_price(increment={}, price=pick_result)
 
 		print(final_result)
@@ -170,7 +171,7 @@ def update_model(game_info_with_event: CorpEventInfo):
 		}
 		return JSONResponse(res)
 	except Exception as e:
-		return JSONResponse({'gameId': game_info_with_event.gameId, "status": "Error : {}".format(traceback.format_exc())})
+		return JSONResponse({'gameId': game_info_with_event.gameId, "status": "Error : {}".format(traceback.format_exc())}, status_code=500)
 
 @app.delete("/model")
 def delete_model(game_info: GameInfo):
@@ -181,7 +182,7 @@ def delete_model(game_info: GameInfo):
 		market_col.delete_one({"gameId": game_info.gameId})
 		return JSONResponse({'gameId':game_info.gameId, 'status': "OK"})
 	except Exception as e:
-		return JSONResponse({'gameId':game_info.gameId, "status": "Error : {}".format(e)})
+		return JSONResponse({'gameId':game_info.gameId, "status": "Error : {}".format(e)}, status_code=500)
 
 @app.get("/modelset")
 def generate_modelset():
