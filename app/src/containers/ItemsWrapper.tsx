@@ -49,6 +49,7 @@ const ItemsWrapper = () => {
         <Items
           players={players}
           playerId={playerId}
+          corps={corps}
           items={items}
           handleApplyItem={handleApplyItem}
         />

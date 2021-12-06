@@ -8,13 +8,25 @@ import {
   ModalHeader,
 } from "reactstrap";
 
-import { ITEM } from "../../constants/item";
+import { ITEM, ITEM_TARGET } from "../../constants/item";
 import "../../styles/Items.css";
 
+const news = [
+  {
+    newsId: "good",
+    newsName: "호재",
+  },
+  {
+    newsId: "bad",
+    newsName: "악재",
+  },
+];
 const ItemTargetModal = ({
   toggle,
   isOpen,
-  players,
+  target,
+  players = [],
+  corps = [],
   playerId,
   handleApplyItem,
   selectedItemId,
@@ -22,11 +34,19 @@ const ItemTargetModal = ({
 }) => {
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
 
-  const playerItems = players.map((player) => {
-    if (player.playerId !== playerId) {
-      return <option value={player.playerId}>{player.name}</option>;
-    }
-  });
+  const optionItems = {
+    player: players.map((player) => {
+      if (player.playerId !== playerId) {
+        return <option value={player.playerId}>{player.name}</option>;
+      }
+    }),
+    corp: corps.map((corp) => (
+      <option value={corp.corpId}>{corp.corpName}</option>
+    )),
+    news: news.map((newsItem) => (
+      <option value={newsItem.newsId}>{newsItem.newsName}</option>
+    )),
+  };
 
   const onChangeSelection = (e: any) => {
     setSelectedTargetId(e.target.value);
@@ -34,9 +54,10 @@ const ItemTargetModal = ({
 
   const handleApplyItemWithTarget = () => {
     if (selectedTargetId == "") {
-      alert("사용자를 선택해주세요!");
+      alert(`${ITEM_TARGET[target]?.name || "타겟"}을/를 선택해주세요!`);
     } else {
       handleApplyItem(selectedItemId, selectedTargetId);
+      toggle();
       setSelectedItemId("");
       setSelectedTargetId("");
     }
@@ -55,15 +76,18 @@ const ItemTargetModal = ({
       ></ModalHeader>
       <ModalBody className="itemTargetModalBody">
         <div className="targetSelectLabel">
-          {ITEM[selectedItemId]?.NAME} 아이템을 적용할 사용자를 선택해주세요.
+          {ITEM[selectedItemId]?.NAME} 아이템을 적용할{" "}
+          {ITEM_TARGET[target]?.name || "타겟"}을/를 선택해주세요.
         </div>
         <Input
           type="select"
           value={selectedTargetId}
           onChange={onChangeSelection}
         >
-          <option value="">사용자를 선택해주세요.</option>
-          {playerItems}
+          <option value="">
+            {ITEM_TARGET[target]?.name || "타겟"}을/를 선택해주세요.
+          </option>
+          {optionItems[target]}
         </Input>
       </ModalBody>
       <ModalFooter className="itemTargetModalFooter">
