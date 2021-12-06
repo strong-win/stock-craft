@@ -1,4 +1,4 @@
-import { Role, updateRole } from "./../user";
+import { Role, updateCash, updateRole } from "./../user";
 import { channel, eventChannel } from "@redux-saga/core";
 import { apply, call, put, select, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
@@ -26,6 +26,7 @@ import {
   JOIN_START,
 } from "./events";
 import { RootState } from "../..";
+import { ROLE_TYPE } from "../../constants/role";
 
 export type CorpResponse = {
   corpId: string;
@@ -93,6 +94,10 @@ export function* receiveJoinPlayersSaga(socket: Socket) {
     if (role) {
       yield put(updateRole(role));
       yield put(setItems(role));
+      const initialAsset = ROLE_TYPE[role]?.INITIAL_ASSET;
+      yield put(
+        updateCash({ totalCash: initialAsset, availableCash: initialAsset })
+      );
     }
   }
 }
