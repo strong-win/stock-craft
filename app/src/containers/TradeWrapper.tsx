@@ -40,8 +40,8 @@ const TradeWrapper = () => {
 
     const stockBill = {
       // price: corpStock.todayChart[tick * 4 - 1] || 0,
-      price: corpStock.todayChart[tick - 1] || 0,
-      quantity: corpAsset.availableQuantity,
+      price: corpStock?.todayChart[tick - 1] || 0,
+      quantity: corpAsset?.availableQuantity,
     };
 
     setStockBill(stockBill);

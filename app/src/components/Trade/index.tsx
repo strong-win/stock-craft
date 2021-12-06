@@ -41,7 +41,7 @@ const Trade = ({
   const [tradeType, setTradeType] = useState<"sell" | "buy">("buy");
 
   useEffect(() => {
-    setTradeBill({ ...tradeBill, price: stockBill.price });
+    setTradeBill({ ...tradeBill, price: stockBill?.price });
   }, [stockBill]);
 
   const handleChangeType = (e) => {

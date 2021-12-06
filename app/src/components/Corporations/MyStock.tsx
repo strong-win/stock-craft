@@ -15,19 +15,19 @@ const MyStock = ({ tick, corps, assets, onClickCorpItem }: MyStockProps) => {
   const CorpItem = ({ corp }) => {
     const asset = assets.find((asset) => asset.corpId === corp.corpId);
     const averagePrice: number =
-      asset.purchaseAmount / asset.totalQuantity || 0;
+      asset?.purchaseAmount / asset?.totalQuantity || 0;
     const nowPrice = corp.todayChart[tick - 1];
-    const rate = asset.totalQuantity
+    const rate = asset?.totalQuantity
       ? ((nowPrice - averagePrice) / averagePrice) * 100
       : 0;
-    const gap = asset.totalQuantity ? nowPrice - averagePrice : 0;
+    const gap = asset?.totalQuantity ? nowPrice - averagePrice : 0;
     let color = "";
     if (rate > 0) color = "red";
     else if (rate < 0) color = "blue";
 
     return (
-      <tr className="corpItem" onClick={() => onClickCorpItem(corp.corpId)}>
-        <th scope="row">{corp.corpName}</th>
+      <tr className="corpItem" onClick={() => onClickCorpItem(corp?.corpId)}>
+        <th scope="row">{corp?.corpName}</th>
         <td>{asset.totalQuantity}</td>
         <td>{averagePrice ? Math.floor(averagePrice) : "-"}</td>
         <td>{nowPrice}</td>
