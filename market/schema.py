@@ -27,7 +27,7 @@ class CorpEventInfo(BaseModel):
     gameId: str
     prevTime: TimeState
     nextTime: TimeState
-    event: Dict[str, CorpMarketInfo]
+    corps: Dict[str, CorpMarketInfo]
 
 
 # used for res in PUT
