@@ -12,6 +12,8 @@ import {
   PlayerStatus,
   Role,
 } from 'src/schemas/player.schema';
+import { sampleSize } from 'lodash';
+import { CORP_NAMES, NUM_STOCKS } from 'src/constants';
 
 @Injectable()
 export class JoinService {
@@ -56,25 +58,22 @@ export class JoinService {
     gameId: Types.ObjectId | string,
     room: string,
     corps: Corp[],
-  ): Promise<void> {
+  ): Promise<Corp[]> {
     if (typeof gameId === 'string') {
       gameId = Types.ObjectId(gameId);
     }
 
-    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
-    const IND_STOCK = Math.floor(Math.random() * NUM_STOCKS);
+    const indSample = Math.floor(Math.random() * NUM_STOCKS);
+    const corpNames = sampleSize(CORP_NAMES, NUM_STOCKS);
+
+    corps = corps.map((corp: Corp, ind: number) =>
+      ind === indSample
+        ? { ...corp, corpName: corpNames[ind], target: true }
+        : { ...corp, corpName: corpNames[ind], target: false },
+    );
 
     // game
-    await this.gameModel.updateOne(
-      { _id: gameId },
-      {
-        corps: corps.map((corp: Corp, ind: number) =>
-          ind === IND_STOCK
-            ? { ...corp, target: true }
-            : { ...corp, target: false },
-        ),
-      },
-    );
+    await this.gameModel.updateOne({ _id: gameId }, { corps });
 
     // players
     const players: Player[] = await this.playerModel
@@ -105,23 +104,6 @@ export class JoinService {
       }
     }
 
-    const assets: Asset[] = corps.map(({ corpId }) => ({
-      corpId,
-      totalQuantity: 0,
-      availableQuantity: 0,
-      purchaseAmount: 0,
-    }));
-
-    const options: PlayerOption = {
-      chatoff: false,
-      tradeoff: false,
-    };
-
-    const skills: PlayerSkill = {
-      leverage: false,
-      cloaking: '',
-    };
-
     const individualIds = players
       .filter((player: Player) => !player.role)
       .map(({ _id }) => _id);
@@ -132,10 +114,10 @@ export class JoinService {
         status: 'play',
         game: gameId,
         role: 'individual',
-        assets,
+        assets: this.getAssets(corps),
         cash: this.getCash('individual'),
-        options,
-        skills,
+        options: this.getOptions(),
+        skills: this.getSkills(),
       },
     );
 
@@ -149,10 +131,10 @@ export class JoinService {
         status: 'play',
         game: gameId,
         role: 'institutional',
-        assets,
+        assets: this.getAssets(corps),
         cash: this.getCash('institutional'),
-        options,
-        skills,
+        options: this.getOptions(),
+        skills: this.getSkills(),
       },
     );
 
@@ -166,12 +148,14 @@ export class JoinService {
         status: 'play',
         role: 'party',
         game: gameId,
-        assets,
+        assets: this.getAssets(corps),
         cash: this.getCash('party'),
-        options,
-        skills,
+        options: this.getOptions(),
+        skills: this.getSkills(),
       },
     );
+
+    return corps;
   }
 
   getStatuses(status: PlayerStatus | 'all'): PlayerStatus[] {
@@ -203,5 +187,28 @@ export class JoinService {
         availableCash: 5_000_000,
       };
     }
+  }
+
+  getAssets(corps: Corp[]): Asset[] {
+    return corps.map(({ corpId }) => ({
+      corpId,
+      totalQuantity: 0,
+      availableQuantity: 0,
+      purchaseAmount: 0,
+    }));
+  }
+
+  getOptions(): PlayerOption {
+    return {
+      chatoff: false,
+      tradeoff: false,
+    };
+  }
+
+  getSkills(): PlayerSkill {
+    return {
+      leverage: false,
+      cloaking: '',
+    };
   }
 }

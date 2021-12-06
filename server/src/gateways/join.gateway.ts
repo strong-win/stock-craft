@@ -228,8 +228,8 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     if (gameId) {
-      const corps: Corp[] = await this.marketApi.postModel(gameId);
-      await this.joinService.initGame(gameId, room, corps);
+      let corps: Corp[] = await this.marketApi.postModel(gameId);
+      corps = await this.joinService.initGame(gameId, room, corps);
 
       const players: Player[] = await this.playerService.findByRoomAndStatuses(
         room,

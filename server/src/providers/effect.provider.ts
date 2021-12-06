@@ -16,6 +16,7 @@ import { Message } from 'src/dto/item-response.dto';
 import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import { CorpResult } from 'src/dto/chart-response.dto';
 import { instanceOfChartResponseDto } from 'src/utils/typeGuard';
+import { NUM_STOCKS } from 'src/constants';
 
 export type EffectRequest = {
   type: string;
@@ -100,7 +101,6 @@ export class EffectProvider {
     week,
     day,
   }) => {
-    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
     const LAST_TICK = 3;
 
     const player: Player = await this.playerModel.findOne({
@@ -463,8 +463,7 @@ export class EffectProvider {
       throw new Error('데이터 타입이 일치하지 않습니다.');
     }
 
-    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
-    const IND_STOCK = Math.floor(Math.random() * NUM_STOCKS);
+    const indSample = Math.floor(Math.random() * NUM_STOCKS);
 
     const game: Game = await this.gameModel
       .findOne({
@@ -472,7 +471,7 @@ export class EffectProvider {
       })
       .populate('players');
 
-    const corp: Corp = game.corps[IND_STOCK];
+    const corp: Corp = game.corps[indSample];
     const corpResult: CorpResult = data.corps[corp.corpId];
 
     const messagePlayer: Message = {

@@ -18,6 +18,7 @@ import {
   StockEffectStateProvider,
 } from 'src/states/stock.effect.state';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
+import { NUM_STOCKS } from 'src/constants';
 
 export type PlayerScore = {
   playerId: Types.ObjectId;
@@ -90,8 +91,6 @@ export class GameService {
   }
 
   async calculateScore(gameId: string): Promise<PlayerScore[]> {
-    const NUM_STOCKS = 4; // actual NUM_STOCKS = 5
-
     const stocks: Stock[] = await this.stockModel
       .find({ game: Types.ObjectId(gameId) })
       .sort({ week: -1, day: -1, tick: -1 })
