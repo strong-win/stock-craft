@@ -36,18 +36,20 @@ export const ITEM = {
     IMAGE: "",
     CONTENT: "선택한 종목의 주가가 다음 날 10% 하락합니다.",
     TARGET: "corp",
+    COOLTIME: 3,
   },
   long: {
     NAME: "찌라시",
     IMAGE: "",
     CONTENT: "선택한 종목의 주가가 다음 날 10% 상승합니다.",
     TARGET: "corp",
+    COOLTIME: 3,
   },
   blackout: {
     NAME: "블랙아웃",
     IMAGE: "",
     CONTENT: "모든 플레이어의 채팅과 거래를 하루동안 금지시킬 수 있습니다.",
-    COOLTIME: 3,
+    COOLTIME: 6,
   },
   leading: {
     NAME: "리딩방",
