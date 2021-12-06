@@ -26,7 +26,7 @@ const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
   );
 };
 
-const Items = ({ items, handleApplyItem, players, playerId }) => {
+const Items = ({ items, handleApplyItem, players, corps, playerId }) => {
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   const [targetModalOpen, setTargetModalOpen] = useState<boolean>(false);
 
@@ -39,7 +39,7 @@ const Items = ({ items, handleApplyItem, players, playerId }) => {
   };
 
   const onClickApplyItemButton = () => {
-    if (ITEM[selectedItemId].NEED_TARGET) {
+    if (ITEM[selectedItemId]?.TARGET) {
       setTargetModalOpen(true);
     } else {
       handleApplyItem(selectedItemId);
@@ -69,6 +69,8 @@ const Items = ({ items, handleApplyItem, players, playerId }) => {
         isOpen={targetModalOpen}
         toggle={toggleModal}
         players={players}
+        corps={corps}
+        target={ITEM[selectedItemId]?.TARGET}
         playerId={playerId}
         handleApplyItem={handleApplyItem}
         selectedItemId={selectedItemId}
