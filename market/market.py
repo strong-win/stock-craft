@@ -116,7 +116,7 @@ def init_model(game_info: GameInfo):
 		market_col.insert_one(new_game)
 
 		# 4. 반환을 위한 dict res 생성, `gameId`와 `data` attribute 추가 후 반환
-		res = {'gameId': new_game['gameId'], 'initData': new_data}
+		res = {'corps': new_data}
 		return JSONResponse(res)
 	except Exception as e:
 		return JSONResponse({'gameId': game_info.gameId, "data": "Error : {}".format(e)})
