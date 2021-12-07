@@ -2,21 +2,27 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import queryString from "query-string";
 import { Container, Row, Col } from "reactstrap";
+import { ToastContainer } from "react-toastify";
 
 import { RootState } from "..";
+
+import WaitingRoom from "./WaitingRoom";
+
 import ChattingWrapper from "../containers/ChattingWrapper";
 import TradeWrapper from "../containers/TradeWrapper";
 import ItemsWrapper from "../containers/ItemsWrapper";
 import CorporationsWrapper from "../containers/CorporationsWrapper";
 import AssetWrapper from "../containers/AssetWrapper";
+
+import Header from "../components/Header";
+import RoleNoticeModal from "../components/RoleNoticeModal";
+
+import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
 import { updateName, updateRoom, resetUser } from "../modules/user";
 import { createName } from "../utils/create";
-import WaitingRoom from "./WaitingRoom";
-import Header from "../components/Header";
-import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
 
+import "react-toastify/dist/ReactToastify.css";
 import "../styles/Play.css";
-import RoleNoticeModal from "../components/RoleNoticeModal";
 
 const Play = ({ location, history }: any) => {
   const [isBlocking, setIsBlocking] = useState<boolean>(false);
@@ -104,33 +110,48 @@ const Play = ({ location, history }: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
-  return status === "play" ? (
-    <Container className="playContainer" fluid={true}>
-      <RoleNoticeModal
-        isShowRoleModal={isShowRoleModal}
-        setIsShowRoleModal={setIsShowRoleModal}
-        role={role}
+  return (
+    <>
+      {status === "play" ? (
+        <Container className="playContainer" fluid={true}>
+          <RoleNoticeModal
+            isShowRoleModal={isShowRoleModal}
+            setIsShowRoleModal={setIsShowRoleModal}
+            role={role}
+          />
+          <Header isGameStart day={day} tick={tick} />
+          <Row className="playRow1">
+            <Col md="8">
+              <CorporationsWrapper />
+            </Col>
+            <Col md="4">
+              <ChattingWrapper room={room} name={name} />
+            </Col>
+          </Row>
+          <Row className="playRow2">
+            <Col md="8" className="h-100">
+              {isShowItems ? <ItemsWrapper /> : <TradeWrapper />}
+            </Col>
+            <Col md="4">
+              <AssetWrapper />
+            </Col>
+          </Row>
+        </Container>
+      ) : (
+        <WaitingRoom name={name} room={room} />
+      )}
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
-      <Header isGameStart day={day} tick={tick} />
-      <Row className="playRow1">
-        <Col md="8">
-          <CorporationsWrapper />
-        </Col>
-        <Col md="4">
-          <ChattingWrapper room={room} name={name} />
-        </Col>
-      </Row>
-      <Row className="playRow2">
-        <Col md="8" className="h-100">
-          {isShowItems ? <ItemsWrapper /> : <TradeWrapper />}
-        </Col>
-        <Col md="4">
-          <AssetWrapper />
-        </Col>
-      </Row>
-    </Container>
-  ) : (
-    <WaitingRoom name={name} room={room} />
+    </>
   );
 };
 
