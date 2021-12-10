@@ -41,8 +41,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     );
 
   const currentAmounts: number[] = corps.map((corp) => {
-    const nowPrice =
-      corp?.todayChart[tick - 1] || corp?.totalChart?.at(-1) || 0;
+    const nowPrice = corp.todayChart[tick - 1] || corp.totalChart?.at(-1) || 0;
     return (
       nowPrice *
       assets.find((asset: AssetState) => asset.corpId === corp.corpId)

@@ -7,12 +7,14 @@ import {
   AssetState,
   CashState,
   MessageState,
-  PlayerOptionState,
+  PlayerOption,
+  PlayerSkill,
   updateAssets,
   updateCash,
   updateItemCoolTime,
   updateMessage,
   updateOptions,
+  updateSkills,
 } from "../user";
 import { channel, eventChannel } from "@redux-saga/core";
 
@@ -27,7 +29,8 @@ export type ItemRequest = {
 
 export type ItemResponse = {
   clientId: string;
-  options?: PlayerOptionState;
+  options?: PlayerOption;
+  skills?: PlayerSkill;
   cash?: CashState;
   assets?: AssetState[];
   messages?: MessageState[];
@@ -80,6 +83,7 @@ export function* receiveItemResponseSaga(socket: Socket) {
     const payload: ItemResponse = yield take(channel);
 
     if (payload.options) yield put(updateOptions(payload.options));
+    if (payload.skills) yield put(updateSkills(payload.skills));
     if (payload.cash) yield put(updateCash(payload.cash));
     if (payload.assets) yield put(updateAssets(payload.assets));
     if (payload.messages) yield put(appendMessages(payload.messages));

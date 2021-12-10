@@ -63,12 +63,12 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
   }, [second]);
 
   useEffect(() => {
-    if (day) setSecond(Tick[tick].duration);
+    if (day) setSecond(Tick[tick]?.duration);
     else setSecond(30);
   }, [tick]);
 
   useEffect(() => {
-    if (day === 1) setSecond(Tick[tick].duration);
+    if (day === 1) setSecond(Tick[tick]?.duration);
   }, [day]);
 
   return (

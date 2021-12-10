@@ -45,7 +45,7 @@ const Play = ({ location, history }: any) => {
       if (action === "POP" && isBlocking) {
         if (window.confirm("정말 나가시겠습니까?")) {
           //TODO: host 처리 fe? be?
-          dispatch(sendJoinLeave());
+          dispatch(sendJoinLeave({ room }));
           return true;
         } else return false;
       }
@@ -61,7 +61,7 @@ const Play = ({ location, history }: any) => {
     };
     const leaveHandler = (e: any) => {
       //TODO: event handler
-      dispatch(sendJoinLeave());
+      dispatch(sendJoinLeave({ room }));
     };
 
     setIsBlocking(true);

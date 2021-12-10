@@ -46,12 +46,14 @@ export type CashState = {
   availableCash: number;
 };
 
-export type PlayerOptionState = {
-  chatting?: boolean;
-  trade?: boolean;
-  chart?: boolean;
-  cash?: boolean;
-  asset?: boolean;
+export type PlayerOption = {
+  chatoff?: boolean;
+  tradeoff?: boolean;
+};
+
+export type PlayerSkill = {
+  leverage?: boolean;
+  cloaking?: string;
 };
 
 export type PlayerScore = {
@@ -75,7 +77,8 @@ export type UserState = {
   selectedCorpId: string;
   isChartView: boolean;
   items: { [key: string]: number };
-  options: PlayerOptionState;
+  options: PlayerOption;
+  skills: PlayerSkill;
   scores: PlayerScore[];
   role: Role;
 };
@@ -103,6 +106,7 @@ const initialState: UserState = {
   selectedCorpId: "gyu",
   isChartView: false,
   options: {},
+  skills: {},
   scores: [],
   role: "",
 };
@@ -153,21 +157,23 @@ export const gameSlice = createSlice({
     updateIsChartView: (state, action: PayloadAction<boolean>) => {
       state.isChartView = action.payload;
     },
-    updateOptions: (state, action: PayloadAction<PlayerOptionState>) => {
+    updateOptions: (state, action: PayloadAction<PlayerOption>) => {
       state.options = action.payload;
+    },
+    updateSkills: (state, action: PayloadAction<PlayerSkill>) => {
+      state.skills = action.payload;
     },
     updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
       state.scores = action.payload;
     },
     setItems: (state, action: PayloadAction<string>) => {
-      // set items after role is decided
-      // const roleItems = ITEM_TYPE[action.payload];
+      //set items after role is decided
+      const roleItems = ITEM_TYPE[action.payload];
 
-      // const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
-      // [...roleItems, ...randomCommonItems].forEach(
-      //   (id) => (state.items[id] = 0)
-      // );
-      state.items = { salary: 0, dividend: 0, chatoff: 0, tradeoff: 0 }; //for test
+      const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
+      [...roleItems, ...randomCommonItems].forEach(
+        (id) => (state.items[id] = 0)
+      );
     },
     updateItemsBytime: (state) => {
       Object.keys(state.items).forEach((itemId) => {
@@ -223,6 +229,7 @@ export const {
   updateSelectedCorpId,
   updateIsChartView,
   updateOptions,
+  updateSkills,
   updateScores,
   updateRole,
   updateTrades,
