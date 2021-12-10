@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { toast } from "react-toastify";
 import {
   Button,
   Input,
@@ -54,7 +55,7 @@ const ItemTargetModal = ({
 
   const handleApplyItemWithTarget = () => {
     if (selectedTargetId == "") {
-      alert(`${ITEM_TARGET[target]?.name || "타겟"}을/를 선택해주세요!`);
+      toast.error(`${ITEM_TARGET[target]?.name || "타겟"}을/를 선택해주세요!`);
     } else {
       handleApplyItem(selectedItemId, selectedTargetId);
       toggle();

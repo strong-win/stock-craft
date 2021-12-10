@@ -181,7 +181,9 @@ export const gameSlice = createSlice({
       });
     },
     updateItemCoolTime: (state, action: PayloadAction<string>) => {
-      state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      if (state.items[action.payload]) {
+        state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      }
     },
     updateRole: (state, action: PayloadAction<Role>) => {
       state.role = action.payload;
