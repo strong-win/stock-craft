@@ -12,3 +12,8 @@
 .playRow2 {
   height: 35%;
 }
+
+.chattingContainer {
+  position: relative;
+  padding: 0;
+}

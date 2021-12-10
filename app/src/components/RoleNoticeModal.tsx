@@ -21,9 +21,9 @@ const RoleNoticeModal = ({ isShowRoleModal, setIsShowRoleModal, role }) => {
       ></ModalHeader>
       <ModalBody className="roleNoticeModalBody">
         <div className="noticeTitle">
-          당신은 <b>{ROLE_TYPE[role].NAME}</b>입니다
+          당신은 <b>{ROLE_TYPE[role]?.NAME}</b>입니다
         </div>
-        <div>{ROLE_TYPE[role].CONTENT}</div>
+        <div>{ROLE_TYPE[role]?.CONTENT}</div>
       </ModalBody>
     </Modal>
   );

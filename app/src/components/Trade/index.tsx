@@ -11,6 +11,7 @@ import TradeTab from "./TradeTab";
 import TradeList from "./TradeList";
 
 import "../../styles/Trade.css";
+import Ban from "../Ban";
 
 type TradeProps = {
   trades: TradeState[];
@@ -19,6 +20,7 @@ type TradeProps = {
   stockBill: billType;
   tradeBill: billType;
   isChartView: boolean;
+  disabled: boolean;
   setTradeBill: React.Dispatch<React.SetStateAction<billType>>;
   handleDeal: React.MouseEventHandler<HTMLButtonElement>;
   handleCancel: (_id: string, corpId: string) => void;
@@ -30,6 +32,7 @@ const Trade = ({
   selectedCorpId,
   stockBill,
   tradeBill,
+  disabled,
   isChartView,
   setTradeBill,
   handleDeal,
@@ -38,7 +41,7 @@ const Trade = ({
   const [tradeType, setTradeType] = useState<"sell" | "buy">("buy");
 
   useEffect(() => {
-    setTradeBill({ ...tradeBill, price: stockBill.price });
+    setTradeBill({ ...tradeBill, price: stockBill?.price });
   }, [stockBill]);
 
   const handleChangeType = (e) => {
@@ -58,9 +61,14 @@ const Trade = ({
         />
       </Col>
       <Col className="tradeCard">
+        <Ban disabled={disabled} />
         <TradeTab tradeType={tradeType} handleChangeType={handleChangeType} />
         <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />
-        <TradeButton tradeType={tradeType} handleDeal={handleDeal} />
+        <TradeButton
+          tradeType={tradeType}
+          handleDeal={handleDeal}
+          disabled={disabled}
+        />
       </Col>
     </Row>
   ) : (

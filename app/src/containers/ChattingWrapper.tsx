@@ -6,9 +6,8 @@ import Chatting from "../components/Chatting";
 import { sendChatting } from "../modules/sockets/chatting";
 
 const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
-  const { playerId, messages, status, cash, assets, role } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { playerId, messages, options, status, cash, assets, role, skills } =
+    useSelector((state: RootState) => state.user);
 
   const { tick } = useSelector((state: RootState) => state.time);
 
@@ -22,7 +21,11 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
     e.preventDefault();
 
     if (message) {
-      dispatch(sendChatting({ playerId, message }));
+      if (skills?.cloaking) {
+        dispatch(sendChatting({ playerId: skills?.cloaking, message }));
+      } else {
+        dispatch(sendChatting({ playerId, message }));
+      }
       setMessage("");
     }
   };
@@ -41,6 +44,7 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
       tick={tick}
       role={role}
       assets={assets}
+      disabled={options?.chatoff}
     />
   );
 };

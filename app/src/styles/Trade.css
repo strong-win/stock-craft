@@ -123,6 +123,10 @@ td {
   text-align: left;
 }
 
+.tradeCard {
+  position: relative;
+}
+
 .tradeTab {
   font-family: "IBM Plex Sans KR";
   text-align: center;

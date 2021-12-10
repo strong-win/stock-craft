@@ -51,7 +51,7 @@ const RoleCard = ({ role, cash, assets, corps, tick }) => {
     },
     {
       name: "최종 점수",
-      value: totalCurrentAmount + cash.totalCash || 0,
+      value: totalCurrentAmount + cash?.totalCash || 0,
       unit: "점",
     },
   ];

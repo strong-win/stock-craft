@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Row, Button, Col } from "reactstrap";
 
-import { ITEM } from "../constants/item";
+import { ITEM } from "../../constants/item";
+import ItemTargetModal from "./ItemTargetModal";
 
 const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
   return (
@@ -25,16 +26,25 @@ const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
   );
 };
 
-const Items = ({ items, handleApplyItem }) => {
+const Items = ({ items, handleApplyItem, players, corps, playerId }) => {
   const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [targetModalOpen, setTargetModalOpen] = useState<boolean>(false);
 
   const handleSelectedItemId = (e) => {
     if (items[e.target.id] === 0) setSelectedItemId(e.target.id);
   };
 
+  const toggleModal = () => {
+    setTargetModalOpen(!targetModalOpen);
+  };
+
   const onClickApplyItemButton = () => {
-    handleApplyItem(selectedItemId);
-    setSelectedItemId("");
+    if (ITEM[selectedItemId]?.TARGET) {
+      setTargetModalOpen(true);
+    } else {
+      handleApplyItem(selectedItemId);
+      setSelectedItemId("");
+    }
   };
 
   return (
@@ -55,6 +65,17 @@ const Items = ({ items, handleApplyItem }) => {
           사용하기
         </Button>
       </Row>
+      <ItemTargetModal
+        isOpen={targetModalOpen}
+        toggle={toggleModal}
+        players={players}
+        corps={corps}
+        target={ITEM[selectedItemId]?.TARGET}
+        playerId={playerId}
+        handleApplyItem={handleApplyItem}
+        selectedItemId={selectedItemId}
+        setSelectedItemId={setSelectedItemId}
+      />
     </>
   );
 };

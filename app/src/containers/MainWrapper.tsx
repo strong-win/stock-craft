@@ -12,6 +12,7 @@ const MainWrapper = () => {
 
   // react state
   const [room, setRoom] = useState<string>("");
+  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false);
 
   useEffect(() => {
     dispatch(updateName(createName()));
@@ -19,7 +20,19 @@ const MainWrapper = () => {
   }, []);
 
   const onChangeName = (e: any) => {
+    const name = e.target.value;
+    const pattern = /^\S.{0,14}\S$/;
     dispatch(updateName(e.target.value));
+    if (
+      name.length > 16 ||
+      name.length < 2 ||
+      !pattern.test(name) ||
+      name === "관리자"
+    ) {
+      setIsButtonDisabled(true);
+    } else {
+      setIsButtonDisabled(false);
+    }
   };
 
   const onChangeRoom = (e: any) => {
@@ -37,6 +50,7 @@ const MainWrapper = () => {
       onChangeName={onChangeName}
       onChangeRoom={onChangeRoom}
       onCreateRoom={onCreateRoom}
+      isButtonDisabled={isButtonDisabled}
     />
   );
 };

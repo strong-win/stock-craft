@@ -44,7 +44,7 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
             {"<"}
           </Button>
         </Col>
-        <Col>{corp.corpName}</Col>
+        <Col>{corp?.corpName}</Col>
         {asset ? (
           <>
             <Col>{asset.totalQuantity}</Col>
