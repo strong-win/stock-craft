@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import queryString from "query-string";
 import { Container, Row, Col } from "reactstrap";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 import { RootState } from "..";
 
@@ -18,7 +18,12 @@ import Header from "../components/Header";
 import RoleNoticeModal from "../components/RoleNoticeModal";
 
 import { sendJoinConnected, sendJoinLeave } from "../modules/sockets/join";
-import { updateName, updateRoom, resetUser } from "../modules/user";
+import {
+  updateName,
+  updateRoom,
+  resetUser,
+  updateErrorMessage,
+} from "../modules/user";
 import { createName } from "../utils/create";
 
 import "react-toastify/dist/ReactToastify.css";
@@ -32,9 +37,8 @@ const Play = ({ location, history }: any) => {
   const [isShowRoleModal, setIsShowRoleModal] = useState<boolean>(true);
   const { room: initRoom } = queryString.parse(location.search);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
-  const { playerId, name, room, status, isHost, role } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { playerId, name, room, status, isHost, role, errorMessage } =
+    useSelector((state: RootState) => state.user);
 
   const dispatch = useDispatch();
 
@@ -53,6 +57,13 @@ const Play = ({ location, history }: any) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isBlocking]);
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(updateErrorMessage(""));
+    }
+  }, [errorMessage]);
 
   useEffect(() => {
     const checkLeaveHandler = (e: any) => {

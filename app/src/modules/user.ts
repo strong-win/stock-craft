@@ -183,7 +183,7 @@ export const gameSlice = createSlice({
       });
     },
     updateItemCoolTime: (state, action: PayloadAction<string>) => {
-      if (state.items[action.payload]) {
+      if (state.items[action.payload] !== undefined) {
         state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
       }
     },
