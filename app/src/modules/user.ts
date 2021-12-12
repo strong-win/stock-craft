@@ -81,6 +81,7 @@ export type UserState = {
   skills: PlayerSkill;
   scores: PlayerScore[];
   role: Role;
+  errorMessage: string;
 };
 
 const initialState: UserState = {
@@ -109,6 +110,7 @@ const initialState: UserState = {
   skills: {},
   scores: [],
   role: "",
+  errorMessage: "",
 };
 
 export const gameSlice = createSlice({
@@ -212,6 +214,9 @@ export const gameSlice = createSlice({
           break;
       }
     },
+    updateErrorMessage: (state, action: PayloadAction<string>) => {
+      state.errorMessage = action.payload;
+    },
   },
 });
 
@@ -237,6 +242,7 @@ export const {
   updateTrades,
   updateItemsBytime,
   updateItemCoolTime,
+  updateErrorMessage,
   setItems,
 } = gameSlice.actions;
 
