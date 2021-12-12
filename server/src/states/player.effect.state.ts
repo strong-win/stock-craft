@@ -114,7 +114,7 @@ export class PlayerEffectStateProvider {
       });
   }
 
-  findPlayerEffects(
+  find(
     gameId: Types.ObjectId | string,
     week: number,
     day: number,
@@ -151,5 +151,15 @@ export class PlayerEffectStateProvider {
       );
 
     return itemResponseDtos;
+  }
+
+  delete(gameId: Types.ObjectId | string) {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
+    this.playerEffects = this.playerEffects.filter(
+      (playerEffect: PlayerEffectState) => gameId !== playerEffect.gameId,
+    );
   }
 }

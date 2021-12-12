@@ -10,7 +10,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { GameService, PlayerScore } from 'src/services/game.service';
 import { StockService } from 'src/services/stock.service';
 import { ItemService } from 'src/services/item.service';
@@ -43,7 +43,7 @@ export class GameGateway {
 
   @SubscribeMessage(GAME_TIME_REQUEST)
   async handleTimeRequest(
-    client: any,
+    client: Socket,
     payload: { gameId: string },
   ): Promise<void> {
     const { gameId } = payload;
@@ -63,15 +63,19 @@ export class GameGateway {
 
     // refresh trade
     if (nextTime.day > 0 && nextTime.tick > 0 && nextTime.tick < 4) {
-      this.tradeService
-        .handleRefresh(gameId, nextTime.week, nextTime.day, nextTime.tick)
-        .then((tradesResponseDtos: TradeResponseDto[]) => {
-          tradesResponseDtos.forEach((tradeResponseDto) => {
-            this.server
-              .to(tradeResponseDto.clientId)
-              .emit(TRADE_RESPONSE, tradeResponseDto);
-          });
-        });
+      const tradeResponseDtos: TradeResponseDto[] =
+        await this.tradeService.handleRefresh(
+          gameId,
+          nextTime.week,
+          nextTime.day,
+          nextTime.tick,
+        );
+
+      tradeResponseDtos.forEach((tradeResponseDto: TradeResponseDto) => {
+        this.server
+          .to(tradeResponseDto.clientId)
+          .emit(TRADE_RESPONSE, tradeResponseDto);
+      });
     }
 
     // use item and generate chart
@@ -84,7 +88,7 @@ export class GameGateway {
         .useItems(gameId, prevTime.week, prevTime.day, 'now')
         .then(() => {
           const itemResponseDtos: ItemResponseDto[] =
-            this.playerEffectState.findPlayerEffects(
+            this.playerEffectState.find(
               gameId,
               prevTime.week,
               prevTime.day,
@@ -122,7 +126,7 @@ export class GameGateway {
           );
 
           const itemResponseDtos: ItemResponseDto[] =
-            this.playerEffectState.findPlayerEffects(
+            this.playerEffectState.find(
               gameId,
               prevTime.week,
               prevTime.day,
@@ -139,11 +143,16 @@ export class GameGateway {
 
     // calculate score
     if (nextTime.week > 0 && nextTime.day === 0 && nextTime.tick == 0) {
-      this.gameService
-        .calculateScore(gameId)
-        .then((playerScores: PlayerScore[]) => {
-          this.server.to(room).emit(GAME_SCORE, playerScores);
-        });
+      const playerScores: PlayerScore[] = await this.gameService.calculateScore(
+        gameId,
+      );
+      this.server.to(room).emit(GAME_SCORE, playerScores);
+    }
+
+    // end game
+    if (nextTime.week > 2 && nextTime.day > 0) {
+      await this.gameService.endGame(gameId);
+      await this.marketApi.deleteModel(gameId);
     }
   }
 }

@@ -120,7 +120,7 @@ export class EffectProvider {
     if (stocks.length !== NUM_STOCKS) {
       const message: Message = {
         user: '관리자',
-        text: `주가 정보를 불러오지 못하여 배당을 받을 수 없습니다.`,
+        text: `배당금 아이템 사용으로 총 평가금액의 5% 인 0원 증가하였습니다.`,
         statuses: ['play'],
       };
 
@@ -422,34 +422,98 @@ export class EffectProvider {
 
   private effectHandler_short: EffectHandler = async ({
     gameId,
+    playerId,
     target,
     week,
     day,
   }) => {
-    const stock: Stock = await this.stockModel
-      .find({ gameId: Types.ObjectId(gameId), corpId: target })
-      .sort({ week: -1, day: -1, tick: -1 })
-      .limit(1)[0];
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(playerId),
+    });
 
-    const increment = -stock.price * 0.1;
+    const stocks: Stock[] = await this.stockModel
+      .find({ game: Types.ObjectId(gameId), corpId: target })
+      .sort({ week: -1, day: -1, tick: -1 })
+      .limit(1);
+
+    let price: number;
+    if (stocks.length) price = stocks[0].price;
+    else {
+      const game: Game = await this.gameModel.findOne({
+        _id: Types.ObjectId(gameId),
+      });
+      const corp: Corp = game.corps.find(
+        (corp: Corp) => target === corp.corpId,
+      );
+      price = corp.totalChart[corp.totalChart.length - 1];
+    }
+    const increment = -price * 0.1;
 
     this.stockEffectState.update(gameId, target, week, day, increment);
+
+    const message: Message = {
+      user: '관리자',
+      text: `공매도 아이템을 사용하여 주가가 하락하였습니다.`,
+      statuses: ['play'],
+    };
+
+    this.playerEffectState.update({
+      gameId,
+      playerId: player._id,
+      clientId: player.clientId,
+      week,
+      day,
+      messages: [message],
+      moment: 'after-infer',
+    });
   };
 
   private effectHandler_long: EffectHandler = async ({
     gameId,
+    playerId,
     target,
     week,
     day,
   }) => {
-    const stock: Stock = await this.stockModel
-      .find({ gameId: Types.ObjectId(gameId), corpId: target })
-      .sort({ week: -1, day: -1, tick: -1 })
-      .limit(1)[0];
+    const player: Player = await this.playerModel.findOne({
+      _id: Types.ObjectId(playerId),
+    });
 
-    const increment = stock.price * 0.1;
+    const stocks: Stock[] = await this.stockModel
+      .find({ game: Types.ObjectId(gameId), corpId: target })
+      .sort({ week: -1, day: -1, tick: -1 })
+      .limit(1);
+
+    let price: number;
+    if (!stocks.length) price = stocks[0].price;
+    else {
+      const game: Game = await this.gameModel.findOne({
+        _id: Types.ObjectId(gameId),
+      });
+      const corp: Corp = game.corps.find(
+        (corp: Corp) => target === corp.corpId,
+      );
+      price = corp.totalChart[corp.totalChart.length - 1];
+    }
+    const increment = price * 0.1;
 
     this.stockEffectState.update(gameId, target, week, day, increment);
+
+    const message: Message = {
+      user: '관리자',
+      text: `찌라시 아이템을 사용하여 주가가 상승하였습니다.`,
+      statuses: ['play'],
+    };
+
+    this.playerEffectState.update({
+      gameId,
+      playerId: player._id,
+      clientId: player.clientId,
+      week,
+      day,
+      messages: [message],
+      moment: 'after-infer',
+    });
   };
 
   private effectHandler_news: EffectHandler = async ({
@@ -463,7 +527,7 @@ export class EffectProvider {
       throw new Error('데이터 타입이 일치하지 않습니다.');
     }
 
-    const indSample = Math.floor(Math.random() * NUM_STOCKS);
+    const sampleInd = Math.floor(Math.random() * NUM_STOCKS);
 
     const game: Game = await this.gameModel
       .findOne({
@@ -471,7 +535,7 @@ export class EffectProvider {
       })
       .populate('players');
 
-    const corp: Corp = game.corps[indSample];
+    const corp: Corp = game.corps[sampleInd];
     const corpResult: CorpResult = data.corps[corp.corpId];
 
     const messagePlayer: Message = {
@@ -507,14 +571,10 @@ export class EffectProvider {
   private effectHandler_leading: EffectHandler = async ({
     gameId,
     playerId,
+    target,
     week,
     day,
-    data,
   }) => {
-    if (!instanceOfChartResponseDto(data)) {
-      throw new Error('데이터 타입이 일치하지 않습니다.');
-    }
-
     const game: Game = await this.gameModel
       .findOne({
         _id: Types.ObjectId(gameId),
@@ -522,7 +582,6 @@ export class EffectProvider {
       .populate('players');
 
     const corp: Corp = game.corps.find((corp: Corp) => corp.target);
-    const corpResult: CorpResult = data.corps[corp.corpId];
 
     const messagePlayer: Message = {
       user: '관리자',
@@ -533,7 +592,7 @@ export class EffectProvider {
     const messageAll: Message = {
       user: '관리자',
       text: `[정보] ${corp.corpName} 종목이 곧 ${
-        corpResult.info ? '상승' : '하락'
+        target === 'good' ? '상승' : target === 'bad' ? '하락' : '...'
       }합니다.`,
       statuses: ['play'],
     };
@@ -585,13 +644,34 @@ export class EffectProvider {
       playerId = playerId.toString();
     }
 
-    await this.effectHandler[type]({
-      gameId,
-      playerId,
-      target,
-      week,
-      day,
-      data,
-    });
+    try {
+      await this.effectHandler[type]({
+        gameId,
+        playerId,
+        target,
+        week,
+        day,
+        data,
+      });
+    } catch (e) {
+      const player: Player = await this.playerModel.findOne({
+        _id: Types.ObjectId(playerId),
+      });
+
+      const message: Message = {
+        user: '관리자',
+        text: '일시적인 오류로 아이템 사용에 실패하였습니다.',
+        statuses: ['play'],
+      };
+      this.playerEffectState.update({
+        gameId,
+        playerId: player._id,
+        clientId: player.clientId,
+        week,
+        day,
+        messages: [message],
+        moment: type === 'short' || type === 'long' ? 'after-infer' : 'now',
+      });
+    }
   }
 }

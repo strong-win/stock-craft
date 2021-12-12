@@ -8,7 +8,7 @@ export type Corp = {
   corpId: string;
   corpName: string;
   totalChart: number[];
-  target: boolean;
+  target: number;
 };
 
 @Schema()

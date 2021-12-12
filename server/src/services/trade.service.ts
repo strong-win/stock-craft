@@ -34,13 +34,8 @@ export class TradeService {
       time.tick < 1 ||
       time.tick > 3 ||
       day < 1
-    ) {
-      const timeError = new Error(
-        '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
-      );
-      timeError.name = 'TimeException';
-      throw timeError;
-    }
+    )
+      throw Error('거래 시간이 불일치하거나 거래 불가능 시간입니다.');
 
     // find stock price
     const stock = await this.stockModel.findOne({
@@ -51,19 +46,20 @@ export class TradeService {
       corpId,
     });
 
+    if (!stock) throw Error('주가 정보를 불러올 수 없습니다.');
+
     // find player asset
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
 
+    if (!player) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
     let isDirect: boolean;
     if (deal === 'buy') {
       // check if player can trade
-      if (player.cash.availableCash < price * quantity) {
-        const tradeError = new Error('거래 가능 잔액이 부족합니다');
-        tradeError.name = 'TradeException';
-        throw tradeError;
-      }
+      if (player.cash.availableCash < price * quantity)
+        throw Error('거래 가능 잔액이 부족합니다.');
 
       // check if player can directly trade
       isDirect = stock.price <= price ? true : false;
@@ -90,11 +86,9 @@ export class TradeService {
       for (const asset of player.assets) {
         if (asset.corpId === corpId) {
           // check if player can trade
-          if (asset.availableQuantity < quantity) {
-            const tradeError = new Error('거래 가능 수량이 부족합니다');
-            tradeError.name = 'TradeException';
-            throw tradeError;
-          }
+          if (asset.availableQuantity < quantity)
+            throw Error('거래 가능 수량이 부족합니다.');
+
           asset.availableQuantity -= quantity;
           if (isDirect) {
             asset.purchaseAmount -=
@@ -176,6 +170,10 @@ export class TradeService {
         tick,
       })
       .exec();
+
+    if (!players) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
+    if (!stocks) throw Error('주가 정보를 불러올 수 없습니다.');
 
     const playersResponse: TradeResponseDto[] = [];
     const tradesResponse: Trade[] = [];
@@ -283,7 +281,12 @@ export class TradeService {
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
+
+    if (!player) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
     const trade = await this.tradeModel.findOne({ _id: Types.ObjectId(_id) });
+
+    if (!trade) throw Error('거래 정보를 불러올 수 없습니다.');
 
     if (trade.deal === 'buy') {
       player.cash.availableCash += trade.price * trade.quantity;

@@ -14,24 +14,37 @@ export class MarketApi {
     private configService: ConfigService,
   ) {}
 
-  private MOCK_SERVER_URI = this.configService.get<string>('MOCK_SERVER_URI');
+  private MARKET_SERVER_URI =
+    this.configService.get<string>('MARKET_SERVER_URI');
 
   async postModel(gameId: Types.ObjectId | string): Promise<Corp[]> {
-    if (typeof gameId === 'string') {
-      gameId = Types.ObjectId(gameId);
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
     }
 
     return lastValueFrom(
       this.httpService
-        .post(`${this.MOCK_SERVER_URI}/model`, { gameId })
-        .pipe(map((res) => res.data)),
+        .post(`${this.MARKET_SERVER_URI}/model`, { gameId })
+        .pipe(map((res) => res.data.corps)),
     );
   }
 
   async putModel(chartRequestDto: ChartRequestDto): Promise<ChartResponseDto> {
     return lastValueFrom(
       this.httpService
-        .put(`${this.MOCK_SERVER_URI}/model`, chartRequestDto)
+        .put(`${this.MARKET_SERVER_URI}/model`, chartRequestDto)
+        .pipe(map((res) => res.data)),
+    );
+  }
+
+  async deleteModel(gameId: Types.ObjectId | string): Promise<void> {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
+    return lastValueFrom(
+      this.httpService
+        .delete(`${this.MARKET_SERVER_URI}/model?gameId=${gameId}`)
         .pipe(map((res) => res.data)),
     );
   }

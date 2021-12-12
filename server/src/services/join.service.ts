@@ -34,7 +34,7 @@ export class JoinService {
     // check if all players are ready
     const numHost: number = players.filter(
       (player) =>
-        player.status === 'connected' && player._id.toString() === playerId,
+        player.status === 'ready' && player._id.toString() === playerId,
     ).length;
 
     const numGuest: number = players.filter(
@@ -59,21 +59,25 @@ export class JoinService {
     room: string,
     corps: Corp[],
   ): Promise<Corp[]> {
-    if (typeof gameId === 'string') {
-      gameId = Types.ObjectId(gameId);
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
     }
 
-    const indSample = Math.floor(Math.random() * NUM_STOCKS);
+    const sampleInd = Math.floor(Math.random() * NUM_STOCKS);
     const corpNames = sampleSize(CORP_NAMES, NUM_STOCKS);
 
     corps = corps.map((corp: Corp, ind: number) =>
-      ind === indSample
-        ? { ...corp, corpName: corpNames[ind], target: true }
-        : { ...corp, corpName: corpNames[ind], target: false },
+      ind === sampleInd
+        ? {
+            ...corp,
+            corpName: corpNames[ind],
+            target: this.getTargetValue(corps, sampleInd),
+          }
+        : { ...corp, corpName: corpNames[ind], target: 0 },
     );
 
     // game
-    await this.gameModel.updateOne({ _id: gameId }, { corps });
+    await this.gameModel.updateOne({ _id: Types.ObjectId(gameId) }, { corps });
 
     // players
     const players: Player[] = await this.playerModel
@@ -112,7 +116,7 @@ export class JoinService {
       { _id: { $in: individualIds } },
       {
         status: 'play',
-        game: gameId,
+        game: Types.ObjectId(gameId),
         role: 'individual',
         assets: this.getAssets(corps),
         cash: this.getCash('individual'),
@@ -129,7 +133,7 @@ export class JoinService {
       { _id: { $in: institutionalIds } },
       {
         status: 'play',
-        game: gameId,
+        game: Types.ObjectId(gameId),
         role: 'institutional',
         assets: this.getAssets(corps),
         cash: this.getCash('institutional'),
@@ -147,7 +151,7 @@ export class JoinService {
       {
         status: 'play',
         role: 'party',
-        game: gameId,
+        game: Types.ObjectId(gameId),
         assets: this.getAssets(corps),
         cash: this.getCash('party'),
         options: this.getOptions(),
@@ -168,6 +172,34 @@ export class JoinService {
     if (status === 'play') {
       return ['play'];
     }
+  }
+
+  getStockBase(price: number) {
+    return price < 1_000
+      ? 1
+      : price < 5_000
+      ? 5
+      : price < 10_000
+      ? 10
+      : price < 50_000
+      ? 50
+      : price < 100_000
+      ? 100
+      : price < 500_000
+      ? 500
+      : 1_000;
+  }
+
+  getTargetValue(corps: Corp[], index: number): number {
+    const totalChart = corps[index].totalChart;
+    const lastValue = totalChart[totalChart.length - 1];
+
+    const lower = Math.ceil(lastValue * 0.8);
+    const upper = Math.floor(lastValue * 1.2);
+
+    const price = Math.floor(Math.random() * (upper - lower)) + lower;
+    const base = this.getStockBase(price);
+    return base * Math.round(price / base);
   }
 
   getCash(role: Role): Cash {

@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { ChartRequestDto, CorpEvents } from 'src/dto/chart-request.dto';
-import { Game, GameDocument } from 'src/schemas/game.schema';
+import { Corp, Game, GameDocument } from 'src/schemas/game.schema';
 import { Trade, TradeDocument } from 'src/schemas/trade.schema';
 import { TimeState } from 'src/states/game.state';
 import {
@@ -19,6 +19,7 @@ import {
 } from 'src/states/stock.effect.state';
 import { Stock, StockDocument } from 'src/schemas/stock.schema';
 import { NUM_STOCKS } from 'src/constants';
+import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
 
 export type PlayerScore = {
   playerId: Types.ObjectId;
@@ -35,6 +36,7 @@ export class GameService {
     @InjectModel(Player.name) private playerModel: Model<PlayerDocument>,
 
     private stockEffectState: StockEffectStateProvider,
+    private playerEffectState: PlayerEffectStateProvider,
   ) {}
   async composeChartRequest(
     gameId: string,
@@ -45,12 +47,11 @@ export class GameService {
       _id: Types.ObjectId(gameId),
     });
 
-    const stockEffectState: StockEffectState[] =
-      this.stockEffectState.findStockEffects(
-        gameId,
-        prevTime.week,
-        prevTime.day,
-      );
+    const stockEffectState: StockEffectState[] = this.stockEffectState.find(
+      gameId,
+      prevTime.week,
+      prevTime.day,
+    );
 
     const trades: Trade[] = await this.tradeModel
       .find({
@@ -91,6 +92,10 @@ export class GameService {
   }
 
   async calculateScore(gameId: string): Promise<PlayerScore[]> {
+    const game: Game = await this.gameModel.findOne({
+      _id: Types.ObjectId(gameId),
+    });
+
     const stocks: Stock[] = await this.stockModel
       .find({ game: Types.ObjectId(gameId) })
       .sort({ week: -1, day: -1, tick: -1 })
@@ -112,24 +117,101 @@ export class GameService {
       .find({ game: Types.ObjectId(gameId) })
       .exec();
 
-    const playerScores: PlayerScore[] = players.map((player) => {
-      let purchaseAmount = 0;
-      player.assets.forEach((asset: Asset) => {
-        if (prices[asset.corpId])
-          purchaseAmount += prices[asset.corpId] * asset.totalQuantity;
+    let individualSum = 0;
+
+    const individualScores: PlayerScore[] = players
+      .filter((player: Player) => player.role === 'individual')
+      .map((player: Player) => {
+        const stockCash: number = player.assets.reduce(
+          (acc: number, cur: Asset) =>
+            acc + prices[cur.corpId] * cur.totalQuantity,
+          0,
+        );
+
+        const initialCash = this.getCash(player.role).totalCash;
+        const score = player.cash.totalCash + stockCash - initialCash;
+        individualSum += score;
+
+        return {
+          playerId: player._id,
+          name: player.name,
+          score,
+        };
       });
 
-      const initialCash = this.getCash(player.role).totalCash;
-      const score = player.cash.totalCash + purchaseAmount - initialCash;
+    const institutionalScores: PlayerScore[] = players
+      .filter((player: Player) => player.role === 'institutional')
+      .map((player: Player) => {
+        const stockCash: number = player.assets.reduce(
+          (acc: number, cur: Asset) =>
+            acc + prices[cur.corpId] * cur.totalQuantity,
+          0,
+        );
 
-      return {
-        playerId: player._id,
-        name: player.name,
-        score,
-      };
-    });
+        const initialCash = this.getCash(player.role).totalCash;
+        const score =
+          Math.round((player.cash.totalCash + stockCash - initialCash) / 100) -
+          individualSum;
+
+        return {
+          playerId: player._id,
+          name: player.name,
+          score,
+        };
+      });
+
+    const partyScores: PlayerScore[] = players
+      .filter((player: Player) => player.role === 'party')
+      .map((player: Player) => {
+        const stockCash: number = player.assets.reduce(
+          (acc: number, cur: Asset) =>
+            acc + prices[cur.corpId] * cur.totalQuantity,
+          0,
+        );
+
+        const targetCorp: Corp = game.corps.find((corp: Corp) => corp.target);
+
+        const initialCash = this.getCash(player.role).totalCash;
+        const score = Math.round(
+          (player.cash.totalCash + stockCash - initialCash) / 2 +
+            // 점수 수정 필요
+            Math.floor(
+              100_000 /
+                Math.abs(prices[targetCorp.corpId] - targetCorp.target + 1),
+            ),
+        );
+
+        return {
+          playerId: player._id,
+          name: player.name,
+          score,
+        };
+      });
+
+    const playerScores: PlayerScore[] = [
+      ...individualScores,
+      ...institutionalScores,
+      ...partyScores,
+    ];
 
     return playerScores;
+  }
+
+  async endGame(gameId: Types.ObjectId | string): Promise<void> {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
+    await this.playerModel.updateMany(
+      {
+        game: Types.ObjectId(gameId),
+        status: 'play',
+      },
+      { status: 'finish' },
+    );
+
+    this.playerEffectState.delete(gameId);
+    this.stockEffectState.delete(gameId);
   }
 
   getCash(role: Role): Cash {

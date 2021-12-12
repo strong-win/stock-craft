@@ -134,7 +134,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     } = await this.playerService.create({
       ...payload,
       clientId: client.id,
-      status: 'connected',
+      status: payload.isHost ? 'ready' : 'connected',
     });
 
     client.join(room);
@@ -156,10 +156,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status }: Player) => ({
+      ({ _id: playerId, name, status, isHost }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
+        isHost,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
@@ -182,10 +183,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status }: Player) => ({
+      ({ _id: playerId, name, status, isHost }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
+        isHost,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
@@ -207,10 +209,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status }: Player) => ({
+      ({ _id: playerId, name, status, isHost }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
+        isHost,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
@@ -237,10 +240,11 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       );
 
       const playersInfo: PlayerInfo[] = players.map(
-        ({ _id: playerId, name, status, role }: Player) => ({
+        ({ _id: playerId, name, status, isHost, role }: Player) => ({
           playerId: playerId.toString(),
           name,
           status,
+          isHost,
           role,
         }),
       );

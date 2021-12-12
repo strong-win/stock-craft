@@ -25,7 +25,7 @@ export class PlayerService {
     return this.playerModel.create(playerCreateDto);
   }
 
-  async findByPlayerId(playerId: string | Types.ObjectId): Promise<Player> {
+  async findByPlayerId(playerId: Types.ObjectId | string): Promise<Player> {
     if (typeof playerId === 'string') {
       playerId = Types.ObjectId(playerId);
     }
@@ -50,7 +50,7 @@ export class PlayerService {
   }
 
   async updateByPlayerId(
-    playerId: string | Types.ObjectId,
+    playerId: Types.ObjectId | string,
     playerUpdateDto: PlayerUpdateDto,
   ) {
     if (typeof playerId === 'string') {

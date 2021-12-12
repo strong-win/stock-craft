@@ -10,25 +10,25 @@ services:
       - ./:/usr/proj/server
       - /usr/proj/server/node_modules
     ports:
-      - '8080:8080'
-    links:
-      - mongodb
-    depends_on:
-      - mongodb
+      - '8081:8080'
+    # links:
+    #   - mongodb
+    # depends_on:
+    #   - mongodb
 
-  mongodb:
-    image: mongo
-    restart: always
-    ports:
-      - '27017:27017'
+  # mongodb:
+  #   image: mongo
+  #   restart: always
+  #   ports:
+  #     - '27017:27017'
 
-  mock:
-    image: stockcraft_nestjs_mock
-    build:
-      context: .
-      dockerfile: ./docker/Dockerfile.mock
-    volumes:
-      - ./:/usr/proj/server
-      - /usr/proj/server/node_modules
-    ports:
-      - '8081:8081'
+  # mock:
+  #   image: stockcraft_nestjs_mock
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/Dockerfile.mock
+  #   volumes:
+  #     - ./:/usr/proj/server
+  #     - /usr/proj/server/node_modules
+  #   ports:
+  #     - '8081:8081'

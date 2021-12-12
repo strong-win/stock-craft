@@ -11,4 +11,4 @@ export const CORP_NAMES: string[] = [
   '위약약품',
 ];
 
-export const NUM_STOCKS = 4;
+export const NUM_STOCKS = 5;

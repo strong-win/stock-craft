@@ -62,7 +62,7 @@ export class StockEffectStateProvider {
     if (!flag) this.create(gameId, corpId, week, day, increment);
   }
 
-  findStockEffects(gameId: Types.ObjectId | string, week: number, day: number) {
+  find(gameId: Types.ObjectId | string, week: number, day: number) {
     if (typeof gameId !== 'string') {
       gameId = gameId.toString();
     }
@@ -70,6 +70,12 @@ export class StockEffectStateProvider {
     return this.stockEffects.filter(
       (stock) =>
         gameId === stock.gameId && week === stock.week && day === stock.day,
+    );
+  }
+
+  delete(gameId: Types.ObjectId | string) {
+    this.stockEffects = this.stockEffects.filter(
+      (stockEffect: StockEffectState) => gameId !== stockEffect.gameId,
     );
   }
 }
