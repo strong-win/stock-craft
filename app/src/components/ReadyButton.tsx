@@ -18,7 +18,12 @@ const ReadyButton = ({
           취소하기
         </Button>
       ) : (
-        <Button className="readyButton" onClick={onClickReady}>
+        <Button
+          className={`readyButton ${
+            readyPlayers.length === players.length ? "playActive" : ""
+          }`}
+          onClick={onClickReady}
+        >
           {isHost ? "시작하기" : "준비하기"}
         </Button>
       )}

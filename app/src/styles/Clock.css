@@ -19,8 +19,9 @@
 }
 
 .time {
-  vertical-align: middle;
-  line-height: 4rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   flex: 2;
 }
 .week {

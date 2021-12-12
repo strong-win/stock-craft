@@ -24,7 +24,12 @@ const Messages = ({ name, messages }: ChattingProps) => {
     <div className="messages">
       {messages.map(({ user, text }, index) => (
         <div key={index}>
-          <Message name={name} user={user} text={text} />
+          <Message
+            hideName={index && messages[index - 1].user === user}
+            name={name}
+            user={user}
+            text={text}
+          />
         </div>
       ))}
       <div ref={messagesEndRef} />

@@ -95,10 +95,10 @@ const Asset = ({ cash, assets, corps, tick }) => {
     <AssetItem name={asset.name} value={asset.value} unit={asset.unit} />
   ));
   return (
-    <>
+    <div className="assetWrapper">
       <div className="assetTitle">보유 자산</div>
       {AssetItemsComponent}
-    </>
+    </div>
   );
 };
 

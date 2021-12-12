@@ -23,6 +23,7 @@ export type PlayerState = {
   name: string;
   status: PlayerStatus;
   role: Role;
+  isHost: boolean;
 };
 
 export type AssetState = {

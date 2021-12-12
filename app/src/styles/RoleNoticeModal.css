@@ -8,6 +8,7 @@
 
 .roleNoticeModalHeader {
   border-bottom: none;
+  height: 2rem;
 }
 
 .roleNoticeModalHeader button {
@@ -20,6 +21,10 @@
 .roleNoticeModalBody {
   height: 100%;
   text-align: center;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .roleNoticeModalBody b {
@@ -28,5 +33,5 @@
 
 .noticeTitle {
   font-size: 3rem;
-  margin: 4rem;
+  margin-bottom: 3rem;
 }

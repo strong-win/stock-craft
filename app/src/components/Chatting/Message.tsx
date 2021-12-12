@@ -4,9 +4,10 @@ type MessageProps = {
   name: string;
   user: string;
   text: string;
+  hideName: boolean;
 };
 
-const Message = ({ name, user, text }: MessageProps) => {
+const Message = ({ hideName, name, user, text }: MessageProps) => {
   const isMessageByUser: boolean = name === user ? true : false;
   const isMessageByManager: boolean = user === "관리자";
   return isMessageByUser ? (
@@ -15,7 +16,7 @@ const Message = ({ name, user, text }: MessageProps) => {
     </div>
   ) : (
     <div className="messageWrapper justifyStart">
-      <div>{user}</div>
+      {!hideName && <div>{user}</div>}
       <div
         className={
           isMessageByManager

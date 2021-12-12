@@ -113,7 +113,7 @@ const Play = ({ location, history }: any) => {
       />
       <Header isGameStart day={day} tick={tick} />
       <Row className="playRow1">
-        <Col md="8">
+        <Col md="8" className="h-100">
           <CorporationsWrapper />
         </Col>
         <Col md="4" className="chattingContainer">
@@ -124,7 +124,7 @@ const Play = ({ location, history }: any) => {
         <Col md="8" className="h-100">
           {isShowItems ? <ItemsWrapper /> : <TradeWrapper />}
         </Col>
-        <Col md="4">
+        <Col md="4" className="assetContainer">
           <AssetWrapper />
         </Col>
       </Row>

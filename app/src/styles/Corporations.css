@@ -56,6 +56,9 @@
 .ScoreBoard {
   text-align: center;
   font-size: 2rem;
-  margin: 3rem;
+  padding: 3rem;
   font-family: "IBM Plex Sans KR";
+  display: block;
+  height: 100%;
+  overflow: auto;
 }

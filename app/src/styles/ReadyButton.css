@@ -1,12 +1,16 @@
-.readyButtonWrapper{
-    text-align: center;
-    font-size: 1.2rem;
+.readyButtonWrapper {
+  text-align: center;
+  font-size: 1.2rem;
 }
 
-.readyButton{
-    margin: 3rem;
-    width: 11.25rem;
-    font-size: 1.5rem;
-    background-color: #C4C4C4;
-    border: none;
+.readyButton {
+  margin-bottom: 3rem;
+  width: 15rem;
+  font-size: 1.5rem;
+  background-color: #c4c4c4;
+  border: none;
+}
+
+.playActive {
+  background-color: rgb(21, 147, 0);
 }

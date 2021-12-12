@@ -61,6 +61,7 @@ const Trade = ({
         />
       </Col>
       <Col className="tradeCard">
+        <div className="tableTitle">주식 주문</div>
         <Ban disabled={disabled} />
         <TradeTab tradeType={tradeType} handleChangeType={handleChangeType} />
         <TradeInput tradeBill={tradeBill} setTradeBill={setTradeBill} />

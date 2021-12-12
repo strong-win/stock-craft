@@ -11,6 +11,8 @@ import tutorial1 from "../assets/tutorial1.png";
 import tutorial2 from "../assets/tutorial2.png";
 import tutorial3 from "../assets/tutorial3.png";
 import tutorial4 from "../assets/tutorial4.png";
+
+import "../styles/WaitingRoom.css";
 const items = [
   {
     src: tutorial1,
@@ -58,7 +60,7 @@ const Tutorial = () => {
   const slides = items.map((item) => {
     return (
       <CarouselItem
-        className="custom-tag"
+        className="custom-tag h-100"
         tag="div"
         key={item.src}
         onExiting={() => setAnimating(true)}
@@ -76,7 +78,12 @@ const Tutorial = () => {
 
   return (
     <>
-      <Carousel activeIndex={activeIndex} next={next} previous={previous}>
+      <Carousel
+        className="carousel"
+        activeIndex={activeIndex}
+        next={next}
+        previous={previous}
+      >
         <CarouselIndicators
           items={items}
           activeIndex={activeIndex}

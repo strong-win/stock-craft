@@ -17,3 +17,9 @@
   position: relative;
   padding: 0;
 }
+
+.assetContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

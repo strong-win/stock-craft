@@ -5,3 +5,24 @@
 .body {
   height: 90%;
 }
+
+.carousel .carousel-inner {
+  height: 100%;
+}
+.carousel {
+  height: 100%;
+}
+
+.row1 {
+  height: 60%;
+}
+
+.row2 {
+  height: 40%;
+}
+
+.readyContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

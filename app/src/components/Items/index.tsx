@@ -16,11 +16,13 @@ const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
       <div className="itemTitle" id={itemId}>
         {ITEM[itemId]?.NAME}
       </div>
-      <div className="itemContent" id={itemId}>
-        {ITEM[itemId]?.CONTENT}
-      </div>
-      <div className="itemContent itemCooltime" id={itemId}>
-        아이템 쿨타임: {ITEM[itemId]?.COOLTIME}
+      <div className="itemContentWrapper">
+        <div className="itemContent" id={itemId}>
+          {ITEM[itemId]?.CONTENT}
+        </div>
+        <div className="itemContent itemCooltime" id={itemId}>
+          아이템 쿨타임: {ITEM[itemId]?.COOLTIME}
+        </div>
       </div>
     </Col>
   );

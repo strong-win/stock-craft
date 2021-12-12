@@ -2,6 +2,7 @@ import { ChartState } from "../../modules/stock";
 import { AssetState } from "../../modules/user";
 
 import { Button, Col, Row } from "reactstrap";
+import { MdArrowBack } from "react-icons/md";
 import {
   LineChart,
   Line,
@@ -9,6 +10,8 @@ import {
   YAxis,
   Tooltip,
   ReferenceLine,
+  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
 import "../../styles/Chart.css";
@@ -32,6 +35,71 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
   let color = "black";
   if (rate > 0) color = "red";
   else if (rate < 0) color = "blue";
+
+  const chartHeaderCommonData = [
+    {
+      key: "종목명",
+      value: corp?.corpName,
+    },
+    {
+      key: "현재가격",
+      value: nowPrice ? nowPrice : "-",
+    },
+    {
+      key: "대비",
+      value: gap ? gap : "-",
+      color: true,
+    },
+    {
+      key: "등락률",
+      value: `${rate ? Math.floor(rate) : "-"}%`,
+      color: true,
+    },
+  ];
+
+  const chartHeaderMyData = [
+    {
+      key: "종목명",
+      value: corp?.corpName,
+    },
+    {
+      key: "보유량",
+      value: asset?.totalQuantity,
+    },
+    {
+      key: "평단가",
+      value: Math.floor(averagePrice),
+    },
+    {
+      key: "현재가격",
+      value: nowPrice ? nowPrice : "-",
+    },
+    {
+      key: "이익",
+      value: Math.floor(nowPrice - averagePrice),
+      color: true,
+    },
+    {
+      key: "수익률",
+      value: `${
+        asset?.totalQuantity
+          ? Math.floor(((nowPrice - averagePrice) / averagePrice) * 100)
+          : 0
+      }%`,
+      color: true,
+    },
+  ];
+
+  const chartHeaderData = asset ? chartHeaderMyData : chartHeaderCommonData;
+  const chartHeaderItems = chartHeaderData.map((header) => (
+    <Col className="chartHeaderItem">
+      <label>{header.key}</label>
+      <div className={`chartHeaderContent ${header.color ? color : ""}`}>
+        {header.value}
+      </div>
+    </Col>
+  ));
+
   return (
     <>
       <Row className="chartHeader">
@@ -41,55 +109,38 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
             color="link"
             onClick={() => onClickBackButton("")}
           >
-            {"<"}
+            <MdArrowBack />
           </Button>
         </Col>
-        <Col>{corp?.corpName}</Col>
-        {asset ? (
-          <>
-            <Col>{asset.totalQuantity}</Col>
-            <Col>{Math.floor(averagePrice)}</Col>
-            <Col>{nowPrice ? nowPrice : "-"}</Col>
-            <Col className={color}>{Math.floor(nowPrice - averagePrice)}</Col>
-            <Col className={color}>
-              {asset.totalQuantity
-                ? Math.floor(((nowPrice - averagePrice) / averagePrice) * 100)
-                : 0}
-              %
-            </Col>
-          </>
-        ) : (
-          <>
-            <Col>{nowPrice ? nowPrice : "-"}</Col>
-            <Col className={color}>{gap ? gap : "-"}</Col>
-            <Col className={color}>{rate ? Math.floor(rate) : "-"}%</Col>
-          </>
-        )}
+        {chartHeaderItems}
       </Row>
-      <LineChart
-        width={850}
-        height={350}
-        data={chartData.map((value, index) => ({ time: index, value }))}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 30,
-          bottom: 5,
-        }}
-      >
-        <XAxis dataKey="time" hide={true} />
-        <YAxis hide={true} />
-        <Tooltip />
-        <Line type="linear" dataKey="value" strokeWidth={3} stroke={color} />
-        {asset && (
-          <ReferenceLine
-            y={asset.purchaseAmount / asset.totalQuantity || null}
-            strokeWidth={3}
-            strokeDasharray="5 5"
-            stroke="purple"
-          />
-        )}
-      </LineChart>
+      <ResponsiveContainer width="100%" height="80%">
+        <LineChart
+          width={500}
+          height={300}
+          data={chartData.map((value, index) => ({ time: index, value }))}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 30,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <YAxis axisLine={false} />
+          <XAxis dataKey="time" hide={true} />
+          <Tooltip />
+          <Line type="linear" dataKey="value" strokeWidth={3} stroke={color} />
+          {asset && (
+            <ReferenceLine
+              y={asset.purchaseAmount / asset.totalQuantity || null}
+              strokeWidth={3}
+              strokeDasharray="5 5"
+              stroke="purple"
+            />
+          )}
+        </LineChart>
+      </ResponsiveContainer>
     </>
   );
 };
