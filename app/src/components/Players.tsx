@@ -13,7 +13,7 @@ type PlayersProps = {
 const Players = ({ players }: PlayersProps) => {
   const playerComponent = players.map(({ name, isHost, status }, index) => (
     <Row className="player">
-      <Col className={`readyState ${status === "ready" ? "green" : ""}`} md="1">
+      <Col className={`readyState ${status}`} md="1">
         <BsFillCircleFill size="10" />
       </Col>
       <Col key={index}>

@@ -10,13 +10,18 @@
   border: none;
   padding: 0;
 }
+
 .readyState {
   line-height: normal;
   color: #c4c4c4;
 }
 
-.green {
+.ready {
   color: #8bdc8a;
+}
+
+.play {
+  color: rgb(255, 57, 57);
 }
 
 .player {
