@@ -20,3 +20,4 @@ export const GAME_SCORE = "game/score";
 
 export const ITEM_REQUEST = "item/request";
 export const ITEM_RESPONSE = "item/response";
+export const ERROR = "error";
