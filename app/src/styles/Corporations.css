@@ -62,3 +62,7 @@
   height: 100%;
   overflow: auto;
 }
+
+.myRow {
+  color: rgb(21, 147, 0);
+}

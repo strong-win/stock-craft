@@ -6,6 +6,7 @@ import MyStock from "./MyStock";
 import Chart from "./Chart";
 import "../../styles/Corporations.css";
 import ScoreBoard from "./ScoreBoard";
+import { toast } from "react-toastify";
 
 type CorperationsProps = {
   tick: number;
@@ -22,6 +23,8 @@ const ChartTab = (props) => {
     scores,
     assets,
     corps,
+    players,
+    playerId,
     onClickCorpItem,
     selectedCorpId,
   } = props;
@@ -34,7 +37,14 @@ const ChartTab = (props) => {
   const isShowScoreBoard = week > 1 && day === 0;
 
   useEffect(() => {
-    if (isShowScoreBoard) setActiveTab("ScoreBoard");
+    if (isShowScoreBoard) {
+      setActiveTab("ScoreBoard");
+      if (week === 3) {
+        toast.info(
+          "게임이 종료되었습니다! 최종 결과를 확인 후 대기방으로 이동합니다."
+        );
+      }
+    }
     if (day === 1) setActiveTab("StockMarket");
   }, [week, day]);
 
@@ -74,7 +84,7 @@ const ChartTab = (props) => {
                 onClick={handleTabClick}
                 data-toggle="tab"
               >
-                중간 결과
+                {week === 3 ? "최종 결과" : "중간 결과"}
               </a>
             </li>
           )}
@@ -97,7 +107,14 @@ const ChartTab = (props) => {
           selectedCorpId={selectedCorpId}
         />
       )}
-      {activeTab === "ScoreBoard" && <ScoreBoard scores={scores} />}
+      {activeTab === "ScoreBoard" && (
+        <ScoreBoard
+          scores={scores}
+          isFinal={week === 3}
+          players={players}
+          myId={playerId}
+        />
+      )}
     </>
   );
 };
