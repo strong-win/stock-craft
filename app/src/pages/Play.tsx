@@ -42,6 +42,7 @@ const Play = ({ location, history }: any) => {
   const { week, day, tick } = useSelector((state: RootState) => state.time);
   const { playerId, name, room, status, isHost, role, errorMessage } =
     useSelector((state: RootState) => state.user);
+  const { corps } = useSelector((state: RootState) => state.stock);
 
   const dispatch = useDispatch();
 
@@ -144,6 +145,7 @@ const Play = ({ location, history }: any) => {
             isShowRoleModal={isShowRoleModal}
             setIsShowRoleModal={setIsShowRoleModal}
             role={role}
+            corps={corps}
           />
           <Header isGameStart day={day} tick={tick} />
           <Row className="playRow1">

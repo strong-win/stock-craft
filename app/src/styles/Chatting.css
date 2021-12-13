@@ -95,7 +95,6 @@
   position: absolute;
   border: 1px solid #c4c4c4;
   border-radius: 3rem;
-  height: 20rem;
   width: 95%;
   padding: 1rem;
   text-align: center;
@@ -113,12 +112,15 @@
 .roleCardContent2 {
   display: flex;
   flex-direction: row;
-  height: 10rem;
 }
 
 .roleImageWrapper {
   flex: 5;
   height: 100%;
+}
+
+.roleImageWrapper img {
+  width: 100%;
 }
 .roleAssetWrapper {
   flex: 7;
@@ -135,4 +137,8 @@
 
 .roleNotice {
   color: rgb(148, 148, 148);
+}
+
+.partyTarget {
+  color: red;
 }

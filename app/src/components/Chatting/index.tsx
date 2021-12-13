@@ -9,6 +9,7 @@ import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import RoleCard from "./RoleCard";
 import Ban from "../Ban";
+import { ChartState } from "../../modules/stock";
 
 type ChattingProps = {
   name: string;
@@ -17,6 +18,7 @@ type ChattingProps = {
   userStatus: string;
   score: PlayerScore;
   role: string;
+  corps: ChartState[];
   disabled: boolean;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
@@ -31,6 +33,7 @@ const Chatting = ({
   messages,
   userStatus,
   score,
+  corps,
   role,
   setMessage,
   sendMessage,
@@ -57,7 +60,7 @@ const Chatting = ({
         </CardHeader>
         <CardBody className="chattingBody">
           {userStatus === "play" && isNickNameHover && (
-            <RoleCard score={score} role={role} />
+            <RoleCard score={score} role={role} corps={corps} />
           )}
           <Messages name={name} messages={messages} />
         </CardBody>

@@ -12,7 +12,7 @@ const AssetItem = ({ name, value, unit }) => {
   );
 };
 
-const RoleCard = ({ role, score }) => {
+const RoleCard = ({ role, score, corps }) => {
   const assetData = [
     {
       name: "기본 점수",
@@ -31,6 +31,8 @@ const RoleCard = ({ role, score }) => {
     },
   ];
 
+  const targetCorp = corps.find((corp) => corp.target !== 0);
+
   const roleAssetItems = assetData.map((asset) => (
     <AssetItem name={asset.name} value={asset.value} unit={asset.unit} />
   ));
@@ -43,7 +45,23 @@ const RoleCard = ({ role, score }) => {
         <div className="roleImageWrapper">
           <img className="roleImage" src={ROLE_TYPE[role]?.IMAGE} />
         </div>
-        <div className="roleAssetWrapper">{roleAssetItems}</div>
+        <div className="roleAssetWrapper">
+          {roleAssetItems}
+          {role === "party" && (
+            <div className="partyTarget">
+              <AssetItem
+                name="타겟 종목"
+                value={targetCorp?.corpName}
+                unit=""
+              />
+              <AssetItem
+                name="타겟 가격"
+                value={targetCorp?.target}
+                unit="원"
+              />
+            </div>
+          )}
+        </div>
       </div>
       <div className="roleNotice">점수는 하루 간격으로 업데이트 됩니다.</div>
     </div>

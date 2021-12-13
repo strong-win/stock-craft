@@ -9,6 +9,7 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
   const { playerId, messages, options, status, score, role, skills } =
     useSelector((state: RootState) => state.user);
 
+  const { corps } = useSelector((state: RootState) => state.stock);
   const dispatch = useDispatch();
 
   const [message, setMessage] = useState("");
@@ -37,6 +38,7 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
       userStatus={status}
       role={role}
       score={score}
+      corps={corps}
       disabled={options?.chatoff}
     />
   );
