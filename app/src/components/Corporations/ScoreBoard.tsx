@@ -7,8 +7,8 @@ const ScoreBoard = ({ scores, isFinal, players, myId }) => {
     ({ basic, bonus, name, playerId }, index) => {
       return (
         <div className={`row ${playerId === myId ? "myRow" : ""}`}>
-          <div className="col-1">{index + 1}위</div>
-          <div className="col-1">
+          <div className="col">{index + 1}위</div>
+          <div className="col-2">
             {
               ROLE_TYPE[
                 players.find((player) => player.playerId === playerId)?.role
@@ -17,16 +17,31 @@ const ScoreBoard = ({ scores, isFinal, players, myId }) => {
           </div>
           {isFinal && (
             <>
-              <div className="col-4">{name}</div>
+              <div className="col-3">{name}</div>
             </>
           )}
-          <div className="col-3">기본 {basic}점</div>
-          <div className="col-3">보너스 {bonus}점</div>
+          <div className="col-3">{basic}점</div>
+          <div className="col-3">{bonus}점</div>
         </div>
       );
     }
   );
-  return <div className="ScoreBoard">{scoreItems}</div>;
+  return (
+    <div className="ScoreBoard">
+      <div className="row">
+        <div className="col">순위</div>
+        <div className="col-2">역할</div>
+        {isFinal && (
+          <>
+            <div className="col-3">이름</div>
+          </>
+        )}
+        <div className="col-3">기본 점수</div>
+        <div className="col-3">보너스 점수</div>
+      </div>
+      {scoreItems}
+    </div>
+  );
 };
 
 export default ScoreBoard;
