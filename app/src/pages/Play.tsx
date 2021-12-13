@@ -96,6 +96,8 @@ const Play = ({ location, history }: any) => {
       window.removeEventListener("beforeunload", checkLeaveHandler);
       window.removeEventListener("unload", leaveHandler);
       dispatch(resetUser());
+      dispatch(resetTime());
+      dispatch(resetChart());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
