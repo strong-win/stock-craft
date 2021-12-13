@@ -128,8 +128,8 @@ def init_model(game_info: GameInfo):
         }
 
         market_col.insert(new_game)
-        # 4. 반환을 위한 dict res 생성, `gameId`와 `data` attribute 추가 후 반환
-        res = {'gameId': game_info.gameId, 'data': model_data}
+        # 4. 반환을 위한 dict res 생성, `gameId`와 `corps` attribute 추가 후 반환
+        res = {'gameId': game_info.gameId, 'corps': model_data}
         return JSONResponse(res)
     except Exception as e:
         return JSONResponse({'gameId': game_info.gameId, "status": "Error : {}".format(traceback.format_exc())})
