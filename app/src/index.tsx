@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
@@ -24,19 +24,26 @@ sagaMiddleware.run(rootSaga);
 
 export type RootState = ReturnType<typeof store.getState>;
 
-ReactDOM.render(
-  <React.StrictMode>
-    <Provider store={store}>
-      <Router>
-        <Switch>
-          <Route exact path="/" component={Main} />
-          <Route exact path="/play" component={Play} />
-        </Switch>
-      </Router>
-    </Provider>
-  </React.StrictMode>,
-  document.getElementById("root")
-);
+const StockCraft = () => {
+  useEffect(() => {
+    document.title = "stock-craft";
+  }, []);
+
+  return (
+    <React.StrictMode>
+      <Provider store={store}>
+        <Router>
+          <Switch>
+            <Route exact path="/" component={Main} />
+            <Route exact path="/play" component={Play} />
+          </Switch>
+        </Router>
+      </Provider>
+    </React.StrictMode>
+  );
+};
+
+ReactDOM.render(<StockCraft />, document.getElementById("root"));
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

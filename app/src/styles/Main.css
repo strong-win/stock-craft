@@ -4,6 +4,7 @@
   font-family: "IBM Plex Sans KR";
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
 }
 
@@ -15,7 +16,6 @@
   font-weight: 300;
   display: flex;
   justify-content: center;
-  padding-top: 12rem;
 }
 
 .mainButton {
