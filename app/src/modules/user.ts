@@ -58,9 +58,14 @@ export type PlayerSkill = {
 };
 
 export type PlayerScore = {
+  basic: number;
+  bonus: number;
+};
+
+export type AllPlayerScore = PlayerScore & {
   playerId: string;
+  clientId: string;
   name: string;
-  score: number;
 };
 
 export type UserState = {
@@ -80,7 +85,8 @@ export type UserState = {
   items: { [key: string]: number };
   options: PlayerOption;
   skills: PlayerSkill;
-  scores: PlayerScore[];
+  score: PlayerScore;
+  allScores: AllPlayerScore[];
   role: Role;
   errorMessage: string;
 };
@@ -109,7 +115,11 @@ const initialState: UserState = {
   isChartView: false,
   options: {},
   skills: {},
-  scores: [],
+  score: {
+    basic: 0,
+    bonus: 0,
+  },
+  allScores: [],
   role: "",
   errorMessage: "",
 };
@@ -175,8 +185,11 @@ export const gameSlice = createSlice({
     updateSkills: (state, action: PayloadAction<PlayerSkill>) => {
       state.skills = action.payload;
     },
-    updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
-      state.scores = action.payload;
+    updateScore: (state, action: PayloadAction<PlayerScore>) => {
+      state.score = action.payload;
+    },
+    updateAllScores: (state, action: PayloadAction<AllPlayerScore[]>) => {
+      state.allScores = action.payload;
     },
     setItems: (state, action: PayloadAction<string>) => {
       //set items after role is decided
@@ -247,7 +260,8 @@ export const {
   updateIsChartView,
   updateOptions,
   updateSkills,
-  updateScores,
+  updateScore,
+  updateAllScores,
   updateRole,
   updateTrades,
   updateItemsBytime,

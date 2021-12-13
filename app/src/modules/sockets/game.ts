@@ -1,11 +1,23 @@
+import {} from "./../user";
 import { eventChannel } from "@redux-saga/core";
 import { apply, call, put, take } from "@redux-saga/core/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { Socket } from "socket.io-client";
 import { DayChartState, updateDayChart } from "../stock";
 import { TimeState, updateTime } from "../time";
-import { PlayerScore, updateItemsBytime, updateScores } from "../user";
-import { GAME_SCORE, GAME_TIME_REQUEST, GAME_TIME_RESPONSE } from "./events";
+import {
+  AllPlayerScore,
+  PlayerScore,
+  updateItemsBytime,
+  updateScore,
+  updateAllScores,
+} from "../user";
+import {
+  GAME_DAY_SCORE,
+  GAME_TIME_REQUEST,
+  GAME_TIME_RESPONSE,
+  GAME_WEEK_SCORE,
+} from "./events";
 
 export const sendGameTimeRequest = createAction(
   GAME_TIME_REQUEST,
@@ -45,9 +57,9 @@ export function* receiveGameTimeResponseSaga(socket: Socket) {
   }
 }
 
-const receiveGameScoreChannel = (socket: Socket) => {
-  return eventChannel<PlayerScore[]>((emit) => {
-    socket.on(GAME_SCORE, (payload: PlayerScore[]) => {
+const receiveDayScoreChannel = (socket: Socket) => {
+  return eventChannel<PlayerScore>((emit) => {
+    socket.on(GAME_DAY_SCORE, (payload: PlayerScore) => {
       emit(payload);
     });
 
@@ -55,14 +67,36 @@ const receiveGameScoreChannel = (socket: Socket) => {
   });
 };
 
-export function* receiveGameScoreSaga(socket: Socket) {
-  const channel: ReturnType<typeof receiveGameScoreChannel> = yield call(
-    receiveGameScoreChannel,
+export function* receiveDayScoreSaga(socket: Socket) {
+  const channel: ReturnType<typeof receiveDayScoreChannel> = yield call(
+    receiveDayScoreChannel,
     socket
   );
 
   while (true) {
-    const payload: PlayerScore[] = yield take(channel);
-    yield put(updateScores(payload));
+    const { basic, bonus }: PlayerScore = yield take(channel);
+    yield put(updateScore({ basic, bonus }));
+  }
+}
+
+const receiveWeekScoreChannel = (socket: Socket) => {
+  return eventChannel<AllPlayerScore[]>((emit) => {
+    socket.on(GAME_WEEK_SCORE, (payload: AllPlayerScore[]) => {
+      emit(payload);
+    });
+
+    return () => {};
+  });
+};
+
+export function* receiveWeekScoreSaga(socket: Socket) {
+  const channel: ReturnType<typeof receiveWeekScoreChannel> = yield call(
+    receiveWeekScoreChannel,
+    socket
+  );
+
+  while (true) {
+    const payload: AllPlayerScore[] = yield take(channel);
+    yield put(updateAllScores(payload));
   }
 }

@@ -5,8 +5,9 @@ import connectSocket from "../../configs/socket";
 import { receiveChattingSaga, sendChattingSaga } from "./chatting";
 import { receiveErrorSaga } from "./error";
 import {
-  receiveGameScoreSaga,
+  receiveDayScoreSaga,
   receiveGameTimeResponseSaga,
+  receiveWeekScoreSaga,
   sendGameTimeRequestSaga,
 } from "./game";
 import {
@@ -54,7 +55,8 @@ export function* handleIO() {
     // game
     sendGameTimeRequestSaga(socket),
     receiveGameTimeResponseSaga(socket),
-    receiveGameScoreSaga(socket),
+    receiveDayScoreSaga(socket),
+    receiveWeekScoreSaga(socket),
 
     // item
     sendItemRequestSaga(socket),
