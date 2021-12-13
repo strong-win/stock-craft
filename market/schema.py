@@ -1,5 +1,7 @@
-from typing import List, Dict, Union, Optional
+from typing import Dict, List, Optional, Union
+
 from pydantic import BaseModel
+
 
 # used for req in POST
 class GameInfo(BaseModel):

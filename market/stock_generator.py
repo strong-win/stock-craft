@@ -1,8 +1,11 @@
 import os
-import pandas as pd
 from datetime import date, timedelta
-from random import sample, randint
-from data_constant import KOSPI_200, TICKER_NAME, DATA_PATH, START_DATE, END_DATE
+from random import randint, sample
+
+import pandas as pd
+
+from data_constant import (DATA_PATH, END_DATE, KOSPI_200, START_DATE,
+                           TICKER_NAME)
 
 
 def get_random_date(train_days: int, init_days: int) -> "pd.Timestamp":
