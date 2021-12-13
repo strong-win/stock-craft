@@ -1,6 +1,7 @@
 .WaitingRoomContainer {
   height: 100vh;
   font-family: "IBM Plex Sans KR";
+  overflow: hidden;
 }
 
 .body {
