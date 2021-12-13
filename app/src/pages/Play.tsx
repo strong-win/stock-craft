@@ -23,11 +23,14 @@ import {
   updateRoom,
   resetUser,
   updateErrorMessage,
+  clearPlayer,
 } from "../modules/user";
 import { createName } from "../utils/create";
 
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/Play.css";
+import { resetChart } from "../modules/stock";
+import { resetTime } from "../modules/time";
 
 const Play = ({ location, history }: any) => {
   const [isBlocking, setIsBlocking] = useState<boolean>(false);
@@ -64,6 +67,15 @@ const Play = ({ location, history }: any) => {
       dispatch(updateErrorMessage(""));
     }
   }, [errorMessage]);
+
+  useEffect(() => {
+    if (week === 3 && day === 1) {
+      dispatch(clearPlayer());
+      dispatch(resetChart());
+      dispatch(resetTime());
+      dispatch(sendJoinConnected({ name, room, isHost }));
+    }
+  }, [day]);
 
   useEffect(() => {
     const checkLeaveHandler = (e: any) => {
@@ -121,6 +133,7 @@ const Play = ({ location, history }: any) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, history, initRoom]);
+
   return (
     <>
       {status === "play" ? (
