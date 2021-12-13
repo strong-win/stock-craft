@@ -193,7 +193,7 @@ export const gameSlice = createSlice({
     },
     setItems: (state, action: PayloadAction<string>) => {
       //set items after role is decided
-      if (state.items.length !== 4) {
+      if (Object.keys(state.items).length === 0) {
         const roleItems = ITEM_TYPE[action.payload];
 
         const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
