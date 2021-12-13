@@ -85,7 +85,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     {
       name: "평균 수익률",
       value: totalPurchaseAmount
-        ? Math.floor((totalDiff / totalPurchaseAmount) * 100)
+        ? ((totalDiff / totalPurchaseAmount) * 100).toFixed(1)
         : 0,
       unit: "%",
     },
