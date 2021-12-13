@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Input } from "reactstrap";
+import { toast, ToastContainer } from "react-toastify";
 
 import RoomCodeModal from "./RoomCodeModal";
 
@@ -25,7 +26,7 @@ const Main = ({
 
   const handleModalOpen = () => {
     if (isButtonDisabled) {
-      window.alert(
+      toast.error(
         "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
       );
     } else {
@@ -46,7 +47,7 @@ const Main = ({
       <Link
         onClick={() => {
           if (isButtonDisabled) {
-            window.alert(
+            toast.error(
               "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
             );
           }
@@ -76,6 +77,17 @@ const Main = ({
         isOpen={isModalOpen}
         toggle={handleModalOpen}
         onChangeRoom={onChangeRoom}
+      />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
     </div>
   );

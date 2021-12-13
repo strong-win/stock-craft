@@ -82,6 +82,7 @@ export type UserState = {
   skills: PlayerSkill;
   scores: PlayerScore[];
   role: Role;
+  errorMessage: string;
 };
 
 const initialState: UserState = {
@@ -104,12 +105,13 @@ const initialState: UserState = {
   trades: [
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
-  selectedCorpId: "gyu",
+  selectedCorpId: "",
   isChartView: false,
   options: {},
   skills: {},
   scores: [],
   role: "",
+  errorMessage: "",
 };
 
 export const gameSlice = createSlice({
@@ -117,6 +119,15 @@ export const gameSlice = createSlice({
   initialState,
   reducers: {
     resetUser: () => initialState,
+    clearPlayer(state) {
+      const { name, isHost, room } = state;
+      return {
+        ...initialState,
+        name,
+        isHost,
+        room,
+      };
+    },
     updateName(state, action: PayloadAction<string>) {
       state.name = action.payload;
     },
@@ -182,7 +193,9 @@ export const gameSlice = createSlice({
       });
     },
     updateItemCoolTime: (state, action: PayloadAction<string>) => {
-      state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      if (state.items[action.payload] !== undefined) {
+        state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      }
     },
     updateRole: (state, action: PayloadAction<Role>) => {
       state.role = action.payload;
@@ -211,6 +224,9 @@ export const gameSlice = createSlice({
           break;
       }
     },
+    updateErrorMessage: (state, action: PayloadAction<string>) => {
+      state.errorMessage = action.payload;
+    },
   },
 });
 
@@ -236,7 +252,9 @@ export const {
   updateTrades,
   updateItemsBytime,
   updateItemCoolTime,
+  updateErrorMessage,
   setItems,
+  clearPlayer,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;
