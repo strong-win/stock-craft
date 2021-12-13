@@ -52,7 +52,7 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
     },
     {
       key: "등락률",
-      value: `${rate ? Math.floor(rate) : "-"}%`,
+      value: `${rate ? rate.toFixed(1) : "-"}%`,
       color: true,
     },
   ];
@@ -83,7 +83,7 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
       key: "수익률",
       value: `${
         asset?.totalQuantity
-          ? Math.floor(((nowPrice - averagePrice) / averagePrice) * 100)
+          ? (((nowPrice - averagePrice) / averagePrice) * 100).toFixed(1)
           : 0
       }%`,
       color: true,
@@ -127,7 +127,14 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <YAxis axisLine={false} />
+          <YAxis
+            axisLine={false}
+            domain={[
+              (dataMin: number) => dataMin - dataMin / 50,
+              (dataMax: number) => dataMax + dataMax / 50,
+            ]}
+            scale="linear"
+          />
           <XAxis dataKey="time" hide={true} />
           <Tooltip />
           <Line type="linear" dataKey="value" strokeWidth={3} stroke={color} />

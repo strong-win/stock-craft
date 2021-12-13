@@ -168,8 +168,9 @@ const MyStockMarket = ({
 
 const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
   const CorpItem = ({ corp }) => {
-    const prevPrice = corp?.totalChart?.at(-1);
-    const nowPrice = corp?.todayChart[tick - 1];
+    const chartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
+    const prevPrice = chartData.at(-2);
+    const nowPrice = chartData.at(-1);
     const rate = ((nowPrice - prevPrice) / prevPrice) * 100;
     const gap = nowPrice - prevPrice;
     let color = "";
@@ -181,7 +182,7 @@ const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
         <th scope="row">{corp.corpName}</th>
         <td>{nowPrice ? nowPrice : "-"}</td>
         <td className={color}>{gap ? gap : "-"}</td>
-        <td className={color}>{rate ? Math.floor(rate) : "-"}%</td>
+        <td className={color}>{rate ? rate.toFixed(1) : "-"}%</td>
       </tr>
     );
   };

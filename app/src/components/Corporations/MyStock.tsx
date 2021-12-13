@@ -32,7 +32,7 @@ const MyStock = ({ tick, corps, assets, onClickCorpItem }: MyStockProps) => {
         <td>{averagePrice ? Math.floor(averagePrice) : "-"}</td>
         <td>{nowPrice}</td>
         <td className={color}>{gap ? Math.floor(gap) : "-"}</td>
-        <td className={color}>{rate ? Math.floor(rate) : "-"}%</td>
+        <td className={color}>{rate ? rate.toFixed(1) : "-"}%</td>
       </tr>
     );
   };
