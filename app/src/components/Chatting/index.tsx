@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardHeader, CardBody, CardFooter, Tooltip } from "reactstrap";
-import { AssetState, CashState, MessageState } from "../../modules/user";
+import { MessageState, PlayerScore } from "../../modules/user";
 import { FiUser } from "react-icons/fi";
 
 import "../../styles/Chatting.css";
@@ -8,20 +8,15 @@ import "../../styles/Chatting.css";
 import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import RoleCard from "./RoleCard";
-import { ChartState } from "../../modules/stock";
 import Ban from "../Ban";
-
 
 type ChattingProps = {
   name: string;
   room: string;
   message: string;
   userStatus: string;
-  cash: CashState;
-  assets: AssetState[];
-  corps: ChartState[];
+  score: PlayerScore;
   role: string;
-  tick: number;
   disabled: boolean;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
   sendMessage: (e: any) => void;
@@ -35,11 +30,8 @@ const Chatting = ({
   message,
   messages,
   userStatus,
-  cash,
+  score,
   role,
-  corps,
-  tick,
-  assets,
   setMessage,
   sendMessage,
 }: ChattingProps) => {
@@ -65,13 +57,7 @@ const Chatting = ({
         </CardHeader>
         <CardBody className="chattingBody">
           {userStatus === "play" && isNickNameHover && (
-            <RoleCard
-              assets={assets}
-              corps={corps}
-              tick={tick}
-              cash={cash}
-              role={role}
-            />
+            <RoleCard score={score} role={role} />
           )}
           <Messages name={name} messages={messages} />
         </CardBody>
@@ -85,7 +71,6 @@ const Chatting = ({
         </CardFooter>
       </Card>
     </>
-
   );
 };
 
