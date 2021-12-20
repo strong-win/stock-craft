@@ -23,6 +23,7 @@ export class ItemService {
     if (
       time.week !== week ||
       time.day !== day ||
+      time.week > 2 ||
       (time.day > 0 && time.tick !== 4)
     ) {
       const timeError = new Error(

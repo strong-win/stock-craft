@@ -56,6 +56,9 @@ export class TradeService {
     if (!player) throw Error('플레이어 정보를 불러올 수 없습니다.');
 
     let isDirect: boolean;
+    let isLeverage = false;
+    let bonus: number;
+
     if (deal === 'buy') {
       // check if player can trade
       if (player.cash.availableCash < price * quantity)
@@ -82,12 +85,18 @@ export class TradeService {
     if (deal === 'sell') {
       // check if player can directly trade
       isDirect = stock.price >= price ? true : false;
+      if (isDirect && player.skills.leverage) isLeverage = true;
 
       for (const asset of player.assets) {
         if (asset.corpId === corpId) {
           // check if player can trade
           if (asset.availableQuantity < quantity)
             throw Error('거래 가능 수량이 부족합니다.');
+
+          if (isLeverage)
+            bonus =
+              (price - Math.floor(asset.purchaseAmount / asset.totalQuantity)) *
+              2;
 
           asset.availableQuantity -= quantity;
           if (isDirect) {
@@ -99,14 +108,9 @@ export class TradeService {
       }
       // if corp is included in assets
       if (isDirect) {
-        const amount = price * quantity;
-        if (player.skills.leverage) {
-          player.cash.totalCash += 2 * amount;
-          player.cash.availableCash += 2 * amount;
-        } else {
-          player.cash.totalCash += amount;
-          player.cash.availableCash += amount;
-        }
+        const amount = (price + (isLeverage ? bonus : 0)) * quantity;
+        player.cash.totalCash += amount;
+        player.cash.availableCash += amount;
       }
     }
 
@@ -118,7 +122,7 @@ export class TradeService {
       day,
       tick,
       corpId,
-      price: deal === 'sell' && player.skills.leverage ? 2 * price : price,
+      price: price + (isLeverage ? bonus : 0),
       quantity,
       deal,
       status: isDirect ? 'disposed' : 'pending',
@@ -184,6 +188,8 @@ export class TradeService {
 
         const stock = stocks.find((stock) => stock.corpId === trade.corpId);
 
+        let isLeverage = false;
+
         if (trade.deal === 'buy') {
           if (trade.price >= stock.price) {
             // update player cash
@@ -207,34 +213,34 @@ export class TradeService {
         }
 
         if (trade.deal === 'sell') {
-          if (trade.price <= stock.price) {
-            // update player cash
-            const amount = trade.price * trade.quantity;
-            if (player.skills.leverage) {
-              player.cash.totalCash += 2 * amount;
-              player.cash.availableCash += 2 * amount;
-            } else {
-              player.cash.totalCash += amount;
-              player.cash.availableCash += amount;
-            }
+          if (player.skills.leverage) isLeverage = true;
 
+          if (trade.price <= stock.price) {
             // update player assets
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
+                if (isLeverage)
+                  trade.price +=
+                    (trade.price -
+                      Math.floor(asset.purchaseAmount / asset.totalQuantity)) *
+                    2;
+
                 asset.purchaseAmount -=
                   (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
                 asset.totalQuantity -= trade.quantity;
               }
             }
 
+            // update player cash
+            const amount = trade.price * trade.quantity;
+            player.cash.totalCash += amount;
+            player.cash.availableCash += amount;
+
             await this.tradeModel.updateOne(
               { _id: trade._id },
               {
                 $set: {
-                  price:
-                    trade.deal === 'sell' && player.skills.leverage
-                      ? 2 * trade.price
-                      : trade.price,
+                  price: trade.price,
                   status: 'disposed',
                 },
               },

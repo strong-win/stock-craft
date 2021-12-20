@@ -85,7 +85,7 @@ export class JoinService {
       .exec();
 
     // give random role
-    let NUM_INSTITUTIONAL = 1;
+    let NUM_INSTITUTIONAL = Math.floor(players.length / 4);
     let NUM_PARTY = 1;
 
     if (players.length >= 3) {
@@ -116,8 +116,8 @@ export class JoinService {
       { _id: { $in: individualIds } },
       {
         status: 'play',
-        game: Types.ObjectId(gameId),
         role: 'individual',
+        game: Types.ObjectId(gameId),
         assets: this.getAssets(corps),
         cash: this.getCash('individual'),
         options: this.getOptions(),
@@ -133,8 +133,8 @@ export class JoinService {
       { _id: { $in: institutionalIds } },
       {
         status: 'play',
-        game: Types.ObjectId(gameId),
         role: 'institutional',
+        game: Types.ObjectId(gameId),
         assets: this.getAssets(corps),
         cash: this.getCash('institutional'),
         options: this.getOptions(),

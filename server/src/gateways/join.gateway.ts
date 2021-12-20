@@ -83,10 +83,12 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.getStatuses('all'),
       );
       const playersInfo: PlayerInfo[] = players.map(
-        ({ _id: playerId, name, status }: Player) => ({
+        ({ _id: playerId, name, status, isHost, role }: Player) => ({
           playerId: playerId.toString(),
           name,
           status,
+          isHost,
+          role,
         }),
       );
 
@@ -94,6 +96,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const newHost: Player = players[0];
 
         await this.playerService.updateByPlayerId(newHost._id, {
+          status: 'ready',
           isHost: true,
         });
 
@@ -125,16 +128,22 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(JOIN_CONNECTED)
   async receiveJoinConnected(
     client: Socket,
-    payload: { name: string; room: string; isHost: boolean },
-  ): Promise<{ playerId: string }> {
-    const {
-      _id: playerId,
+    payload: { name: string; room: string; isHost: boolean | undefined },
+  ): Promise<{ playerId: string; isHost: boolean }> {
+    const { name, room } = payload;
+    const residents: Player[] = await this.playerService.findByRoomAndStatuses(
+      payload.room,
+      this.getStatuses('connected'),
+    );
+    const isHost =
+      payload.isHost !== undefined ? payload.isHost : residents.length === 0;
+
+    const { _id: playerId } = await this.playerService.create({
       name,
       room,
-    } = await this.playerService.create({
-      ...payload,
+      isHost,
       clientId: client.id,
-      status: payload.isHost ? 'ready' : 'connected',
+      status: isHost ? 'ready' : 'connected',
     });
 
     client.join(room);
@@ -156,16 +165,17 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status, isHost }: Player) => ({
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
         isHost,
+        role,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
-    return { playerId: playerId.toString() };
+    return { playerId: playerId.toString(), isHost };
   }
 
   @SubscribeMessage(JOIN_READY)
@@ -183,11 +193,12 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status, isHost }: Player) => ({
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
         isHost,
+        role,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
@@ -209,11 +220,12 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     );
 
     const playersInfo: PlayerInfo[] = players.map(
-      ({ _id: playerId, name, status, isHost }: Player) => ({
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
         playerId: playerId.toString(),
         name,
         status,
         isHost,
+        role,
       }),
     );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);

@@ -16,7 +16,8 @@ export const TRADE_CANCEL = 'trade/cancel';
 
 export const GAME_TIME_REQUEST = 'game/time_request';
 export const GAME_TIME_RESPONSE = 'game/time_response';
-export const GAME_SCORE = 'game/score';
+export const GAME_DAY_SCORE = 'game/day_score';
+export const GAME_WEEK_SCORE = 'game/week_score';
 
 export const ITEM_REQUEST = 'item/request';
 export const ITEM_RESPONSE = 'item/response';

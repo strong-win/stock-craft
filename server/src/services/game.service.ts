@@ -23,8 +23,10 @@ import { PlayerEffectStateProvider } from 'src/states/player.effect.state';
 
 export type PlayerScore = {
   playerId: Types.ObjectId;
+  clientId: string;
   name: string;
-  score: number;
+  basic: number;
+  bonus: number;
 };
 
 @Injectable()
@@ -92,9 +94,13 @@ export class GameService {
   }
 
   async calculateScore(gameId: string): Promise<PlayerScore[]> {
-    const game: Game = await this.gameModel.findOne({
-      _id: Types.ObjectId(gameId),
-    });
+    const game: Game = await this.gameModel
+      .findOne({
+        _id: Types.ObjectId(gameId),
+      })
+      .populate('players');
+
+    if (!game) throw Error('플레이어를 정상적으로 불러오지 못하였습니다.');
 
     const stocks: Stock[] = await this.stockModel
       .find({ game: Types.ObjectId(gameId) })
@@ -102,24 +108,21 @@ export class GameService {
       .limit(NUM_STOCKS)
       .exec();
 
-    if (stocks.length !== NUM_STOCKS) {
-      const stockError = new Error('주가를 정상적으로 불러오지 못하였습니다.');
-      stockError.name = 'stockException';
-      throw stockError;
-    }
-
     const prices: { [key: string]: number } = {};
-    stocks.forEach((stock: Stock) => {
-      prices[stock.corpId] = stock.price;
-    });
 
-    const players: Player[] = await this.playerModel
-      .find({ game: Types.ObjectId(gameId) })
-      .exec();
+    if (stocks.length) {
+      stocks.forEach((stock: Stock) => {
+        prices[stock.corpId] = stock.price;
+      });
+    } else {
+      game.corps.forEach((corp: Corp) => {
+        prices[corp.corpId] = corp.totalChart[corp.totalChart.length - 1];
+      });
+    }
 
     let individualSum = 0;
 
-    const individualScores: PlayerScore[] = players
+    const individualScores: PlayerScore[] = game.players
       .filter((player: Player) => player.role === 'individual')
       .map((player: Player) => {
         const stockCash: number = player.assets.reduce(
@@ -128,18 +131,20 @@ export class GameService {
           0,
         );
 
-        const initialCash = this.getCash(player.role).totalCash;
-        const score = player.cash.totalCash + stockCash - initialCash;
-        individualSum += score;
+        const basic = player.cash.totalCash + stockCash;
+        const profit = basic - this.getCash('individual').totalCash;
+        individualSum += profit ? profit : 0;
 
         return {
           playerId: player._id,
+          clientId: player.clientId,
           name: player.name,
-          score,
+          basic,
+          bonus: 0,
         };
       });
 
-    const institutionalScores: PlayerScore[] = players
+    const institutionalScores: PlayerScore[] = game.players
       .filter((player: Player) => player.role === 'institutional')
       .map((player: Player) => {
         const stockCash: number = player.assets.reduce(
@@ -148,19 +153,19 @@ export class GameService {
           0,
         );
 
-        const initialCash = this.getCash(player.role).totalCash;
-        const score =
-          Math.round((player.cash.totalCash + stockCash - initialCash) / 100) -
-          individualSum;
+        const basic = Math.floor((player.cash.totalCash + stockCash) / 200);
+        const bonus = individualSum;
 
         return {
           playerId: player._id,
+          clientId: player.clientId,
           name: player.name,
-          score,
+          basic,
+          bonus,
         };
       });
 
-    const partyScores: PlayerScore[] = players
+    const partyScores: PlayerScore[] = game.players
       .filter((player: Player) => player.role === 'party')
       .map((player: Player) => {
         const stockCash: number = player.assets.reduce(
@@ -170,21 +175,21 @@ export class GameService {
         );
 
         const targetCorp: Corp = game.corps.find((corp: Corp) => corp.target);
-
-        const initialCash = this.getCash(player.role).totalCash;
-        const score = Math.round(
-          (player.cash.totalCash + stockCash - initialCash) / 2 +
-            // 점수 수정 필요
-            Math.floor(
-              100_000 /
-                Math.abs(prices[targetCorp.corpId] - targetCorp.target + 1),
-            ),
+        const targetDiff = Math.abs(
+          prices[targetCorp.corpId] - targetCorp.target,
         );
+
+        const bonus = Math.floor(
+          Math.pow(1 - targetDiff / targetCorp.target, 4) * 1_000_000,
+        );
+        const basic = Math.floor((player.cash.totalCash + stockCash) / 10);
 
         return {
           playerId: player._id,
+          clientId: player.clientId,
           name: player.name,
-          score,
+          basic,
+          bonus,
         };
       });
 
