@@ -60,13 +60,17 @@ const Tutorial = () => {
   const slides = items.map((item) => {
     return (
       <CarouselItem
-        className="custom-tag h-100"
+        className="custom-tag carouselItem"
         tag="div"
         key={item.src}
         onExiting={() => setAnimating(true)}
         onExited={() => setAnimating(false)}
       >
-        <img src={item.src} alt={item.altText} style={{ width: "100%" }} />
+        <img
+          src={item.src}
+          alt={item.altText}
+          style={{ maxWidth: "100%", maxHeight: "100%", margin: "auto" }}
+        />
         <CarouselCaption
           className="text"
           captionText={item.caption}

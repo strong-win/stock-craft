@@ -114,18 +114,24 @@ const Play = ({ location, history }: any) => {
 
   useEffect(() => {
     let createdName: string;
+    const trimmedInitRoom = typeof initRoom === "string" ? initRoom.trim() : "";
+
     if (!name) {
       createdName = createName();
       dispatch(updateName(createdName));
     }
-    if (typeof initRoom === "undefined") {
-      history.push("/");
-    }
-    if (typeof initRoom === "string") {
-      dispatch(updateRoom(initRoom));
+
+    if (trimmedInitRoom) {
+      dispatch(updateRoom(trimmedInitRoom));
       dispatch(
-        sendJoinConnected({ name: name || createdName, room: initRoom, isHost })
+        sendJoinConnected({
+          name: name || createdName,
+          room: trimmedInitRoom,
+          isHost,
+        })
       );
+    } else {
+      history.push("/");
     }
 
     return () => {

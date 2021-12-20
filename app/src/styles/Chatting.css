@@ -58,6 +58,7 @@
 .myMessage {
   background-color: #8ba5ff;
   border-radius: 1rem 1rem 0rem 1rem;
+  max-width: 100%;
 }
 
 .playerMessage {

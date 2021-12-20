@@ -43,6 +43,11 @@ const MainWrapper = () => {
     dispatch(updateIsHost(true));
   };
 
+  const onEnterRoom = (e: any) => {
+    if (!room) e.preventDefault();
+    dispatch(updateIsHost(false));
+  };
+
   return (
     <Main
       name={name}
@@ -50,6 +55,7 @@ const MainWrapper = () => {
       onChangeName={onChangeName}
       onChangeRoom={onChangeRoom}
       onCreateRoom={onCreateRoom}
+      onEnterRoom={onEnterRoom}
       isButtonDisabled={isButtonDisabled}
     />
   );

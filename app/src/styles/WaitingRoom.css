@@ -28,3 +28,12 @@
   justify-content: center;
   align-items: center;
 }
+
+.carouselItem {
+  height: 100%;
+  align-items: center;
+}
+
+.carousel-item.active {
+  align-items: center;
+}

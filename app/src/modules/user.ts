@@ -72,7 +72,7 @@ export type UserState = {
   name: string;
   room: string;
   status: PlayerStatus;
-  isHost: boolean;
+  isHost: boolean | undefined;
   playerId: string;
   gameId: string;
   messages: MessageState[];
@@ -95,7 +95,7 @@ const initialState: UserState = {
   name: "",
   room: "",
   status: "connected",
-  isHost: false,
+  isHost: undefined,
   playerId: "",
   gameId: "",
   messages: [],

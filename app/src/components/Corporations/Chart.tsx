@@ -76,7 +76,7 @@ const Chart = ({ corp, tick, onClickBackButton, asset }: ChartProps) => {
     },
     {
       key: "이익",
-      value: Math.floor(nowPrice - averagePrice),
+      value: asset?.totalQuantity ? Math.floor(nowPrice - averagePrice) : 0,
       color: true,
     },
     {

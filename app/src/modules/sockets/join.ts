@@ -35,12 +35,17 @@ export type CorpResponse = {
   totalChart: number[];
 };
 
+type JoinConnectedRequest = {
+  playerId: string;
+  isHost: boolean;
+};
+
 export const sendJoinConnected = createAction(
   JOIN_CONNECTED,
   (payload: { name: string; room: string; isHost: boolean }) => ({ payload })
 );
 
-const receiveJoinConnectedChannel = channel<string>();
+const receiveJoinConnectedChannel = channel<JoinConnectedRequest>();
 
 export function* sendJoinConnectedSaga(socket: Socket) {
   while (true) {
@@ -48,8 +53,8 @@ export function* sendJoinConnectedSaga(socket: Socket) {
     yield apply(socket, socket.emit, [
       JOIN_CONNECTED,
       payload,
-      ({ playerId }) => {
-        receiveJoinConnectedChannel.put(playerId);
+      ({ playerId, isHost }) => {
+        receiveJoinConnectedChannel.put({ playerId, isHost });
       },
     ]);
   }
@@ -57,9 +62,10 @@ export function* sendJoinConnectedSaga(socket: Socket) {
 
 export function* receiveJoinConnectedSaga() {
   while (true) {
-    const payload: string = yield take(receiveJoinConnectedChannel);
-    yield put(updatePlayerId(payload));
+    const { playerId, isHost } = yield take(receiveJoinConnectedChannel);
+    yield put(updatePlayerId(playerId));
     yield put(updateStatus("connected"));
+    yield put(updateIsHost(isHost));
   }
 }
 

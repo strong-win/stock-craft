@@ -17,7 +17,9 @@ const ChattingWrapper = ({ name, room }: { name: string; room: string }) => {
   const sendMessage = (e: any) => {
     e.preventDefault();
 
-    if (message) {
+    const trimmedMsg = message.trim();
+
+    if (trimmedMsg) {
       if (skills?.cloaking) {
         dispatch(sendChatting({ playerId: skills?.cloaking, message }));
       } else {

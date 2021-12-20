@@ -56,6 +56,7 @@ const ItemsWrapper = () => {
           playerId={playerId}
           corps={corps}
           items={items}
+          disabled={day && !tick ? true : false}
           handleApplyItem={handleApplyItem}
         />
       )}

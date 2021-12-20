@@ -28,7 +28,7 @@ export const ITEM = {
   leverage: {
     NAME: "레버리지",
     IMAGE: "",
-    CONTENT: "하루동안 매도 시 거래 금액 두 배의 현금을 받습니다.",
+    CONTENT: "하루동안 매도/매수 시 거래 손익이 무려 두 배로!.",
     COOLTIME: 3,
   },
   short: {

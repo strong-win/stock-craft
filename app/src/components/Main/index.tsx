@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { HtmlHTMLAttributes, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Input } from "reactstrap";
 import { toast, ToastContainer } from "react-toastify";
@@ -11,6 +11,7 @@ type MainProps = {
   isButtonDisabled: boolean;
   onChangeName: (e: any) => void;
   onChangeRoom: (e: any) => void;
+  onEnterRoom: React.MouseEventHandler<HTMLButtonElement>;
   onCreateRoom: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -21,6 +22,7 @@ const Main = ({
   onChangeName,
   onChangeRoom,
   onCreateRoom,
+  onEnterRoom,
 }: MainProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -77,6 +79,7 @@ const Main = ({
         isOpen={isModalOpen}
         toggle={handleModalOpen}
         onChangeRoom={onChangeRoom}
+        onEnterRoom={onEnterRoom}
       />
       <ToastContainer
         position="top-right"
