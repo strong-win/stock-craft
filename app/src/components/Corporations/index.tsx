@@ -76,7 +76,7 @@ const ChartTab = (props) => {
           </li>
           {isShowScoreBoard && (
             <li>
-              <a
+              <button
                 id="ScoreBoard"
                 className={`chartTab ${
                   activeTab === "ScoreBoard" ? "active" : ""
@@ -85,7 +85,7 @@ const ChartTab = (props) => {
                 data-toggle="tab"
               >
                 {week === 3 ? "최종 결과" : "중간 결과"}
-              </a>
+              </button>
             </li>
           )}
         </ul>
