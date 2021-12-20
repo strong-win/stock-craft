@@ -244,8 +244,20 @@ export const gameSlice = createSlice({
     updateErrorMessage: (state, action: PayloadAction<string>) => {
       state.errorMessage = action.payload;
     },
-    updateInfoMessages: (state, action: PayloadAction<string[]>) => {
-      state.infoMessages = action.payload;
+    updateInfoMessages: (state, action: PayloadAction<TradeState[]>) => {
+      const dealStatus = {
+        pending: "예약",
+        disposed: "처리",
+        cancel: "취소",
+      };
+
+      const infoMessages: string[] = action.payload.map(
+        (trade: TradeState) =>
+          `${trade.deal === "buy" ? "매수" : "매도"} 주문이 ${
+            dealStatus[trade.status] || "처리"
+          }되었습니다.`
+      );
+      state.infoMessages = infoMessages;
     },
   },
 });
@@ -274,6 +286,7 @@ export const {
   updateItemsBytime,
   updateItemCoolTime,
   updateErrorMessage,
+  updateInfoMessages,
   setItems,
   clearPlayer,
 } = gameSlice.actions;

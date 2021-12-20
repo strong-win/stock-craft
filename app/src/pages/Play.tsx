@@ -24,6 +24,7 @@ import {
   resetUser,
   updateErrorMessage,
   clearPlayer,
+  updateInfoMessages,
 } from "../modules/user";
 import { createName } from "../utils/create";
 
@@ -40,8 +41,16 @@ const Play = ({ location, history }: any) => {
   const [isShowRoleModal, setIsShowRoleModal] = useState<boolean>(true);
   const { room: initRoom } = queryString.parse(location.search);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
-  const { playerId, name, room, status, isHost, role, errorMessage } =
-    useSelector((state: RootState) => state.user);
+  const {
+    playerId,
+    name,
+    room,
+    status,
+    isHost,
+    role,
+    errorMessage,
+    infoMessages,
+  } = useSelector((state: RootState) => state.user);
   const { corps } = useSelector((state: RootState) => state.stock);
 
   const dispatch = useDispatch();
@@ -68,6 +77,13 @@ const Play = ({ location, history }: any) => {
       dispatch(updateErrorMessage(""));
     }
   }, [errorMessage]);
+
+  useEffect(() => {
+    if (infoMessages.length) {
+      infoMessages.map((infoMessage) => toast.info(infoMessage));
+      dispatch(updateInfoMessages([]));
+    }
+  }, [infoMessages]);
 
   useEffect(() => {
     if (week === 3 && day === 1) {
