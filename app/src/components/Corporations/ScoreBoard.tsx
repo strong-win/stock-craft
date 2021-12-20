@@ -9,11 +9,12 @@ const ScoreBoard = ({ scores, isFinal, players, myId }) => {
         <div className={`row ${playerId === myId ? "myRow" : ""}`}>
           <div className="col">{index + 1}위</div>
           <div className="col-2">
-            {
-              ROLE_TYPE[
-                players.find((player) => player.playerId === playerId)?.role
-              ].NAME
-            }
+            {ROLE_TYPE[
+              players.find(
+                (player) =>
+                  player.playerId === playerId && player.status === "play"
+              )?.role
+            ]?.NAME || "?"}
           </div>
           {isFinal && (
             <>

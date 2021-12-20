@@ -11,19 +11,19 @@ const Tick = {
   },
   1: {
     status: "아침",
-    duration: 15,
+    duration: 20,
   },
   2: {
     status: "점심",
-    duration: 15,
+    duration: 20,
   },
   3: {
     status: "저녁",
-    duration: 15,
+    duration: 20,
   },
   4: {
     status: "밤",
-    duration: 15,
+    duration: 20,
   },
 };
 
