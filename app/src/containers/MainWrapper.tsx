@@ -45,7 +45,6 @@ const MainWrapper = () => {
 
   const onEnterRoom = (e: any) => {
     if (!room) e.preventDefault();
-    dispatch(updateIsHost(false));
   };
 
   return (
