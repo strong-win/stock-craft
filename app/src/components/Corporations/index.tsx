@@ -53,7 +53,7 @@ const ChartTab = (props) => {
       <div className="chartTabWrapper container">
         <ul className="nav nav-pills">
           <li>
-            <a
+            <button
               id="StockMarket"
               className={`chartTab ${
                 activeTab === "StockMarket" ? "active" : ""
@@ -62,17 +62,17 @@ const ChartTab = (props) => {
               data-toggle="tab"
             >
               주식 시장
-            </a>
+            </button>
           </li>
           <li>
-            <a
+            <button
               id="MyStock"
               className={`chartTab ${activeTab === "MyStock" ? "active" : ""}`}
               onClick={handleTabClick}
               data-toggle="tab"
             >
               주식 잔고
-            </a>
+            </button>
           </li>
           {isShowScoreBoard && (
             <li>

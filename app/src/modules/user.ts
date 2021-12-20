@@ -229,9 +229,9 @@ export const gameSlice = createSlice({
         case "refresh":
         case "cancel":
           for (const trade of action.payload.trades) {
-            const { _id, status } = trade;
+            const { _id, status, price } = trade;
             state.trades = state.trades.map((trade) =>
-              trade._id === _id ? { ...trade, status } : trade
+              trade._id === _id ? { ...trade, status, price } : trade
             );
           }
           break;
