@@ -78,22 +78,14 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses(status),
       });
 
-      const players: Player[] = await this.playerService.findByRoomAndStatuses(
-        room,
-        this.getStatuses('all'),
-      );
-      const playersInfo: PlayerInfo[] = players.map(
-        ({ _id: playerId, name, status, isHost, role }: Player) => ({
-          playerId: playerId.toString(),
-          name,
-          status,
-          isHost,
-          role,
-        }),
-      );
+      const residents: Player[] =
+        await this.playerService.findByRoomAndStatuses(
+          room,
+          this.getStatuses('all'),
+        );
 
-      if (isHost && players.length) {
-        const newHost: Player = players[0];
+      if (isHost && residents.length) {
+        const newHost: Player = residents[0];
 
         await this.playerService.updateByPlayerId(newHost._id, {
           status: 'ready',
@@ -120,6 +112,20 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
           .emit(JOIN_HOST, { isHost: true, dateDiff });
       }
 
+      const players: Player[] = await this.playerService.findByRoomAndStatuses(
+        room,
+        this.getStatuses('all'),
+      );
+      const playersInfo: PlayerInfo[] = players.map(
+        ({ _id: playerId, name, status, isHost, role }: Player) => ({
+          playerId: playerId.toString(),
+          name,
+          status,
+          isHost,
+          role,
+        }),
+      );
+
       // emit playersInfo to wait room
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
     }
@@ -133,7 +139,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { name, room } = payload;
     const residents: Player[] = await this.playerService.findByRoomAndStatuses(
       payload.room,
-      this.getStatuses('connected'),
+      this.getStatuses('all'),
     );
     const isHost =
       payload.isHost !== undefined ? payload.isHost : residents.length === 0;

@@ -76,8 +76,6 @@ export class GameGateway {
         );
 
       tradeResponseDtos.forEach((tradeResponseDto: TradeResponseDto) => {
-        console.log({ trades: tradeResponseDto.trades });
-
         this.server
           .to(tradeResponseDto.clientId)
           .emit(TRADE_RESPONSE, tradeResponseDto);

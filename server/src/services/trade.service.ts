@@ -102,6 +102,7 @@ export class TradeService {
           if (isDirect) {
             asset.purchaseAmount -=
               (asset.purchaseAmount / asset.totalQuantity) * quantity;
+            if (asset.purchaseAmount < 1e-6) asset.purchaseAmount = 0;
             asset.totalQuantity -= quantity;
           }
         }
@@ -227,6 +228,7 @@ export class TradeService {
 
                 asset.purchaseAmount -=
                   (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
+                if (asset.purchaseAmount < 1e-6) asset.purchaseAmount = 0;
                 asset.totalQuantity -= trade.quantity;
               }
             }

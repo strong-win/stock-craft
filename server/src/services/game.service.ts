@@ -133,7 +133,7 @@ export class GameService {
 
         const basic = player.cash.totalCash + stockCash;
         const profit = basic - this.getCash('individual').totalCash;
-        individualSum += profit ? profit : 0;
+        individualSum += profit < 0 ? -profit : 0;
 
         return {
           playerId: player._id,
@@ -153,8 +153,8 @@ export class GameService {
           0,
         );
 
-        const basic = Math.floor((player.cash.totalCash + stockCash) / 200);
-        const bonus = individualSum;
+        const basic = Math.floor((player.cash.totalCash + stockCash) / 100);
+        const bonus = -individualSum;
 
         return {
           playerId: player._id,
