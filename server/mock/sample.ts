@@ -2,7 +2,6 @@ export default {
   corps: [
     {
       corpId: 'gyu',
-      corpName: '규희전자',
       totalChart: [
         100, 200, 300, 400, 500, 100, 200, 300, 400, 500, 100, 200, 300, 400,
         500,
@@ -10,7 +9,6 @@ export default {
     },
     {
       corpId: 'kang',
-      corpName: '창구물산',
       totalChart: [
         100, 200, 300, 400, 500, 100, 200, 300, 400, 500, 100, 200, 300, 400,
         500,
@@ -18,7 +16,6 @@ export default {
     },
     {
       corpId: 'han',
-      corpName: '상일제약',
       totalChart: [
         100, 200, 300, 400, 500, 100, 200, 300, 400, 500, 100, 200, 300, 400,
         500,
@@ -26,7 +23,6 @@ export default {
     },
     {
       corpId: 'lee',
-      corpName: '호준건설',
       totalChart: [
         100, 200, 300, 400, 500, 100, 200, 300, 400, 500, 100, 200, 300, 400,
         500,

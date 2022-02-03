@@ -1,10 +1,17 @@
 import { IsNotEmpty } from 'class-validator';
-import { TimeState } from 'src/states/game.state';
+
+export type CorpResult = {
+  info: number;
+};
+
+export type CorpResults = {
+  [key: string]: CorpResult;
+};
 
 export class ChartResponseDto {
   @IsNotEmpty()
   gameId: string;
 
   @IsNotEmpty()
-  nextTime: TimeState;
+  corps: CorpResults;
 }

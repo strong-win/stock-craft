@@ -34,13 +34,8 @@ export class TradeService {
       time.tick < 1 ||
       time.tick > 3 ||
       day < 1
-    ) {
-      const timeError = new Error(
-        '거래 시간이 불일치하거나 거래 불가능 시간입니다.',
-      );
-      timeError.name = 'TimeException';
-      throw timeError;
-    }
+    )
+      throw Error('거래 시간이 불일치하거나 거래 불가능 시간입니다.');
 
     // find stock price
     const stock = await this.stockModel.findOne({
@@ -51,19 +46,23 @@ export class TradeService {
       corpId,
     });
 
+    if (!stock) throw Error('주가 정보를 불러올 수 없습니다.');
+
     // find player asset
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
 
+    if (!player) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
     let isDirect: boolean;
+    let isLeverage = false;
+    let bonus: number;
+
     if (deal === 'buy') {
       // check if player can trade
-      if (player.cash.availableCash < price * quantity) {
-        const tradeError = new Error('거래 가능 잔액이 부족합니다');
-        tradeError.name = 'TradeException';
-        throw tradeError;
-      }
+      if (player.cash.availableCash < price * quantity)
+        throw Error('거래 가능 잔액이 부족합니다.');
 
       // check if player can directly trade
       isDirect = stock.price <= price ? true : false;
@@ -86,27 +85,33 @@ export class TradeService {
     if (deal === 'sell') {
       // check if player can directly trade
       isDirect = stock.price >= price ? true : false;
+      if (isDirect && player.skills.leverage) isLeverage = true;
 
       for (const asset of player.assets) {
         if (asset.corpId === corpId) {
           // check if player can trade
-          if (asset.availableQuantity < quantity) {
-            const tradeError = new Error('거래 가능 수량이 부족합니다');
-            tradeError.name = 'TradeException';
-            throw tradeError;
-          }
+          if (asset.availableQuantity < quantity)
+            throw Error('거래 가능 수량이 부족합니다.');
+
+          if (isLeverage)
+            bonus =
+              (price - Math.floor(asset.purchaseAmount / asset.totalQuantity)) *
+              2;
+
           asset.availableQuantity -= quantity;
           if (isDirect) {
             asset.purchaseAmount -=
               (asset.purchaseAmount / asset.totalQuantity) * quantity;
+            if (asset.purchaseAmount < 1e-6) asset.purchaseAmount = 0;
             asset.totalQuantity -= quantity;
           }
         }
       }
       // if corp is included in assets
       if (isDirect) {
-        player.cash.totalCash += price * quantity;
-        player.cash.availableCash += price * quantity;
+        const amount = (price + (isLeverage ? bonus : 0)) * quantity;
+        player.cash.totalCash += amount;
+        player.cash.availableCash += amount;
       }
     }
 
@@ -118,7 +123,7 @@ export class TradeService {
       day,
       tick,
       corpId,
-      price,
+      price: price + (isLeverage ? bonus : 0),
       quantity,
       deal,
       status: isDirect ? 'disposed' : 'pending',
@@ -171,6 +176,10 @@ export class TradeService {
       })
       .exec();
 
+    if (!players) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
+    if (!stocks) throw Error('주가 정보를 불러올 수 없습니다.');
+
     const playersResponse: TradeResponseDto[] = [];
     const tradesResponse: Trade[] = [];
 
@@ -179,6 +188,8 @@ export class TradeService {
         if (!isTrade(trade)) throw TypeError('타입이 일치하지 않습니다.');
 
         const stock = stocks.find((stock) => stock.corpId === trade.corpId);
+
+        let isLeverage = false;
 
         if (trade.deal === 'buy') {
           if (trade.price >= stock.price) {
@@ -203,23 +214,38 @@ export class TradeService {
         }
 
         if (trade.deal === 'sell') {
-          if (trade.price <= stock.price) {
-            // update player cash
-            player.cash.totalCash += trade.price * trade.quantity;
-            player.cash.availableCash += trade.price * trade.quantity;
+          if (player.skills.leverage) isLeverage = true;
 
+          if (trade.price <= stock.price) {
             // update player assets
             for (const asset of player.assets) {
               if (asset.corpId === trade.corpId) {
+                if (isLeverage)
+                  trade.price +=
+                    (trade.price -
+                      Math.floor(asset.purchaseAmount / asset.totalQuantity)) *
+                    2;
+
                 asset.purchaseAmount -=
                   (asset.purchaseAmount / asset.totalQuantity) * trade.quantity;
+                if (asset.purchaseAmount < 1e-6) asset.purchaseAmount = 0;
                 asset.totalQuantity -= trade.quantity;
               }
             }
 
+            // update player cash
+            const amount = trade.price * trade.quantity;
+            player.cash.totalCash += amount;
+            player.cash.availableCash += amount;
+
             await this.tradeModel.updateOne(
               { _id: trade._id },
-              { $set: { status: 'disposed' } },
+              {
+                $set: {
+                  price: trade.price,
+                  status: 'disposed',
+                },
+              },
             );
             trade.status = 'disposed';
             tradesResponse.push(trade);
@@ -263,7 +289,12 @@ export class TradeService {
     const player = await this.playerModel.findOne({
       _id: Types.ObjectId(playerId),
     });
+
+    if (!player) throw Error('플레이어 정보를 불러올 수 없습니다.');
+
     const trade = await this.tradeModel.findOne({ _id: Types.ObjectId(_id) });
+
+    if (!trade) throw Error('거래 정보를 불러올 수 없습니다.');
 
     if (trade.deal === 'buy') {
       player.cash.availableCash += trade.price * trade.quantity;

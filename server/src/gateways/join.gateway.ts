@@ -19,10 +19,25 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Player, PlayerInfo, PlayerStatus } from 'src/schemas/player.schema';
+import { Player, PlayerStatus, Role } from 'src/schemas/player.schema';
 import { PlayerService } from 'src/services/player.service';
 import { GameStateProvider } from 'src/states/game.state';
 import { isGame } from 'src/utils/typeGuard';
+import { MarketApi } from 'src/api/market.api';
+import { Corp } from 'src/schemas/game.schema';
+import { Types } from 'mongoose';
+
+export type PlayerInfo = {
+  playerId: string;
+  name: string;
+  status: PlayerStatus;
+  role?: Role;
+};
+
+export type GameInfo = {
+  gameId: string;
+  corps: Corp[];
+};
 
 @WebSocketGateway()
 export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -35,6 +50,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private gameState: GameStateProvider,
     private playerService: PlayerService,
     private joinService: JoinService,
+    private marketApi: MarketApi,
   ) {}
 
   handleConnection(client: Socket): void {
@@ -62,17 +78,19 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses(status),
       });
 
-      const players: Player[] = await this.playerService.findByRoomAndStatuses(
-        room,
-        this.getStatuses('all'),
-      );
-      const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-        name,
-        status,
-      }));
+      const residents: Player[] =
+        await this.playerService.findByRoomAndStatuses(
+          room,
+          this.getStatuses('all'),
+        );
 
-      if (isHost && players.length) {
-        const newHost: Player = players[0];
+      if (isHost && residents.length) {
+        const newHost: Player = residents[0];
+
+        await this.playerService.updateByPlayerId(newHost._id, {
+          status: 'ready',
+          isHost: true,
+        });
 
         this.server.to(newHost.clientId).emit(CHATTING_SERVER_MESSAGE, {
           user: '관리자',
@@ -80,16 +98,34 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
           statuses: this.getStatuses(status),
         });
 
-        if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
+        let dateDiff: number = null;
+        if (game) {
+          if (!isGame(game)) throw Error('타입이 일치하지 않습니다.');
 
-        const nowDate: Date = new Date();
-        const nextDate: Date = this.gameState.getNextDate(game._id);
-        const dateDiff: number = nextDate.getTime() - nowDate.getTime();
+          const nowDate: Date = new Date();
+          const nextDate: Date = this.gameState.getNextDate(game._id);
+          dateDiff = nextDate.getTime() - nowDate.getTime();
+        }
 
         this.server
           .to(newHost.clientId)
           .emit(JOIN_HOST, { isHost: true, dateDiff });
       }
+
+      const players: Player[] = await this.playerService.findByRoomAndStatuses(
+        room,
+        this.getStatuses('all'),
+      );
+      const playersInfo: PlayerInfo[] = players.map(
+        ({ _id: playerId, name, status, isHost, role }: Player) => ({
+          playerId: playerId.toString(),
+          name,
+          status,
+          isHost,
+          role,
+        }),
+      );
+
       // emit playersInfo to wait room
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
     }
@@ -98,16 +134,22 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage(JOIN_CONNECTED)
   async receiveJoinConnected(
     client: Socket,
-    payload: { name: string; room: string; isHost: boolean },
-  ): Promise<{ playerId: string }> {
-    const {
-      _id: playerId,
+    payload: { name: string; room: string; isHost: boolean | undefined },
+  ): Promise<{ playerId: string; isHost: boolean }> {
+    const { name, room } = payload;
+    const residents: Player[] = await this.playerService.findByRoomAndStatuses(
+      payload.room,
+      this.getStatuses('all'),
+    );
+    const isHost =
+      payload.isHost !== undefined ? payload.isHost : residents.length === 0;
+
+    const { _id: playerId } = await this.playerService.create({
       name,
       room,
-    } = await this.playerService.create({
-      ...payload,
+      isHost,
       clientId: client.id,
-      status: 'connected',
+      status: isHost ? 'ready' : 'connected',
     });
 
     client.join(room);
@@ -128,13 +170,18 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room,
       this.getStatuses('all'),
     );
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
-    this.server.emit(JOIN_PLAYERS, playersInfo);
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+        isHost,
+        role,
+      }),
+    );
+    this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
-    return { playerId: playerId.toString() };
+    return { playerId: playerId.toString(), isHost };
   }
 
   @SubscribeMessage(JOIN_READY)
@@ -151,10 +198,15 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       room,
       this.getStatuses('all'),
     );
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+        isHost,
+        role,
+      }),
+    );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
   }
 
@@ -173,10 +225,15 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.getStatuses('all'),
     );
 
-    const playersInfo: PlayerInfo[] = players.map(({ name, status }) => ({
-      name,
-      status,
-    }));
+    const playersInfo: PlayerInfo[] = players.map(
+      ({ _id: playerId, name, status, isHost, role }: Player) => ({
+        playerId: playerId.toString(),
+        name,
+        status,
+        isHost,
+        role,
+      }),
+    );
     this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
   }
 
@@ -186,12 +243,34 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
     payload: { playerId: string; room: string },
   ): Promise<void> {
     const { playerId, room } = payload;
-    const { playersInfo, gameInfo, start } = await this.joinService.startGame(
+    const gameId: Types.ObjectId = await this.joinService.createGame(
       playerId,
       room,
     );
 
-    if (start) {
+    if (gameId) {
+      let corps: Corp[] = await this.marketApi.postModel(gameId);
+      corps = await this.joinService.initGame(gameId, room, corps);
+
+      const players: Player[] = await this.playerService.findByRoomAndStatuses(
+        room,
+        this.getStatuses('play'),
+      );
+
+      const playersInfo: PlayerInfo[] = players.map(
+        ({ _id: playerId, name, status, isHost, role }: Player) => ({
+          playerId: playerId.toString(),
+          name,
+          status,
+          isHost,
+          role,
+        }),
+      );
+      const gameInfo: GameInfo = {
+        gameId: gameId.toString(),
+        corps,
+      };
+
       this.server.to(room).emit(JOIN_PLAYERS, playersInfo);
 
       this.server.to(room).emit(JOIN_PLAY, gameInfo);
@@ -202,7 +281,7 @@ export class JoinGateway implements OnGatewayConnection, OnGatewayDisconnect {
         statuses: this.getStatuses('play'),
       });
 
-      this.gameState.createGameState(gameInfo.gameId, room);
+      this.gameState.createGameState(gameId, room);
     } else {
       this.server.to(room).emit(CHATTING_SERVER_MESSAGE, {
         user: '관리자',

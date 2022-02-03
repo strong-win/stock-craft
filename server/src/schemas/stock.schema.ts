@@ -19,9 +19,6 @@ export class Stock {
   corpId: string;
 
   @Prop()
-  corpName: string;
-
-  @Prop()
   price: number;
 
   @Prop({ type: Types.ObjectId, ref: 'Game' })

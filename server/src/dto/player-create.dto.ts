@@ -14,6 +14,9 @@ export class PlayerCreateDto {
   @IsNotEmpty()
   status: PlayerStatus;
 
+  @IsNotEmpty()
+  isHost: boolean;
+
   @IsOptional()
   gameId?: number;
 

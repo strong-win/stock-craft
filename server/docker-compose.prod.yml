@@ -8,13 +8,3 @@ services:
       dockerfile: ./docker/Dockerfile.prod
     ports:
       - '8080:8080'
-    links:
-      - mongodb
-    depends_on:
-      - mongodb
-
-  mongodb:
-    image: mongo
-    restart: always
-    ports:
-      - '27017:27017'
