@@ -37,11 +37,11 @@
   padding: 0.5rem 1rem;
   text-decoration: none;
   color: black;
-  transform: perspective(0.5em) rotateX(5deg);
   transform-origin: bottom;
   font-size: 1rem;
   position: relative;
-  top: -1.8rem;
+  border: none;
+  top: -2.5rem;
 }
 
 .chartTab:hover {
@@ -55,7 +55,14 @@
 
 .ScoreBoard {
   text-align: center;
-  font-size: 2rem;
-  margin: 3rem;
+  font-size: 1.5rem;
+  padding: 3rem;
   font-family: "IBM Plex Sans KR";
+  display: block;
+  height: 100%;
+  overflow: auto;
+}
+
+.myRow {
+  color: rgb(21, 147, 0);
 }

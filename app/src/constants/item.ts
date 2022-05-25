@@ -28,7 +28,7 @@ export const ITEM = {
   leverage: {
     NAME: "레버리지",
     IMAGE: "",
-    CONTENT: "하루동안 매도 시 거래 금액 두 배의 현금을 받습니다.",
+    CONTENT: "하루동안 매도/매수 시 거래 손익이 무려 두 배로!",
     COOLTIME: 3,
   },
   short: {
@@ -54,8 +54,7 @@ export const ITEM = {
   leading: {
     NAME: "리딩방",
     IMAGE: "",
-    CONTENT:
-      "내 목표주식에 대해 원하는 뉴스(호재/악재)를 모든 플레이어에게 알립니다.",
+    CONTENT: "내 목표주식에 대해 원하는 뉴스(호재/악재)를 전체공개합니다.",
     COOLTIME: 3,
     TARGET: "news",
   },
@@ -89,13 +88,13 @@ export const ITEM = {
   lotto: {
     NAME: "로또",
     IMAGE: "",
-    CONTENT: "낮은 확률로 큰 돈을 얻을 수 있습니다! 기본 1만원 부터! 굿 럭 ~",
+    CONTENT: "낮은 확률로 큰 돈을 얻을 수 있습니다! 1만원 부터! 굿 럭 ~",
     COOLTIME: 3,
   },
   news: {
     NAME: "뉴스",
     IMAGE: "",
-    CONTENT: "임의의 한 종목 대해 호재/악재 정보를 모든 플레이어에게 알립니다.",
+    CONTENT: "임의의 한 종목의 호재/악재 정보를 전체 공개합니다.",
     COOLTIME: 3,
   },
 };

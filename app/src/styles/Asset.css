@@ -7,6 +7,10 @@
   margin-bottom: 0.5rem;
 }
 
+.assetWrapper {
+  width: 100%;
+}
+
 .assetItemRow {
   font-family: "IBM Plex Sans KR";
   justify-content: center;

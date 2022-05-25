@@ -8,7 +8,7 @@ import {
   Input,
 } from "reactstrap";
 
-const RoomCodeModal = ({ room, isOpen, toggle, onChangeRoom }) => {
+const RoomCodeModal = ({ room, isOpen, toggle, onChangeRoom, onEnterRoom }) => {
   return (
     <Modal className="roomCodeModal" size="lg" isOpen={isOpen} toggle={toggle}>
       <ModalHeader
@@ -23,10 +23,7 @@ const RoomCodeModal = ({ room, isOpen, toggle, onChangeRoom }) => {
         />
       </ModalBody>
       <ModalFooter className="roomCodeModalFooter">
-        <Link
-          onClick={(e) => (!room ? e.preventDefault() : null)}
-          to={`/play?room=${room}`}
-        >
+        <Link onClick={(e) => onEnterRoom(e)} to={`/play?room=${room}`}>
           <Button className="EnterRoomButton">입장하기</Button>
         </Link>
       </ModalFooter>

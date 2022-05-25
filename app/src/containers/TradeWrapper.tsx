@@ -6,6 +6,7 @@ import Trade from "../components/Trade";
 import { AssetState } from "../modules/user";
 import { tradeCancel, tradeRequest } from "../modules/sockets/trade";
 import { ChartState } from "../modules/stock";
+import { toast } from "react-toastify";
 
 export type billType = {
   price: number;
@@ -51,18 +52,22 @@ const TradeWrapper = () => {
 
   const handleDeal = (e: any) => {
     const deal = e.target.name;
-    dispatch(
-      tradeRequest({
-        ...tradeBill,
-        gameId,
-        playerId,
-        week,
-        day,
-        tick,
-        corpId: selectedCorpId,
-        deal,
-      })
-    );
+    if (tradeBill.quantity === 0) {
+      toast.error("입력 수량은 0보다 커야합니다.");
+    } else {
+      dispatch(
+        tradeRequest({
+          ...tradeBill,
+          gameId,
+          playerId,
+          week,
+          day,
+          tick,
+          corpId: selectedCorpId,
+          deal,
+        })
+      );
+    }
   };
 
   const handleCancel = (_id: string, corpId: string) => {

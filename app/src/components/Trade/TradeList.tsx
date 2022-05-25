@@ -74,6 +74,8 @@ const TradeList = ({
                   }`}
                 >
                   {tradeStatusToText[trade.status] || trade.status}
+                </td>
+                <td className="cancelTd">
                   {trade.status === "pending" ? (
                     <Button
                       className="cancelButton"

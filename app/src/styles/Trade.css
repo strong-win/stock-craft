@@ -114,17 +114,17 @@ td {
   text-decoration: none;
   color: rgb(131, 131, 131);
   padding: 0;
-  position: relative;
-  left: 1rem;
 }
 
-.tradeTable .status {
-  padding-left: 3vw;
-  text-align: left;
+.tradeTable .cancelTd {
+  width: 2rem;
 }
 
 .tradeCard {
   position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 .tradeTab {
@@ -132,6 +132,7 @@ td {
   text-align: center;
   font-weight: bold;
   font-size: 1.3rem;
+  width: 100%;
 }
 
 .tradeTab .tabButton {
@@ -163,6 +164,7 @@ td {
 
 .tradeInputWrapper {
   padding: 2rem;
+  width: 100%;
 }
 
 .tradeInputGroup {

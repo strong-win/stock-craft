@@ -9,6 +9,7 @@ import ItemsAndTradeListTab from "../components/ItemsAndTradeListTab";
 import Items from "../components/Items";
 import TradeList from "../components/Trade/TradeList";
 import { sendItemRequest } from "../modules/sockets/items";
+import { toast } from "react-toastify";
 
 const ItemsWrapper = () => {
   // redux state
@@ -34,9 +35,13 @@ const ItemsWrapper = () => {
   };
 
   const handleApplyItem = (id: string, target?: string) => {
-    dispatch(
-      sendItemRequest({ gameId, playerId, week, day, type: id, target })
-    );
+    if (!id) {
+      toast.error("아이템을 선택해주세요.");
+    } else {
+      dispatch(
+        sendItemRequest({ gameId, playerId, week, day, type: id, target })
+      );
+    }
   };
 
   return (
@@ -51,6 +56,7 @@ const ItemsWrapper = () => {
           playerId={playerId}
           corps={corps}
           items={items}
+          disabled={day && !tick ? true : false}
           handleApplyItem={handleApplyItem}
         />
       )}

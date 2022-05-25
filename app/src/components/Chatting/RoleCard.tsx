@@ -1,5 +1,4 @@
 import { ROLE_TYPE } from "../../constants/role";
-import { AssetState } from "../../modules/user";
 import "../../styles/Chatting.css";
 
 const AssetItem = ({ name, value, unit }) => {
@@ -13,48 +12,26 @@ const AssetItem = ({ name, value, unit }) => {
   );
 };
 
-const RoleCard = ({ role, cash, assets, corps, tick }) => {
-  const totalPurchaseAmount = assets
-    .map((asset: AssetState) => asset.purchaseAmount)
-    .reduce(
-      (previousValue: number, currentValue: number) =>
-        previousValue + currentValue
-    );
-
-  const currentAmounts: number[] = corps.map((corp) => {
-    const nowPrice =
-      corp?.todayChart[tick - 1] || corp?.totalChart?.at(-1) || 0;
-    return (
-      nowPrice *
-      assets.find((asset: AssetState) => asset.corpId === corp.corpId)
-        ?.totalQuantity
-    );
-  });
-
-  const totalCurrentAmount = currentAmounts.reduce(
-    (previousValue: number, currentValue: number) =>
-      previousValue + currentValue
-  );
-
-  const totalDiff = totalCurrentAmount - totalPurchaseAmount;
-
+const RoleCard = ({ role, score, corps }) => {
   const assetData = [
     {
-      name: "거래 이익",
-      value: Math.floor(totalDiff) || 0,
+      name: "기본 점수",
+      value: Math.floor(score?.basic) || 0,
       unit: "점",
     },
     {
-      name: "보너스 점수",
-      value: 0,
+      name: "직업 점수",
+      value: Math.floor(score?.bonus) || 0,
       unit: "점",
     },
     {
       name: "최종 점수",
-      value: totalCurrentAmount + cash?.totalCash || 0,
+      value: Math.floor(score?.basic + score?.bonus),
       unit: "점",
     },
   ];
+
+  const targetCorp = corps.find((corp) => corp.target !== 0);
 
   const roleAssetItems = assetData.map((asset) => (
     <AssetItem name={asset.name} value={asset.value} unit={asset.unit} />
@@ -68,8 +45,25 @@ const RoleCard = ({ role, cash, assets, corps, tick }) => {
         <div className="roleImageWrapper">
           <img className="roleImage" src={ROLE_TYPE[role]?.IMAGE} />
         </div>
-        <div className="roleAssetWrapper">{roleAssetItems}</div>
+        <div className="roleAssetWrapper">
+          {roleAssetItems}
+          {role === "party" && (
+            <div className="partyTarget">
+              <AssetItem
+                name="타겟 종목"
+                value={targetCorp?.corpName}
+                unit=""
+              />
+              <AssetItem
+                name="타겟 가격"
+                value={targetCorp?.target}
+                unit="원"
+              />
+            </div>
+          )}
+        </div>
       </div>
+      <div className="roleNotice">점수는 하루 간격으로 업데이트 됩니다.</div>
     </div>
   );
 };

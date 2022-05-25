@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Col, Row } from "reactstrap";
+import { toast } from "react-toastify";
 
 import "../styles/Clock.css";
 
@@ -10,19 +11,19 @@ const Tick = {
   },
   1: {
     status: "아침",
-    duration: 15,
+    duration: 20,
   },
   2: {
     status: "점심",
-    duration: 15,
+    duration: 20,
   },
   3: {
     status: "저녁",
-    duration: 15,
+    duration: 20,
   },
   4: {
     status: "밤",
-    duration: 15,
+    duration: 20,
   },
 };
 
@@ -50,12 +51,14 @@ const Clock = ({ week, day, tick, handleTimeOut }) => {
   const isDark = day === 0 || tick % 4 === 0;
 
   useInterval(() => {
-    setSecond(second - 1);
+    if (second >= 0) setSecond(second - 1);
   }, 1000);
 
   useEffect(() => {
-    if (second <= 0) {
+    if (second === 0) {
       handleTimeOut();
+    } else if (second < 0) {
+      toast.error("네트워크 오류로 시간이 지연됩니다. 잠시만 기다려주세요");
     }
   }, [second]);
 

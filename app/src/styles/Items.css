@@ -63,13 +63,17 @@
   text-align: center;
 }
 
+.itemContentWrapper {
+  padding: 0.3rem;
+}
+
 .itemContent {
   text-align: center;
   vertical-align: middle;
 }
 
 .itemCooltime {
-  margin-top: 2rem;
+  padding-top: 2rem;
 }
 
 .itemTargetModal {

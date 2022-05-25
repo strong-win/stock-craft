@@ -10,7 +10,9 @@ const CorporationsWrapper = () => {
   // redux state
   const { corps } = useSelector((state: RootState) => state.stock);
   const { week, day, tick } = useSelector((state: RootState) => state.time);
-  const { assets, scores } = useSelector((state: RootState) => state.user);
+  const { assets, allScores, players, playerId } = useSelector(
+    (state: RootState) => state.user
+  );
 
   const dispatch = useDispatch();
 
@@ -36,7 +38,9 @@ const CorporationsWrapper = () => {
       day={day}
       assets={assets}
       corps={corps}
-      scores={scores}
+      players={players}
+      playerId={playerId}
+      scores={allScores}
       onClickCorpItem={onClickCorpItem}
       selectedCorpId={selectedCorpId}
     />

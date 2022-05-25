@@ -23,6 +23,7 @@ export type PlayerState = {
   name: string;
   status: PlayerStatus;
   role: Role;
+  isHost: boolean;
 };
 
 export type AssetState = {
@@ -57,16 +58,21 @@ export type PlayerSkill = {
 };
 
 export type PlayerScore = {
+  basic: number;
+  bonus: number;
+};
+
+export type AllPlayerScore = PlayerScore & {
   playerId: string;
+  clientId: string;
   name: string;
-  score: number;
 };
 
 export type UserState = {
   name: string;
   room: string;
   status: PlayerStatus;
-  isHost: boolean;
+  isHost: boolean | undefined;
   playerId: string;
   gameId: string;
   messages: MessageState[];
@@ -79,15 +85,18 @@ export type UserState = {
   items: { [key: string]: number };
   options: PlayerOption;
   skills: PlayerSkill;
-  scores: PlayerScore[];
+  score: PlayerScore;
+  allScores: AllPlayerScore[];
   role: Role;
+  errorMessage: string;
+  infoMessages: string[];
 };
 
 const initialState: UserState = {
   name: "",
   room: "",
   status: "connected",
-  isHost: false,
+  isHost: undefined,
   playerId: "",
   gameId: "",
   messages: [],
@@ -103,12 +112,18 @@ const initialState: UserState = {
   trades: [
     // { _id, corpId: "gyu", price: 0, quantity: 0, deal: "buy", status: "pending" }
   ],
-  selectedCorpId: "gyu",
+  selectedCorpId: "",
   isChartView: false,
   options: {},
   skills: {},
-  scores: [],
+  score: {
+    basic: 0,
+    bonus: 0,
+  },
+  allScores: [],
   role: "",
+  errorMessage: "",
+  infoMessages: [],
 };
 
 export const gameSlice = createSlice({
@@ -116,6 +131,15 @@ export const gameSlice = createSlice({
   initialState,
   reducers: {
     resetUser: () => initialState,
+    clearPlayer(state) {
+      const { name, isHost, room } = state;
+      return {
+        ...initialState,
+        name,
+        isHost,
+        room,
+      };
+    },
     updateName(state, action: PayloadAction<string>) {
       state.name = action.payload;
     },
@@ -163,17 +187,22 @@ export const gameSlice = createSlice({
     updateSkills: (state, action: PayloadAction<PlayerSkill>) => {
       state.skills = action.payload;
     },
-    updateScores: (state, action: PayloadAction<PlayerScore[]>) => {
-      state.scores = action.payload;
+    updateScore: (state, action: PayloadAction<PlayerScore>) => {
+      state.score = action.payload;
+    },
+    updateAllScores: (state, action: PayloadAction<AllPlayerScore[]>) => {
+      state.allScores = action.payload;
     },
     setItems: (state, action: PayloadAction<string>) => {
       //set items after role is decided
-      const roleItems = ITEM_TYPE[action.payload];
+      if (Object.keys(state.items).length === 0) {
+        const roleItems = ITEM_TYPE[action.payload];
 
-      const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
-      [...roleItems, ...randomCommonItems].forEach(
-        (id) => (state.items[id] = 0)
-      );
+        const randomCommonItems = _.sampleSize(ITEM_TYPE.common, 2);
+        [...roleItems, ...randomCommonItems].forEach(
+          (id) => (state.items[id] = 0)
+        );
+      }
     },
     updateItemsBytime: (state) => {
       Object.keys(state.items).forEach((itemId) => {
@@ -181,7 +210,9 @@ export const gameSlice = createSlice({
       });
     },
     updateItemCoolTime: (state, action: PayloadAction<string>) => {
-      state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      if (state.items[action.payload] !== undefined) {
+        state.items[action.payload] = ITEM[action.payload]?.COOLTIME;
+      }
     },
     updateRole: (state, action: PayloadAction<Role>) => {
       state.role = action.payload;
@@ -200,15 +231,33 @@ export const gameSlice = createSlice({
         case "refresh":
         case "cancel":
           for (const trade of action.payload.trades) {
-            const { _id, status } = trade;
+            const { _id, status, price } = trade;
             state.trades = state.trades.map((trade) =>
-              trade._id === _id ? { ...trade, status } : trade
+              trade._id === _id ? { ...trade, status, price } : trade
             );
           }
           break;
         default:
           break;
       }
+    },
+    updateErrorMessage: (state, action: PayloadAction<string>) => {
+      state.errorMessage = action.payload;
+    },
+    updateInfoMessages: (state, action: PayloadAction<TradeState[]>) => {
+      const dealStatus = {
+        pending: "예약",
+        disposed: "처리",
+        cancel: "취소",
+      };
+
+      const infoMessages: string[] = action.payload.map(
+        (trade: TradeState) =>
+          `${trade.deal === "buy" ? "매수" : "매도"} 주문이 ${
+            dealStatus[trade.status] || "처리"
+          }되었습니다.`
+      );
+      state.infoMessages = infoMessages;
     },
   },
 });
@@ -230,12 +279,16 @@ export const {
   updateIsChartView,
   updateOptions,
   updateSkills,
-  updateScores,
+  updateScore,
+  updateAllScores,
   updateRole,
   updateTrades,
   updateItemsBytime,
   updateItemCoolTime,
+  updateErrorMessage,
+  updateInfoMessages,
   setItems,
+  clearPlayer,
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

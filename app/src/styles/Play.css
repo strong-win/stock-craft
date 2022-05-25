@@ -1,5 +1,7 @@
 .playContainer {
   height: 100vh;
+  font-family: "IBM Plex Sans KR";
+  overflow: hidden;
 }
 
 .playHeader {
@@ -16,4 +18,10 @@
 .chattingContainer {
   position: relative;
   padding: 0;
+}
+
+.assetContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

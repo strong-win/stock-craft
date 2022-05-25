@@ -85,7 +85,7 @@ const Asset = ({ cash, assets, corps, tick }) => {
     {
       name: "평균 수익률",
       value: totalPurchaseAmount
-        ? Math.floor((totalDiff / totalPurchaseAmount) * 100)
+        ? ((totalDiff / totalPurchaseAmount) * 100).toFixed(1)
         : 0,
       unit: "%",
     },
@@ -95,10 +95,10 @@ const Asset = ({ cash, assets, corps, tick }) => {
     <AssetItem name={asset.name} value={asset.value} unit={asset.unit} />
   ));
   return (
-    <>
+    <div className="assetWrapper">
       <div className="assetTitle">보유 자산</div>
       {AssetItemsComponent}
-    </>
+    </div>
   );
 };
 

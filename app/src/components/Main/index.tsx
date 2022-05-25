@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { HtmlHTMLAttributes, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button, Input } from "reactstrap";
+import { toast, ToastContainer } from "react-toastify";
 
 import RoomCodeModal from "./RoomCodeModal";
 
@@ -10,6 +11,7 @@ type MainProps = {
   isButtonDisabled: boolean;
   onChangeName: (e: any) => void;
   onChangeRoom: (e: any) => void;
+  onEnterRoom: React.MouseEventHandler<HTMLButtonElement>;
   onCreateRoom: React.MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -20,12 +22,13 @@ const Main = ({
   onChangeName,
   onChangeRoom,
   onCreateRoom,
+  onEnterRoom,
 }: MainProps) => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const handleModalOpen = () => {
     if (isButtonDisabled) {
-      window.alert(
+      toast.error(
         "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
       );
     } else {
@@ -46,7 +49,7 @@ const Main = ({
       <Link
         onClick={() => {
           if (isButtonDisabled) {
-            window.alert(
+            toast.error(
               "닉네임은 앞뒤 공백 없는 2~16 글자로 해야합니다. ('관리자' 사용 불가) "
             );
           }
@@ -76,6 +79,18 @@ const Main = ({
         isOpen={isModalOpen}
         toggle={handleModalOpen}
         onChangeRoom={onChangeRoom}
+        onEnterRoom={onEnterRoom}
+      />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
       />
     </div>
   );

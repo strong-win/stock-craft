@@ -9,6 +9,7 @@ import {
   TradeState,
   updateAssets,
   updateCash,
+  updateInfoMessages,
   updateTrades,
 } from "../user";
 import { TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from "./events";
@@ -86,5 +87,6 @@ export function* tradeResponseSaga(socket: Socket) {
     yield put(updateCash(payload.cash));
     yield put(updateAssets(payload.assets));
     yield put(updateTrades({ action: payload.action, trades: payload.trades }));
+    yield put(updateInfoMessages(payload.trades));
   }
 }

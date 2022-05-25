@@ -6,6 +6,7 @@ import MyStock from "./MyStock";
 import Chart from "./Chart";
 import "../../styles/Corporations.css";
 import ScoreBoard from "./ScoreBoard";
+import { toast } from "react-toastify";
 
 type CorperationsProps = {
   tick: number;
@@ -22,6 +23,8 @@ const ChartTab = (props) => {
     scores,
     assets,
     corps,
+    players,
+    playerId,
     onClickCorpItem,
     selectedCorpId,
   } = props;
@@ -34,7 +37,14 @@ const ChartTab = (props) => {
   const isShowScoreBoard = week > 1 && day === 0;
 
   useEffect(() => {
-    if (isShowScoreBoard) setActiveTab("ScoreBoard");
+    if (isShowScoreBoard) {
+      setActiveTab("ScoreBoard");
+      if (week === 3) {
+        toast.info(
+          "게임이 종료되었습니다! 최종 결과를 확인 후 대기방으로 이동합니다."
+        );
+      }
+    }
     if (day === 1) setActiveTab("StockMarket");
   }, [week, day]);
 
@@ -43,7 +53,7 @@ const ChartTab = (props) => {
       <div className="chartTabWrapper container">
         <ul className="nav nav-pills">
           <li>
-            <a
+            <button
               id="StockMarket"
               className={`chartTab ${
                 activeTab === "StockMarket" ? "active" : ""
@@ -52,21 +62,21 @@ const ChartTab = (props) => {
               data-toggle="tab"
             >
               주식 시장
-            </a>
+            </button>
           </li>
           <li>
-            <a
+            <button
               id="MyStock"
               className={`chartTab ${activeTab === "MyStock" ? "active" : ""}`}
               onClick={handleTabClick}
               data-toggle="tab"
             >
               주식 잔고
-            </a>
+            </button>
           </li>
           {isShowScoreBoard && (
             <li>
-              <a
+              <button
                 id="ScoreBoard"
                 className={`chartTab ${
                   activeTab === "ScoreBoard" ? "active" : ""
@@ -74,8 +84,8 @@ const ChartTab = (props) => {
                 onClick={handleTabClick}
                 data-toggle="tab"
               >
-                중간 결과
-              </a>
+                {week === 3 ? "최종 결과" : "중간 결과"}
+              </button>
             </li>
           )}
         </ul>
@@ -97,7 +107,14 @@ const ChartTab = (props) => {
           selectedCorpId={selectedCorpId}
         />
       )}
-      {activeTab === "ScoreBoard" && <ScoreBoard scores={scores} />}
+      {activeTab === "ScoreBoard" && (
+        <ScoreBoard
+          scores={scores}
+          isFinal={week === 3}
+          players={players}
+          myId={playerId}
+        />
+      )}
     </>
   );
 };
@@ -151,8 +168,9 @@ const MyStockMarket = ({
 
 const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
   const CorpItem = ({ corp }) => {
-    const prevPrice = corp?.totalChart?.at(-1);
-    const nowPrice = corp?.todayChart[tick - 1];
+    const chartData = [...corp.totalChart, ...corp.todayChart.slice(0, tick)];
+    const prevPrice = chartData.at(-2);
+    const nowPrice = chartData.at(-1);
     const rate = ((nowPrice - prevPrice) / prevPrice) * 100;
     const gap = nowPrice - prevPrice;
     let color = "";
@@ -164,7 +182,7 @@ const Corporations = ({ tick, corps, onClickCorpItem }: CorperationsProps) => {
         <th scope="row">{corp.corpName}</th>
         <td>{nowPrice ? nowPrice : "-"}</td>
         <td className={color}>{gap ? gap : "-"}</td>
-        <td className={color}>{rate ? Math.floor(rate) : "-"}%</td>
+        <td className={color}>{rate ? rate.toFixed(1) : "-"}%</td>
       </tr>
     );
   };

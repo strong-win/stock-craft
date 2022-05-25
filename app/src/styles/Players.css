@@ -10,29 +10,45 @@
   border: none;
   padding: 0;
 }
-.readyState{
+
+.readyState {
   line-height: normal;
-  color: #C4C4C4;
+  color: #c4c4c4;
 }
 
-.green{
-  color: #8BDC8A;
+.ready {
+  color: #8bdc8a;
 }
 
-.player{
+.play {
+  color: rgb(255, 57, 57);
+}
+
+.player {
   margin-left: 2rem;
   font-size: 1.5rem;
   font-weight: 600;
 }
 
-.playersCount{
- margin-top: 1.2rem;
- margin-left: 3.375rem;
- font-size: 1.5rem;
- margin-bottom: 1.2rem;
+.playersCount {
+  margin-top: 1.2rem;
+  margin-left: 3.375rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.playersContainer {
+  height: 100%;
+  display: block;
+  overflow: auto;
 }
 
 .label {
   font-size: small;
   font-weight: lighter;
+}
+
+.hostIcon {
+  color: rgb(235, 200, 2);
+  padding-bottom: 0.3rem;
 }

@@ -4,7 +4,13 @@ import { Row, Button, Col } from "reactstrap";
 import { ITEM } from "../../constants/item";
 import ItemTargetModal from "./ItemTargetModal";
 
-const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
+const ItemComponent = ({
+  isSelected,
+  disabled,
+  itemId,
+  items,
+  handleSelectItem,
+}) => {
   return (
     <Col
       className={`itemComponent ${isSelected ? "selectedItem" : ""} ${
@@ -16,17 +22,26 @@ const ItemComponent = ({ isSelected, disabled, itemId, handleSelectItem }) => {
       <div className="itemTitle" id={itemId}>
         {ITEM[itemId]?.NAME}
       </div>
-      <div className="itemContent" id={itemId}>
-        {ITEM[itemId]?.CONTENT}
-      </div>
-      <div className="itemContent itemCooltime" id={itemId}>
-        아이템 쿨타임: {ITEM[itemId]?.COOLTIME}
+      <div className="itemContentWrapper">
+        <div className="itemContent" id={itemId}>
+          {ITEM[itemId]?.CONTENT}
+        </div>
+        <div className="itemContent itemCooltime" id={itemId}>
+          아이템 쿨타임: {disabled ? items[itemId] : ITEM[itemId]?.COOLTIME}
+        </div>
       </div>
     </Col>
   );
 };
 
-const Items = ({ items, handleApplyItem, players, corps, playerId }) => {
+const Items = ({
+  items,
+  handleApplyItem,
+  disabled,
+  players,
+  corps,
+  playerId,
+}) => {
   const [selectedItemId, setSelectedItemId] = useState<string>("");
   const [targetModalOpen, setTargetModalOpen] = useState<boolean>(false);
 
@@ -55,13 +70,18 @@ const Items = ({ items, handleApplyItem, players, corps, playerId }) => {
             key={itemId}
             itemId={itemId}
             handleSelectItem={handleSelectedItemId}
+            items={items}
             disabled={!!items[itemId]}
             isSelected={selectedItemId === itemId}
           />
         ))}
       </Row>
       <Row className="itemsButtonWrapper">
-        <Button className="itemButton" onClick={onClickApplyItemButton}>
+        <Button
+          className="itemButton"
+          onClick={onClickApplyItemButton}
+          disabled={disabled}
+        >
           사용하기
         </Button>
       </Row>
