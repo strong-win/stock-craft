@@ -18,7 +18,11 @@ export type GameState = {
 export class GameStateProvider {
   private games: GameState[] = [];
 
-  createGameState(gameId: string, room: string) {
+  createGameState(gameId: Types.ObjectId | string, room: string) {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
     this.games.push({ gameId, room, time: { week: 1, day: 0, tick: 0 } });
   }
 
@@ -62,9 +66,7 @@ export class GameStateProvider {
 
   getNextTime({ week, day, tick }: TimeState): TimeState {
     if (day === 0) {
-      return tick < 1
-        ? { week: week, day: day, tick: tick + 1 }
-        : { week: week, day: day + 1, tick: 0 };
+      return { week: week, day: day + 1, tick: 0 };
     }
     if (day === 5) {
       return tick < 4
@@ -78,6 +80,10 @@ export class GameStateProvider {
   }
 
   getNextDate(gameId: Types.ObjectId | string): Date {
+    if (typeof gameId !== 'string') {
+      gameId = gameId.toString();
+    }
+
     const game: GameState = this.games.find((game) => game.gameId === gameId);
 
     const { time, date } = game;

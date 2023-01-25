@@ -5,6 +5,8 @@ import { Trade } from './trade.schema';
 
 export type PlayerDocument = Player & Document;
 
+export type Role = 'individual' | 'institutional' | 'party';
+
 export type Asset = {
   corpId: string;
   totalQuantity: number;
@@ -18,11 +20,13 @@ export interface Cash {
 }
 
 export type PlayerOption = {
-  chatting?: boolean;
-  trade?: boolean;
-  chart?: boolean;
-  cash?: boolean;
-  asset?: boolean;
+  chatoff?: boolean;
+  tradeoff?: boolean;
+};
+
+export type PlayerSkill = {
+  leverage?: boolean;
+  cloaking?: string;
 };
 
 export type PlayerStatus =
@@ -31,11 +35,6 @@ export type PlayerStatus =
   | 'play'
   | 'finish'
   | 'disconnected';
-
-export type PlayerInfo = {
-  name: string;
-  status: PlayerStatus;
-};
 
 @Schema()
 export class Player {
@@ -62,6 +61,9 @@ export class Player {
   @Prop({ type: Types.ObjectId, ref: 'Game' })
   game: Types.ObjectId | Game;
 
+  @Prop()
+  role?: Role;
+
   @Prop({ type: { totalCash: Number, availableCash: Number } })
   cash?: Cash;
 
@@ -73,14 +75,18 @@ export class Player {
 
   @Prop({
     type: {
-      chating: Boolean,
-      trade: Boolean,
-      chart: Boolean,
-      cash: Boolean,
-      asset: Boolean,
+      chatoff: Boolean,
+      tradeoff: Boolean,
     },
   })
   options?: PlayerOption;
+
+  @Prop({
+    type: {
+      leverage: Boolean,
+    },
+  })
+  skills?: PlayerSkill;
 }
 
 export const PlayerSchema = SchemaFactory.createForClass(Player);

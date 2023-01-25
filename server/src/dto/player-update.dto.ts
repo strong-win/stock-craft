@@ -1,9 +1,17 @@
 import { IsOptional } from 'class-validator';
-import { PlayerStatus, Asset, Cash } from '../schemas/player.schema';
+import {
+  PlayerStatus,
+  Asset,
+  Cash,
+  PlayerOption,
+} from '../schemas/player.schema';
 
 export class PlayerUpdateDto {
   @IsOptional()
   status?: PlayerStatus;
+
+  @IsOptional()
+  isHost?: boolean;
 
   @IsOptional()
   gameId?: string;
@@ -13,4 +21,7 @@ export class PlayerUpdateDto {
 
   @IsOptional()
   assets?: Asset[];
+
+  @IsOptional()
+  option?: PlayerOption;
 }

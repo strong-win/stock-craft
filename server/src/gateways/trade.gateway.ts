@@ -5,10 +5,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from './events';
+import { ERROR, TRADE_CANCEL, TRADE_REQUEST, TRADE_RESPONSE } from './events';
 import { TradeRequestDto } from 'src/dto/trade-request.dto';
 import { TradeCancelDto } from 'src/dto/trade-cancel.dto';
 import { TradeService } from 'src/services/trade.service';
+import { ErrorInterface } from 'src/dto/error-interface';
 
 @WebSocketGateway({ cors: true })
 export class TradeGateway {
@@ -26,12 +27,8 @@ export class TradeGateway {
       const tradeResponseDto = await this.tradeService.handleTrade(payload);
       this.server.to(client.id).emit(TRADE_RESPONSE, tradeResponseDto);
     } catch (e) {
-      console.error(e);
-
-      if (e.name === 'TradeException') {
-        // To do
-        // handle TradeException
-      }
+      const errorInstance: ErrorInterface = { message: e.message };
+      this.server.to(client.id).emit(ERROR, errorInstance);
     }
   }
 
@@ -40,7 +37,14 @@ export class TradeGateway {
     client: Socket,
     payload: TradeCancelDto,
   ): Promise<void> {
-    const tradeResponseDto = await this.tradeService.handleTradeCancel(payload);
-    this.server.to(client.id).emit(TRADE_RESPONSE, tradeResponseDto);
+    try {
+      const tradeResponseDto = await this.tradeService.handleTradeCancel(
+        payload,
+      );
+      this.server.to(client.id).emit(TRADE_RESPONSE, tradeResponseDto);
+    } catch (e) {
+      const errorInstance: ErrorInterface = { message: e.message };
+      this.server.to(client.id).emit(ERROR, errorInstance);
+    }
   }
 }
