@@ -3,6 +3,7 @@ import { Socket } from "socket.io-client";
 
 import connectSocket from "../../configs/socket";
 import { receiveChattingSaga, sendChattingSaga } from "./chatting";
+import { receiveErrorSaga } from "./error";
 import {
   receiveGameScoreSaga,
   receiveGameTimeResponseSaga,
@@ -59,5 +60,8 @@ export function* handleIO() {
     sendItemRequestSaga(socket),
     receiveItemResponseSaga(socket),
     receiveItemRequestSaga(),
+
+    // error
+    receiveErrorSaga(socket),
   ]);
 }

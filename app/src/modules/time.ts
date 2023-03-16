@@ -31,9 +31,10 @@ export const timeSlice = createSlice({
       state.day = action.payload.day;
       state.tick = action.payload.tick;
     },
+    resetTime: () => initialState,
   },
 });
 
-export const { updateDate, updateTime } = timeSlice.actions;
+export const { updateDate, updateTime, resetTime } = timeSlice.actions;
 
 export default timeSlice.reducer;

@@ -50,9 +50,10 @@ export const stockSlice = createSlice({
         todayChart: [],
       }));
     },
+    resetChart: () => initialState,
   },
 });
 
-export const { updateDayChart, initChart } = stockSlice.actions;
+export const { updateDayChart, initChart, resetChart } = stockSlice.actions;
 
 export default stockSlice.reducer;
